@@ -527,22 +527,18 @@
         const monthly = json.outputs?.monthly?.fixed;
         if (!monthly || monthly.length < 12) throw new Error('Risposta PVGIS non valida o incompleta');
 
-        // Struttura risposta PVGIS PVcalc:
-        // m['E_m']    = energia mensile totale in Wh per 1 kWp installato
-        // m['H(i)_m'] = irraggiamento mensile sul piano inclinato (Wh/m²)
-        // kwp_kwh = kWh/kWp/GIORNO = E_m[Wh] / 1000 / giorni_del_mese
-        pvgisData = monthly.map((m, i) => {
-          const giorni = FALLBACK_MENSILI[i].giorni;
-          const e_m_wh = parseFloat(m['E_m'] || 0);          // Wh/kWp/mese
-          const kwp_kwh_giorno = e_m_wh / 1000 / giorni;     // kWh/kWp/giorno
-          return {
-            nome:    FALLBACK_MENSILI[i].nome,
-            irr:     Math.round(parseFloat(m['H(i)_m'] || m['Hm'] || 0) || FALLBACK_MENSILI[i].irr),
-            kwp_kwh: parseFloat(kwp_kwh_giorno.toFixed(4)),
-            giorni:  giorni,
-          };
-        });
-        console.log('PVGIS parsed:', pvgisData.map(m => m.nome+': '+m.kwp_kwh.toFixed(2)+' kWh/kWp/day'));
+        // Struttura risposta PVGIS PVcalc (verificata):
+        // E_d = kWh/giorno per 1 kWp  ← questo usiamo come kwp_kwh
+        // E_m = kWh/mese per 1 kWp
+        // H(i)_m = kWh/m²/mese irraggiamento sul piano inclinato
+        pvgisData = monthly.map((m, i) => ({
+          nome:    FALLBACK_MENSILI[i].nome,
+          irr:     Math.round(parseFloat(m['H(i)_m'] || 0) || FALLBACK_MENSILI[i].irr),
+          kwp_kwh: parseFloat(parseFloat(m['E_d'] || 0).toFixed(4)), // kWh/kWp/giorno
+          kwp_kwh_mese: parseFloat(parseFloat(m['E_m'] || 0).toFixed(2)), // kWh/kWp/mese
+          giorni:  FALLBACK_MENSILI[i].giorni,
+        }));
+        console.log('PVGIS parsed OK:', pvgisData.map(m => m.nome+': '+m.kwp_kwh.toFixed(2)+' kWh/kWp/d').join(', '));
 
         pvgisLoaded = true;
         dot.className = 'pvgis-dot dot-ok';
@@ -747,8 +743,13 @@
       const labels  = mensili.map(m=>m.nome);
       const fonte   = pvgisLoaded ? 'PVGIS' : 'stima';
 
-      const prodFv  = mensili.map(m => Math.round(m.kwp_kwh * kwp * (1-loss/0.14) * 1000) / 1000 * 1000 );
-      // Nota: kwp_kwh già include perdite 14% base. Correzione per loss diverso da 14%.
+      // kwp_kwh = E_d (kWh/kWp/giorno), kwp_kwh_mese = E_m (kWh/kWp/mese) — da PVGIS
+      // lossCorr corregge proporzionalmente se loss != 14% (base PVGIS)
+      const lossCorr = (1 - loss) / (1 - 0.14);
+      const prodFv = mensili.map(m => {
+        const base = m.kwp_kwh_mese != null ? m.kwp_kwh_mese : m.kwp_kwh * m.giorni;
+        return Math.round(base * kwp * lossCorr);
+      });
       const dcTot   = dcBase * pue;
       const consDc  = mensili.map(m => Math.round(dcTot * 24 * m.giorni));
       const surplus = mensili.map((_,i) => Math.max(0, prodFv[i]-consDc[i]));
