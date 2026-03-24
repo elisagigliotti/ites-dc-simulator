@@ -1,0 +1,21 @@
+{
+  "name": "ites-dc-simulator",
+  "version": "1.0.0",
+  "description": "Simulazione ITES Data Center Bellocchi \u2014 FV + Ice Thermal Energy Storage",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ITES",
+    "PVGIS",
+    "fotovoltaico",
+    "data-center"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0"
+  }
+}
