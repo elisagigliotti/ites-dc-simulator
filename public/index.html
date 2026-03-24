@@ -213,11 +213,11 @@
                     <div class="cg">
                         <div>
                             <div class="ch"><span class="cn">Carico base rack DC</span><span class="cv" id="v-dc">300 kW</span></div>
-                            <input type="range" min="50" max="800" step="10" value="300" id="r-dc" oninput="run()">
+                            <input type="range" min="50" max="800" step="10" value="100" id="r-dc" oninput="run()">
                         </div>
                         <div>
                             <div class="ch"><span class="cn">PUE Data Center</span><span class="cv" id="v-pue">1.4</span></div>
-                            <input type="range" min="1.1" max="2.0" step="0.1" value="1.4" id="r-pue" oninput="run()">
+                            <input type="range" min="1.1" max="2.0" step="0.1" value="1.2" id="r-pue" oninput="run()">
                             <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">PUE: rapporto tot. energia / energia IT. DC AI moderni: 1.2–1.5</div>
                         </div>
                         <div>
@@ -281,6 +281,9 @@
 
     <!-- ═══════════════ TAB 2: MENSILE ═══════════════ -->
     <div id="panel-mensile" class="panel">
+        <div id="mensile-surplus-warn" style="display:none;background:var(--amber3);border:1px solid rgba(227,179,65,.35);border-radius:var(--r);padding:.6rem 1rem;font-size:.78rem;color:#c9a227;margin-bottom:.8rem;">
+            ⚠ <b>Surplus FV = 0 per tutti i mesi</b> — il consumo DC supera sempre la produzione FV. Per vedere ITES in funzione abbassa il <b>Carico base rack DC</b> (es. 100 kW) o aumenta la <b>Potenza FV installata</b>.
+        </div>
         <div class="ibar" style="margin-bottom:1rem;" id="mensile-source">
             <b>Fonte dati:</b> Stime interne calibrate per Bellocchi. Premere "Carica da PVGIS" per sostituire con dati ufficiali CE.
         </div>
@@ -688,10 +691,17 @@
 
       // INFO BAR
       document.getElementById('info-day').innerHTML =
-        `<b>Stagione: ${p.label}</b> · FV: ${Math.round(totFv)} kWh · Surplus: ${Math.round(Math.max(0,totFv-totDc))} kWh → ` +
-        `freddo ITES: <b>${Math.round(totCar)} kWh_th</b> (${ghiaccioT} t ghiaccio) · ` +
-        `Autoconsumo: <b>${autocons}%</b> · Prelievo rete: ${Math.round(totRete)} kWh` +
-        (pvgisLoaded ? ' · <span style="color:var(--green);">✅ dati PVGIS</span>' : ' · <span style="color:var(--amber);">⚠ dati stimati</span>');
+        (()=>{
+        const surplusKwh = Math.round(Math.max(0,totFv-totDc));
+        const noSurplus = surplusKwh === 0
+          ? ` · <span style="color:var(--amber);">⚠ Nessun surplus FV — abbassa il carico DC o aumenta la potenza FV per vedere ITES in funzione</span>`
+          : '';
+        return `<b>Stagione: ${p.label}</b> · FV: ${Math.round(totFv)} kWh · Surplus: ${surplusKwh} kWh → ` +
+          `freddo ITES: <b>${Math.round(totCar)} kWh_th</b> (${ghiaccioT} t ghiaccio) · ` +
+          `Autoconsumo: <b>${autocons}%</b> · Prelievo rete: ${Math.round(totRete)} kWh` +
+          noSurplus +
+          (pvgisLoaded ? ' · <span style="color:var(--green);">✅ dati PVGIS</span>' : ' · <span style="color:var(--amber);">⚠ dati stimati</span>');
+      })();
 
       // CHARTS
       const co = {responsive:true,maintainAspectRatio:false,
@@ -753,6 +763,10 @@
       const dcTot   = dcBase * pue;
       const consDc  = mensili.map(m => Math.round(dcTot * 24 * m.giorni));
       const surplus = mensili.map((_,i) => Math.max(0, prodFv[i]-consDc[i]));
+      // Avviso se nessun surplus in nessun mese
+      const hasSurplus = surplus.some(s => s > 0);
+      const surplusWarn = document.getElementById('mensile-surplus-warn');
+      if(surplusWarn) surplusWarn.style.display = hasSurplus ? 'none' : 'block';
       const freddo  = surplus.map(s => Math.round(s*cop));
       const rete    = mensili.map((_,i) => Math.max(0, consDc[i]-prodFv[i]));
       const autoC   = mensili.map((_,i) => Math.round(Math.min(100, prodFv[i]/consDc[i]*100)));
