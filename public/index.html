@@ -527,12 +527,22 @@
         const monthly = json.outputs?.monthly?.fixed;
         if (!monthly || monthly.length < 12) throw new Error('Risposta PVGIS non valida o incompleta');
 
-        pvgisData = monthly.map((m, i) => ({
-          nome:       FALLBACK_MENSILI[i].nome,
-          irr:        Math.round(m['H(i)_m'] || m['Hm'] || FALLBACK_MENSILI[i].irr),
-          kwp_kwh:    parseFloat(((m['E_m'] || 0) / 1000).toFixed(3)), // Wh→kWh per kWp
-          giorni:     FALLBACK_MENSILI[i].giorni,
-        }));
+        // Struttura risposta PVGIS PVcalc:
+        // m['E_m']    = energia mensile totale in Wh per 1 kWp installato
+        // m['H(i)_m'] = irraggiamento mensile sul piano inclinato (Wh/m²)
+        // kwp_kwh = kWh/kWp/GIORNO = E_m[Wh] / 1000 / giorni_del_mese
+        pvgisData = monthly.map((m, i) => {
+          const giorni = FALLBACK_MENSILI[i].giorni;
+          const e_m_wh = parseFloat(m['E_m'] || 0);          // Wh/kWp/mese
+          const kwp_kwh_giorno = e_m_wh / 1000 / giorni;     // kWh/kWp/giorno
+          return {
+            nome:    FALLBACK_MENSILI[i].nome,
+            irr:     Math.round(parseFloat(m['H(i)_m'] || m['Hm'] || 0) || FALLBACK_MENSILI[i].irr),
+            kwp_kwh: parseFloat(kwp_kwh_giorno.toFixed(4)),
+            giorni:  giorni,
+          };
+        });
+        console.log('PVGIS parsed:', pvgisData.map(m => m.nome+': '+m.kwp_kwh.toFixed(2)+' kWh/kWp/day'));
 
         pvgisLoaded = true;
         dot.className = 'pvgis-dot dot-ok';
