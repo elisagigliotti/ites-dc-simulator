@@ -136,6 +136,28 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 
 @media(max-width:960px){.gsb{grid-template-columns:1fr;}.g4{grid-template-columns:1fr 1fr;}}
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+
+/* ── CALENDARIO ── */
+.cal-wrap{user-select:none;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.cal-nav button{background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:var(--r);padding:2px 7px;cursor:pointer;font-size:.72rem;}
+.cal-nav button:hover{color:var(--text);}
+.cal-month-label{font-size:.78rem;font-weight:500;color:var(--text);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{font-size:.58rem;color:var(--text3);text-align:center;padding:2px 0;}
+.cal-day{font-size:.66rem;text-align:center;padding:3px 1px;border-radius:4px;cursor:pointer;color:var(--text2);border:1px solid transparent;transition:background .1s;}
+.cal-day:hover{background:var(--bg4);color:var(--text);}
+.cal-day.empty{cursor:default;pointer-events:none;}
+.cal-day.selected{color:#fff!important;font-weight:600;}
+.cal-day::after{content:'';display:block;width:3px;height:3px;border-radius:50%;margin:1px auto 0;}
+.cal-day.fv-high::after{background:#39d353;}
+.cal-day.fv-mid::after{background:#e3b341;}
+.cal-day.fv-low::after{background:#f85149;}
+/* colori selezione multi — fino a 4 giorni */
+.sel-0{background:#1a5fa3!important;}
+.sel-1{background:#4a2080!important;}
+.sel-2{background:#7a3010!important;}
+.sel-3{background:#0a6040!important;}
 </style>
 </head>
 <body>
@@ -198,15 +220,9 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
             <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Range consigliato: 14–16% (impianto nuovo)</div>
           </div>
           <div>
-            <div class="ch"><span class="cn">Giorno dell'anno</span><span class="cv" id="v-giorno">1 Gen</span></div>
-            <input type="range" min="1" max="365" step="1" value="196" id="r-giorno" oninput="run()">
-            <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--text3);margin-top:2px;">
-              <span>1 Gen</span><span>1 Apr</span><span>1 Lug</span><span>1 Ott</span><span>31 Dic</span>
-            </div>
-          </div>
-          <div>
-            <div class="ch"><span class="cn">Stato serbatoio a inizio giorno</span></div>
-            <div style="font-size:.70rem;color:var(--text3);" id="tank-prev-state">Calcolato dalla simulazione annuale</div>
+            <div class="ct" style="margin-bottom:6px;">Seleziona giorno</div>
+            <div id="cal-container"></div>
+            <div style="font-size:.70rem;color:var(--text3);margin-top:6px;" id="tank-prev-state">—</div>
           </div>
         </div>
       </div>
@@ -250,35 +266,43 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 
     <!-- MAIN -->
     <div style="display:flex;flex-direction:column;gap:.8rem;">
+
+      <!-- Giorni selezionati (badge) -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:.72rem;color:var(--text3);">Giorni selezionati:</span>
+        <div id="selected-badges" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <button onclick="clearAll()" style="font-size:.68rem;padding:2px 8px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">Cancella tutto</button>
+        <span id="data-source-label" style="margin-left:auto;font-size:.65rem;color:var(--text3);">dati: stima interna</span>
+      </div>
+
       <div class="g4" id="kpi-top"></div>
 
       <div class="card">
-        <div class="ct">Profilo orario — potenze (kW) <span id="data-source-label" style="float:right;font-size:.65rem;color:var(--text3);">dati: stima interna</span></div>
-        <div class="leg">
-          <div class="li"><div class="ls" style="background:#39d353;"></div>Produzione FV (kW_el)</div>
-          <div class="li"><div class="ls" style="background:#58a6ff;"></div>Consumo DC rack × PUE (kW_el)</div>
-          <div class="li"><div class="ls" style="background:#39c8c8;"></div>Surplus → ghiaccio (kW_th)</div>
-          <div class="li"><div class="ls" style="background:#e3b341;"></div>Deficit → rete (kW_el)</div>
-          <div class="li"><div class="ls" style="background:#a371f7;"></div>Ghiaccio scaricato (kW_th)</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div class="ct" style="margin:0;">Profilo orario — potenze (kW)</div>
+          <div class="leg" style="margin:0;">
+            <div class="li"><div class="ls" style="background:#39d353;"></div>FV (kW_el)</div>
+            <div class="li"><div class="ls" style="background:#58a6ff;"></div>DC (kW_el)</div>
+            <div class="li"><div class="ls" style="background:#39c8c8;"></div>→ ghiaccio (kW_th)</div>
+            <div class="li"><div class="ls" style="background:#a371f7;"></div>ghiaccio → (kW_th)</div>
+            <div class="li"><div class="ls" style="background:#e3b341;"></div>rete (kW_el)</div>
+          </div>
         </div>
-        <div class="cw" style="height:230px;"><canvas id="cOrario"></canvas></div>
+        <div id="charts-orari" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
 
       <div class="g2">
         <div class="card">
-          <div class="ct">Bilancio energetico giornaliero (kWh)</div>
-          <div class="cw" style="height:175px;"><canvas id="cBilancio"></canvas></div>
+          <div class="ct">Bilancio energetico (kWh/giorno)</div>
+          <div class="cw" style="height:190px;"><canvas id="cBilancio"></canvas></div>
         </div>
         <div class="card">
-          <div class="ct">Stato serbatoio ghiaccio (% pieno)</div>
-          <div class="leg"><div class="li"><div class="ls" style="background:#39c8c8;"></div>% riempimento</div></div>
-          <div class="cw" style="height:150px;"><canvas id="cTank"></canvas></div>
+          <div class="ct">Serbatoio ghiaccio (% pieno)</div>
+          <div class="cw" style="height:190px;"><canvas id="cTank"></canvas></div>
         </div>
       </div>
 
       <div class="ibar" id="info-day">—</div>
-
-
     </div>
   </div>
 </div>
@@ -1076,18 +1100,241 @@ function runDim() {
   document.getElementById('t-sens').innerHTML=t;
 }
 
-// ══════════════════════════════════════════════
+
+// ═══════════════════════════════════════════
 //  RESET CACHE + RUN
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 function resetRun() {
-  tankStates365 = null;  // invalida cache pre-simulazione
-  run();
+  tankStates365 = null;
+  selectedDays = [];
+  renderCalendar();
+  renderAll();
 }
 
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  CALENDARIO
+// ═══════════════════════════════════════════
+let calMese = 6;
+let selectedDays = [196];
+const MAX_GIORNI = 4;
+const SEL_COLORS = ['#1a5fa3','#6a2090','#b44010','#0a7050'];
+const SEL_BG = ['rgba(26,95,163,0.12)','rgba(106,32,144,0.12)','rgba(180,64,16,0.12)','rgba(10,112,80,0.12)'];
+
+function toGiornoAnno(m, d) {
+  let g=0; for(let i=0;i<m;i++) g+=GIORNI_MESE[i]; return g+d;
+}
+
+function fvNorm(gg) {
+  const {mese_idx}=giornoToMese(gg);
+  const mensili=getMensili();
+  const maxEd=Math.max(...mensili.map(m=>m.kwp_kwh||1));
+  return (mensili[mese_idx].kwp_kwh||1)/maxEd;
+}
+
+function renderCalendar() {
+  const cont=document.getElementById('cal-container');
+  if(!cont) return;
+  const MESI_FULL=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+    'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  const primo=new Date(2024,calMese,1).getDay();
+  const off=(primo===0)?6:primo-1;
+  let h='<div class="cal-wrap">';
+  h+='<div class="cal-nav">';
+  h+='<button onclick="calPrev()">&#8249;</button>';
+  h+='<span class="cal-month-label">'+MESI_FULL[calMese]+' 2024</span>';
+  h+='<button onclick="calNext()">&#8250;</button>';
+  h+='</div><div class="cal-grid">';
+  ['L','M','M','G','V','S','D'].forEach(d=>h+='<div class="cal-dow">'+d+'</div>');
+  for(let i=0;i<off;i++) h+='<div class="cal-day empty"></div>';
+  for(let d=1;d<=GIORNI_MESE[calMese];d++){
+    const gg=toGiornoAnno(calMese,d);
+    const si=selectedDays.indexOf(gg);
+    const fv=fvNorm(gg);
+    const fc=fv>0.65?'fv-high':fv>0.35?'fv-mid':'fv-low';
+    const sc=si>=0?' selected sel-'+si:'';
+    h+='<div class="cal-day '+fc+sc+'" onclick="toggleDay('+gg+')">'+d+'</div>';
+  }
+  h+='</div></div>';
+  cont.innerHTML=h;
+}
+
+function calPrev(){calMese=(calMese+11)%12;renderCalendar();}
+function calNext(){calMese=(calMese+1)%12;renderCalendar();}
+
+function toggleDay(gg){
+  const idx=selectedDays.indexOf(gg);
+  if(idx>=0){selectedDays.splice(idx,1);}
+  else{if(selectedDays.length>=MAX_GIORNI)selectedDays.shift();selectedDays.push(gg);}
+  renderCalendar();renderAll();
+}
+
+function clearAll(){selectedDays=[];renderCalendar();renderAll();}
+
+// ═══════════════════════════════════════════
+//  SIMULA UN GIORNO
+// ═══════════════════════════════════════════
+function simulaGiorno(gg, kwp, loss, dcBase, pue, cop, tankV) {
+  const {mese_idx}=giornoToMese(gg);
+  const mensili=getMensili();
+  const kwpDay=mensili[mese_idx].kwp_kwh;
+  const lossCorr=(1-loss)/(1-0.14);
+  const capKwh=tankV*RHO_ICE*LATENTE_WH/1000;
+  const tankInizio=tankStates365?tankStates365[gg-1]:0;
+  const prof=PROFILI_MENSILI[mese_idx];
+  const sumP=prof.reduce((a,b)=>a+b,0);
+  const fv=prof.map(v=>+(v/sumP*kwpDay*kwp*lossCorr).toFixed(1));
+  const dcTot=dcBase*pue;
+  const dc=Array.from({length:24},(_,h)=>{
+    let f=1.0;if(h>=8&&h<=18)f=1.20;else if(h>=19&&h<=23)f=0.90;
+    return +(dcTot*f).toFixed(1);
+  });
+  let tank=Math.min(tankInizio,capKwh);
+  const carica_th=[],scarica_th=[],rete_el=[],tank_pct=[];
+  for(let h=0;h<24;h++){
+    const sur=fv[h]-dc[h];
+    if(sur>=0){
+      const fe=sur*cop,car=Math.min(fe,capKwh-tank);
+      tank+=car;carica_th.push(+car.toFixed(1));scarica_th.push(0);rete_el.push(0);
+    } else {
+      const dt=(-sur)*cop,dg=Math.min(dt,tank);
+      tank=Math.max(0,tank-dg);
+      carica_th.push(0);scarica_th.push(+dg.toFixed(1));rete_el.push(+(-sur).toFixed(1));
+    }
+    tank=Math.max(0,Math.min(tank,capKwh));
+    tank_pct.push(+(tank/capKwh*100).toFixed(1));
+  }
+  const totFv=fv.reduce((a,b)=>a+b,0),totDc=dc.reduce((a,b)=>a+b,0);
+  const totR=rete_el.reduce((a,b)=>a+b,0),totC=carica_th.reduce((a,b)=>a+b,0),totS=scarica_th.reduce((a,b)=>a+b,0);
+  return {fv,dc,carica_th,scarica_th,rete_el,tank_pct,
+    tot_fv:totFv,tot_dc:totDc,tot_rete:totR,tot_car:totC,tot_scar:totS,
+    autocons:Math.max(0,Math.min(100,(1-totR/totDc)*100)),
+    ghiaccio_t:tank*1000/(LATENTE_WH*1000),
+    surplus_el:Math.max(0,totFv-totDc)};
+}
+
+// ═══════════════════════════════════════════
+//  RENDER TUTTI I GIORNI SELEZIONATI
+// ═══════════════════════════════════════════
+function renderAll() {
+  const kwp=parseFloat(document.getElementById('r-kwp').value);
+  const loss=parseFloat(document.getElementById('r-loss').value)/100;
+  const dcBase=parseFloat(document.getElementById('r-dc').value);
+  const pue=parseFloat(document.getElementById('r-pue').value);
+  const cop=parseFloat(document.getElementById('r-cop').value);
+  const tankV=parseFloat(document.getElementById('r-tank').value);
+
+  document.getElementById('v-kwp').textContent=kwp+' kWp';
+  document.getElementById('v-loss').textContent=Math.round(loss*100)+'%';
+  document.getElementById('v-dc').textContent=dcBase+' kW';
+  document.getElementById('v-pue').textContent=pue.toFixed(1);
+  document.getElementById('v-cop').textContent=cop.toFixed(1);
+  document.getElementById('v-tank').textContent=tankV+' m³';
+
+  if(!tankStates365) tankStates365=preSimula365(kwp,loss,dcBase,pue,cop,tankV);
+
+  const capKwh=tankV*RHO_ICE*LATENTE_WH/1000;
+  document.getElementById('tank-info').innerHTML=
+    'Capac. termica: <b style="color:var(--teal)">'+Math.round(capKwh)+' kWh_th</b><br>'
+    +'Massa max: <b>'+Math.round(tankV*RHO_ICE/1000)+' t</b>';
+
+  const badgeDiv=document.getElementById('selected-badges');
+  if(selectedDays.length===0){
+    if(badgeDiv) badgeDiv.innerHTML='<span style="font-size:.70rem;color:var(--text3);">Clicca sul calendario per selezionare uno o più giorni (max 4)</span>';
+    document.getElementById('kpi-top').innerHTML='';
+    document.getElementById('charts-orari').innerHTML='<div style="text-align:center;padding:2rem;font-size:.80rem;color:var(--text3);">Seleziona un giorno dal calendario</div>';
+    document.getElementById('info-day').innerHTML='—';
+    destroyC('cBilancio');destroyC('cTank');
+    document.getElementById('tank-prev-state').innerHTML='—';
+    return;
+  }
+  if(badgeDiv) badgeDiv.innerHTML=selectedDays.map((gg,i)=>
+    '<span style="font-size:.70rem;padding:2px 8px;border-radius:4px;background:'+SEL_COLORS[i]+';color:#fff;">'+giornoLabel(gg)+'</span>'
+  ).join('');
+
+  const results=selectedDays.map(gg=>({gg,data:simulaGiorno(gg,kwp,loss,dcBase,pue,cop,tankV)}));
+  const primo=results[0];
+  const tankIn=tankStates365[primo.gg-1];
+  const pctIn=Math.round(tankIn/capKwh*100);
+  document.getElementById('tank-prev-state').innerHTML=
+    'Inizio <b>'+giornoLabel(primo.gg)+'</b>: <b style="color:var(--teal)">'+pctIn+'%</b> pieno ('+
+    (tankIn*1000/(LATENTE_WH*1000)).toFixed(1)+' t)';
+
+  document.getElementById('kpi-top').innerHTML=`
+    <div class="card kpi"><div class="kv" style="color:var(--green)">${Math.round(primo.data.tot_fv)}</div><div class="ku">kWh_el</div><div class="kl">Produzione FV</div></div>
+    <div class="card kpi"><div class="kv" style="color:var(--blue)">${Math.round(primo.data.autocons)}</div><div class="ku">%</div><div class="kl">Autoconsumo</div></div>
+    <div class="card kpi"><div class="kv" style="color:var(--teal)">${primo.data.ghiaccio_t.toFixed(1)}</div><div class="ku">t ghiaccio</div><div class="kl">Fine giornata</div></div>
+    <div class="card kpi"><div class="kv" style="color:var(--amber)">${Math.round(primo.data.tot_rete)}</div><div class="ku">kWh_el</div><div class="kl">Da rete</div></div>`;
+
+  // Grafici orari
+  const chartsDiv=document.getElementById('charts-orari');
+  Object.keys(charts).filter(k=>k.startsWith('cOrario')).forEach(k=>destroyC(k));
+  chartsDiv.innerHTML='';
+  const labels=Array.from({length:24},(_,h)=>h+':00');
+  const coOpts={responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},
+    scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:9},autoSkip:true,maxTicksLimit:12}},
+            y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:9}},title:{display:true,text:'kW',color:'#6e7681',font:{size:9}}}}};
+
+  results.forEach(({gg,data},i)=>{
+    const color=SEL_COLORS[i];
+    const wrap=document.createElement('div');
+    const lbl=document.createElement('div');
+    lbl.style.cssText='font-size:.70rem;color:'+color+';font-weight:600;margin-bottom:3px;';
+    lbl.textContent=giornoLabel(gg)+(results.length>1?' · giorno '+gg:'');
+    const cw=document.createElement('div');
+    cw.style.cssText='position:relative;width:100%;height:'+(results.length===1?'215':'155')+'px;';
+    const cv=document.createElement('canvas');cv.id='cOrario'+i;
+    cw.appendChild(cv);wrap.appendChild(lbl);wrap.appendChild(cw);
+    if(i<results.length-1){const sep=document.createElement('hr');sep.style.cssText='border:none;border-top:0.5px solid var(--border);margin:5px 0;';wrap.appendChild(sep);}
+    chartsDiv.appendChild(wrap);
+    charts['cOrario'+i]=new Chart(cv,{type:'line',data:{labels,datasets:[
+      {label:'FV',   data:data.fv,        borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.06)',  fill:true, tension:.4,pointRadius:0,borderWidth:2},
+      {label:'DC',   data:data.dc,        borderColor:color,    backgroundColor:SEL_BG[i],              fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[5,3]},
+      {label:'→gh',  data:data.carica_th, borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.08)',fill:false,tension:.3,pointRadius:0,borderWidth:2},
+      {label:'gh→',  data:data.scarica_th,borderColor:'#a371f7',backgroundColor:'rgba(163,113,247,.06)',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[3,2]},
+      {label:'rete', data:data.rete_el,   borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.06)', fill:true, tension:.3,pointRadius:0,borderWidth:1.5},
+    ]},options:coOpts});
+  });
+
+  destroyC('cBilancio');
+  charts['cBilancio']=new Chart(document.getElementById('cBilancio'),{type:'bar',
+    data:{labels:results.map(r=>giornoLabel(r.gg)),datasets:[
+      {label:'FV',    data:results.map(r=>Math.round(r.data.tot_fv)),  backgroundColor:'rgba(57,211,83,.7)', borderColor:'#39d353',borderWidth:1,borderRadius:4},
+      {label:'DC',    data:results.map(r=>Math.round(r.data.tot_dc)),  backgroundColor:'rgba(88,166,255,.4)',borderColor:'#58a6ff',borderWidth:1,borderRadius:4},
+      {label:'→ghiaccio',data:results.map(r=>Math.round(r.data.tot_car)),backgroundColor:'rgba(57,200,200,.7)',borderColor:'#39c8c8',borderWidth:1,borderRadius:4},
+      {label:'Rete',  data:results.map(r=>Math.round(r.data.tot_rete)),backgroundColor:'rgba(227,179,65,.7)',borderColor:'#e3b341',borderWidth:1,borderRadius:4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{color:'#8b949e',font:{size:9},boxWidth:10}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:10}}},
+              y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9}},title:{display:true,text:'kWh',color:'#6e7681',font:{size:9}}}}}});
+
+  destroyC('cTank');
+  charts['cTank']=new Chart(document.getElementById('cTank'),{type:'line',
+    data:{labels,datasets:results.map(({gg,data},i)=>({
+      label:giornoLabel(gg),data:data.tank_pct,
+      borderColor:SEL_COLORS[i],backgroundColor:SEL_BG[i],
+      fill:results.length===1,tension:.4,pointRadius:0,borderWidth:2
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:results.length>1,labels:{color:'#8b949e',font:{size:9},boxWidth:10}}},
+      scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9},autoSkip:true,maxTicksLimit:8}},
+              y:{min:0,max:100,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9}},title:{display:true,text:'% pieno',color:'#6e7681',font:{size:9}}}}}});
+
+  const pvgBadge=pvgisLoaded?'&nbsp;<span style="color:var(--green);font-size:.70rem;">✅ PVGIS</span>':'&nbsp;<span style="color:var(--amber);font-size:.70rem;">⚠ stima</span>';
+  document.getElementById('info-day').innerHTML=results.map(({gg,data},i)=>
+    '<span style="color:'+SEL_COLORS[i]+';font-weight:600;">'+giornoLabel(gg)+'</span>: '
+    +'FV '+Math.round(data.tot_fv)+' kWh · ghiaccio ↑'+Math.round(data.tot_car)+' ↓'+Math.round(data.tot_scar)+' kWh_th · '
+    +'rete '+Math.round(data.tot_rete)+' kWh · auto '+Math.round(data.autocons)+'%'
+  ).join('<br>')+pvgBadge;
+}
+
+function run(){renderAll();}
+
+// ═══════════════════════════════════════════
 //  INIT
-// ══════════════════════════════════════════════
-run();
+// ═══════════════════════════════════════════
+calMese=6;
+renderCalendar();
+renderAll();
 </script>
-</body>
-</html>
