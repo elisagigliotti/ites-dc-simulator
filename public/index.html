@@ -189,21 +189,24 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <div class="cg">
           <div>
             <div class="ch"><span class="cn">Potenza installata</span><span class="cv" id="v-kwp">1040 kWp</span></div>
-            <input type="range" min="200" max="1040" step="20" value="1040" id="r-kwp" oninput="run()">
+            <input type="range" min="200" max="1040" step="20" value="1040" id="r-kwp" oninput="resetRun()">
             <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Max installabile: 4.000 m² × 260 Wp/m² = 1.040 kWp</div>
           </div>
           <div>
             <div class="ch"><span class="cn">Perdite sistema (PVGIS)</span><span class="cv" id="v-loss">14 %</span></div>
-            <input type="range" min="10" max="22" step="1" value="14" id="r-loss" oninput="run()">
+            <input type="range" min="10" max="22" step="1" value="14" id="r-loss" oninput="resetRun()">
             <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Range consigliato: 14–16% (impianto nuovo)</div>
           </div>
           <div>
-            <div class="ch"><span class="cn">Stagione simulata</span></div>
-            <select id="r-stag" onchange="run()">
-              <option value="estate">Estate — Luglio (picco produzione)</option>
-              <option value="primavera">Primavera — Aprile</option>
-              <option value="inverno">Inverno — Gennaio (minimo)</option>
-            </select>
+            <div class="ch"><span class="cn">Giorno dell'anno</span><span class="cv" id="v-giorno">1 Gen</span></div>
+            <input type="range" min="1" max="365" step="1" value="196" id="r-giorno" oninput="run()">
+            <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--text3);margin-top:2px;">
+              <span>1 Gen</span><span>1 Apr</span><span>1 Lug</span><span>1 Ott</span><span>31 Dic</span>
+            </div>
+          </div>
+          <div>
+            <div class="ch"><span class="cn">Stato serbatoio a inizio giorno</span></div>
+            <div style="font-size:.70rem;color:var(--text3);" id="tank-prev-state">Calcolato dalla simulazione annuale</div>
           </div>
         </div>
       </div>
@@ -213,16 +216,16 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <div class="cg">
           <div>
             <div class="ch"><span class="cn">Carico base rack DC</span><span class="cv" id="v-dc">300 kW</span></div>
-            <input type="range" min="50" max="800" step="10" value="100" id="r-dc" oninput="run()">
+            <input type="range" min="50" max="800" step="10" value="100" id="r-dc" oninput="resetRun()">
           </div>
           <div>
             <div class="ch"><span class="cn">PUE Data Center</span><span class="cv" id="v-pue">1.4</span></div>
-            <input type="range" min="1.1" max="2.0" step="0.1" value="1.2" id="r-pue" oninput="run()">
+            <input type="range" min="1.1" max="2.0" step="0.1" value="1.2" id="r-pue" oninput="resetRun()">
             <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">PUE: rapporto tot. energia / energia IT. DC AI moderni: 1.2–1.5</div>
           </div>
           <div>
             <div class="ch"><span class="cn">COP pompa di calore</span><span class="cv" id="v-cop">3.5</span></div>
-            <input type="range" min="1.5" max="5.0" step="0.1" value="3.5" id="r-cop" oninput="run()">
+            <input type="range" min="1.5" max="5.0" step="0.1" value="3.5" id="r-cop" oninput="resetRun()">
             <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">⚠ Valore costante — nella realtà varia con T_esterna</div>
           </div>
         </div>
@@ -233,7 +236,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <div class="cg">
           <div>
             <div class="ch"><span class="cn">Volume contenitore</span><span class="cv" id="v-tank">60 m³</span></div>
-            <input type="range" min="5" max="300" step="5" value="60" id="r-tank" oninput="run()">
+            <input type="range" min="5" max="300" step="5" value="60" id="r-tank" oninput="resetRun()">
           </div>
           <div id="tank-info" style="font-size:.70rem;color:var(--text3);line-height:1.7;"></div>
         </div>
@@ -469,6 +472,36 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 const LATENTE_WH = 334000/3600; // 92.78 Wh/kg
 const RHO_ICE    = 917;          // kg/m³
 
+// Mappa giorno anno → mese
+const GIORNI_MESE    = [31,28,31,30,31,30,31,31,30,31,30,31];
+const NOMI_MESE      = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+
+function giornoToMese(gg) {
+  let g=gg-1;
+  for(let m=0;m<12;m++){
+    if(g<GIORNI_MESE[m]) return {mese_idx:m, giorno_m:g+1};
+    g-=GIORNI_MESE[m];
+  }
+  return {mese_idx:11, giorno_m:31};
+}
+function giornoLabel(gg) {
+  const {mese_idx,giorno_m}=giornoToMese(gg);
+  return giorno_m+' '+NOMI_MESE[mese_idx];
+}
+
+// Profili orari mensili normalizzati (curva sin, alba/tramonto lat 43.85 az SSE)
+const _ALBE     = [7.5,7.0,6.0,5.5,5.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5];
+const _TRAMONTI = [16.5,17.5,18.5,20.0,20.5,21.0,20.5,20.0,19.0,18.0,16.5,16.0];
+const PROFILI_MENSILI = Array.from({length:12},(_,m)=>{
+  const a=_ALBE[m],t=_TRAMONTI[m];
+  let p=Array.from({length:24},(_,h)=>(h<a||h>=t)?0:Math.pow(Math.sin((h-a)/(t-a)*Math.PI),1.2));
+  const s=p.reduce((x,y)=>x+y,0);
+  return p.map(v=>s>0?v/s:0);
+});
+
+let tankStates365=null; // cache pre-simulazione
+
+
 // ══════════════════════════════════════════════
 //  DATI FALLBACK (stime calibrate Bellocchi)
 //  usati quando PVGIS non è raggiungibile
@@ -553,7 +586,7 @@ async function loadPVGIS() {
     document.getElementById('mensile-source').innerHTML =
       `<b>Fonte dati:</b> PVGIS v5.2 — Commissione Europea, JRC. Database SARAH2. Anno meteorologico tipico 2005–2020. Perdite sistema: ${loss}%.`;
 
-    run();
+    resetRun();
     if (document.getElementById('panel-mensile').classList.contains('active')) runMensile();
 
   } catch(e) {
@@ -589,38 +622,87 @@ function sw(name) {
 }
 
 // ══════════════════════════════════════════════
+//  PRE-SIMULAZIONE 365 GIORNI (propaga stato serbatoio)
+// ══════════════════════════════════════════════
+function preSimula365(kwp, loss, dcBase, pue, cop, tankV) {
+  const capKwh = tankV * RHO_ICE * LATENTE_WH / 1000;
+  const lossCorr = (1 - loss) / (1 - 0.14);
+  const mensili = getMensili();
+  const states = new Array(366).fill(0);  // states[0]=inizio 1gen, states[1]=inizio 2gen...
+  let tank = 0;
+
+  let giornoAbs = 0;
+  for(let m=0; m<12; m++){
+    const ed = (mensili[m].kwp_kwh || 1.32);
+    const prof = PROFILI_MENSILI[m];
+    const sumProf = prof.reduce((a,b)=>a+b,0);
+
+    for(let g=0; g<GIORNI_MESE[m]; g++){
+      states[giornoAbs] = tank;
+
+      // Simula giorno
+      for(let h=0; h<24; h++){
+        const fv_h = prof[h] / sumProf * ed * kwp * lossCorr;
+        let f = 1.0;
+        if(h>=8&&h<=18) f=1.20; else if(h>=19&&h<=23) f=0.90;
+        const dc_h = dcBase * pue * f;
+        const surplus = fv_h - dc_h;
+
+        if(surplus >= 0){
+          const frigExtra = surplus * cop;
+          const car = Math.min(frigExtra, capKwh - tank);
+          tank += car;
+        } else {
+          const defTh = (-surplus) * cop;
+          const daGhiaccio = Math.min(defTh, tank);
+          tank = Math.max(0, tank - daGhiaccio);
+        }
+        tank = Math.max(0, Math.min(tank, capKwh));
+      }
+      giornoAbs++;
+    }
+  }
+  states[365] = tank;
+  return states;
+}
+
+// ══════════════════════════════════════════════
 //  TAB 1: GIORNALIERA
 // ══════════════════════════════════════════════
 function run() {
-  const kwp   = parseFloat(document.getElementById('r-kwp').value);
-  const loss  = parseFloat(document.getElementById('r-loss').value)/100;
-  const stag  = document.getElementById('r-stag').value;
-  const dcBase= parseFloat(document.getElementById('r-dc').value);
-  const pue   = parseFloat(document.getElementById('r-pue').value);
-  const cop   = parseFloat(document.getElementById('r-cop').value);
-  const tankV = parseFloat(document.getElementById('r-tank').value);
+  const kwp    = parseFloat(document.getElementById('r-kwp').value);
+  const loss   = parseFloat(document.getElementById('r-loss').value)/100;
+  const giornoN= parseInt(document.getElementById('r-giorno').value);
+  const dcBase = parseFloat(document.getElementById('r-dc').value);
+  const pue    = parseFloat(document.getElementById('r-pue').value);
+  const cop    = parseFloat(document.getElementById('r-cop').value);
+  const tankV  = parseFloat(document.getElementById('r-tank').value);
 
-  document.getElementById('v-kwp').textContent  = kwp+' kWp';
-  document.getElementById('v-loss').textContent = Math.round(loss*100)+'%';
-  document.getElementById('v-dc').textContent   = dcBase+' kW';
-  document.getElementById('v-pue').textContent  = pue.toFixed(1);
-  document.getElementById('v-cop').textContent  = cop.toFixed(1);
-  document.getElementById('v-tank').textContent = tankV+' m³';
+  const {mese_idx, giorno_m} = giornoToMese(giornoN);
 
-  const p = PROFILI[stag];
+  document.getElementById('v-kwp').textContent    = kwp+' kWp';
+  document.getElementById('v-loss').textContent   = Math.round(loss*100)+'%';
+  document.getElementById('v-dc').textContent     = dcBase+' kW';
+  document.getElementById('v-pue').textContent    = pue.toFixed(1);
+  document.getElementById('v-cop').textContent    = cop.toFixed(1);
+  document.getElementById('v-tank').textContent   = tankV+' m³';
+  document.getElementById('v-giorno').textContent = giornoLabel(giornoN)+' (giorno '+giornoN+')';
+
   const labels = Array.from({length:24},(_,h)=>h+':00');
 
-  // Scala da kWh/kWp giornaliero PVGIS
-  const mesIdx = STAGIONE_MESE[stag];
-  const mensili = getMensili();
-  const kwpDay = mensili[mesIdx].kwp_kwh; // kWh/kWp giornaliero
-  const sumIrr = p.irr.reduce((a,b)=>a+b,0);
+  // Pre-simula 365 giorni per propagare lo stato serbatoio
+  if(!tankStates365) tankStates365 = preSimula365(kwp, loss, dcBase, pue, cop, tankV);
 
-  // FV: scala profilo per corrispondere alla produzione PVGIS
-  // Scala il profilo orario in modo che la somma = kwpDay * kwp
-  // kwpDay (da PVGIS) già include perdite 14%. Correzione lineare se loss diverso.
+  // Profilo orario per questo mese
+  const prof = PROFILI_MENSILI[mese_idx];
+  const sumProf = prof.reduce((a,b)=>a+b,0);
+
+  // kWh/kWp/giorno da PVGIS per questo mese
+  const mensili = getMensili();
+  const kwpDay = mensili[mese_idx].kwp_kwh;
   const lossCorr = (1 - loss) / (1 - 0.14);
-  const fv = p.irr.map(v => +( v / sumIrr * kwpDay * kwp * lossCorr ).toFixed(1));
+
+  const fv = prof.map(v => +(v / sumProf * kwpDay * kwp * lossCorr).toFixed(1));
 
   // DC: carico IT × PUE = carico totale
   const dcTot = dcBase * pue;
@@ -630,6 +712,13 @@ function run() {
     else if(h>=19&&h<=23) f=0.90;
     return +(dcTot*f).toFixed(1);
   });
+
+  // Stato serbatoio all'inizio di questo giorno (da pre-simulazione)
+  const tankInizio = tankStates365 ? tankStates365[giornoN-1] : 0;
+  const pctInizio  = Math.round(tankInizio / (tankV * RHO_ICE * LATENTE_WH / 1000) * 100);
+  document.getElementById('tank-prev-state').innerHTML =
+    `Inizio giornata: <b style="color:var(--teal)">${pctInizio}%</b> pieno ` +
+    `(${(tankInizio * 1000 / (LATENTE_WH * 1000)).toFixed(1)} t ghiaccio)`;
 
   // ── MOTORE DI SIMULAZIONE (logica corretta) ──────────────────────────
   //
@@ -654,7 +743,7 @@ function run() {
 
   const massaKg  = tankV * RHO_ICE;
   const capKwh   = massaKg * LATENTE_WH / 1000;  // kWh_th capacità serbatoio
-  let tankState  = 0;                              // kWh_th ghiaccio presente
+  let tankState  = tankInizio;                     // kWh_th ghiaccio: stato da pre-simulazione
 
   // Arrays output orari
   const frigDaFv    = new Array(24).fill(0); // kW_th frigorie da surplus FV → ghiaccio
@@ -769,7 +858,7 @@ function run() {
     const noSurplus = surplusKwh === 0
       ? ` · <span style="color:var(--amber);">⚠ Nessun surplus FV — il FV copre solo parte del DC. Il ghiaccio integra se disponibile, il resto dalla rete.</span>`
       : '';
-    return `<b>Stagione: ${p.label}</b> · FV: ${Math.round(totFv)} kWh_el · Surplus → PdC: ${surplusKwh} kWh_el → ` +
+    return `<b>${giornoLabel(giornoN)} — giorno ${giornoN}</b> · FV: ${Math.round(totFv)} kWh_el · Surplus → PdC: ${surplusKwh} kWh_el → ` +
       `ghiaccio caricato: <b>${Math.round(totCarItes)} kWh_th</b> (${ghiaccioT} t) · ` +
       `ghiaccio scaricato: <b>${Math.round(totDaGhiac)} kWh_th</b> · ` +
       `Autoconsumo: <b>${autocons}%</b> · Rete: ${Math.round(totRete)} kWh_el` +
@@ -985,6 +1074,14 @@ function runDim() {
   });
   t+=`</tbody></table>`;
   document.getElementById('t-sens').innerHTML=t;
+}
+
+// ══════════════════════════════════════════════
+//  RESET CACHE + RUN
+// ══════════════════════════════════════════════
+function resetRun() {
+  tankStates365 = null;  // invalida cache pre-simulazione
+  run();
 }
 
 // ══════════════════════════════════════════════
