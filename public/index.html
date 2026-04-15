@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulazione ITES — Data Center Bellocchi</title>
+<title>Simulazione ITES — Data Center Bellocchi v2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -23,8 +23,6 @@
 html{font-size:14px;}
 body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
 .page{max-width:1300px;margin:0 auto;padding:1.5rem;}
-
-/* ── HEADER ── */
 .hdr{border-bottom:1px solid var(--border);padding-bottom:1.25rem;margin-bottom:1.25rem;}
 .hdr-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
 .hdr h1{font-size:1.4rem;font-weight:600;letter-spacing:-0.02em;}
@@ -39,55 +37,33 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .ba{background:var(--amber3);border-color:rgba(227,179,65,.3);color:var(--amber);}
 .br{background:var(--red3);border-color:rgba(248,81,73,.3);color:var(--red);}
 .bp{background:var(--purple3);border-color:rgba(163,113,247,.3);color:var(--purple);}
-
-/* ── WARNINGS ── */
-.warn-box{border-radius:var(--r);padding:.7rem 1rem;font-size:0.78rem;display:flex;gap:.6rem;align-items:flex-start;margin-bottom:.6rem;}
-.warn-box .icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
-.warn-box b{display:block;font-weight:500;margin-bottom:2px;}
-.warn-yellow{background:var(--amber3);border:1px solid rgba(227,179,65,.35);color:#c9a227;}
-.warn-red   {background:var(--red3);border:1px solid rgba(248,81,73,.35);color:#d9534f;}
-.warn-blue  {background:var(--blue3);border:1px solid rgba(88,166,255,.35);color:#79aef7;}
-.warn-green {background:var(--green3);border:1px solid rgba(57,211,83,.35);color:#3dc45a;}
-.warn-purple{background:var(--purple3);border:1px solid rgba(163,113,247,.35);color:#b08af5;}
-.warn-gray  {background:var(--bg3);border:1px solid var(--border2);color:var(--text2);}
-
-/* ── PVGIS STATUS ── */
 .pvgis-bar{display:flex;align-items:center;gap:10px;font-size:0.78rem;padding:.55rem .9rem;border-radius:var(--r);border:1px solid var(--border2);margin-bottom:1rem;background:var(--bg2);}
 .pvgis-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.dot-idle   {background:var(--text3);}
+.dot-idle{background:var(--text3);}
 .dot-loading{background:var(--amber);animation:pulse 1s infinite;}
-.dot-ok     {background:var(--green);}
-.dot-error  {background:var(--red);}
+.dot-ok{background:var(--green);}
+.dot-error{background:var(--red);}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 .pvgis-btn{margin-left:auto;background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:var(--r);padding:4px 12px;font-size:0.75rem;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;}
 .pvgis-btn:hover{border-color:var(--border2);background:var(--bg4);}
 .pvgis-btn:disabled{opacity:.4;cursor:not-allowed;}
 .pvgis-src{font-size:0.68rem;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
-
-/* ── TABS ── */
 .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem;}
 .tab{padding:.55rem 1.1rem;font-size:0.80rem;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);transition:all .15s;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--blue);border-bottom-color:var(--blue);}
 .panel{display:none;} .panel.active{display:block;}
-
-/* ── GRID ── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;}
-.gsb{display:grid;grid-template-columns:290px 1fr;gap:1rem;}
-
-/* ── CARDS ── */
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;}
+.gsb{display:grid;grid-template-columns:300px 1fr;gap:1rem;}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.1rem 1.2rem;}
 .ct{font-size:.68rem;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.7rem;}
-
-/* ── KPI ── */
 .kpi{text-align:center;padding:.9rem .5rem;}
 .kv{font-size:1.9rem;font-weight:600;font-family:'IBM Plex Mono',monospace;line-height:1;}
 .ku{font-size:.72rem;color:var(--text2);margin-top:2px;}
 .kl{font-size:.68rem;color:var(--text3);margin-top:5px;text-transform:uppercase;letter-spacing:.05em;}
-
-/* ── CONTROLS ── */
 .cg{display:flex;flex-direction:column;gap:.8rem;}
 .ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
 .cn{font-size:.75rem;color:var(--text2);}
@@ -96,16 +72,10 @@ input[type=range]{width:100%;-webkit-appearance:none;background:transparent;curs
 input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--bg3);border-radius:2px;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--blue);border-radius:50%;margin-top:-5px;}
 select{background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:var(--r);padding:5px 9px;font-size:.80rem;font-family:'IBM Plex Sans',sans-serif;width:100%;cursor:pointer;}
-
-/* ── CHARTS ── */
 .cw{position:relative;width:100%;}
-
-/* ── LEGEND ── */
 .leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;}
 .li{display:flex;align-items:center;gap:5px;font-size:.70rem;color:var(--text2);}
 .ls{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
-
-/* ── TABLE ── */
 table{width:100%;border-collapse:collapse;font-size:.76rem;}
 th{font-weight:500;text-transform:uppercase;letter-spacing:.05em;font-size:.65rem;color:var(--text3);padding:5px 9px;text-align:right;border-bottom:1px solid var(--border);}
 th:first-child{text-align:left;}
@@ -114,30 +84,15 @@ td:first-child{font-family:'IBM Plex Sans',sans-serif;color:var(--text2);text-al
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:var(--bg3);}
 .pos{color:var(--green);} .neg{color:var(--red);}
-
-/* ── FORMULA ── */
 .formula{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:.6rem .9rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--teal);margin:.4rem 0;}
-
-/* ── INFO BAR ── */
 .ibar{border-left:3px solid var(--blue);background:var(--blue3);border-radius:0 var(--r) var(--r) 0;padding:.6rem .9rem;font-size:.76rem;color:var(--text2);}
 .ibar b{color:var(--blue);}
 .ibar-g{border-left-color:var(--green);background:var(--green3);}
 .ibar-g b{color:var(--green);}
-
-/* ── PROGRESS ── */
-.prog-track{height:5px;background:var(--bg3);border-radius:3px;margin-top:3px;overflow:hidden;}
-.prog-fill{height:100%;border-radius:3px;transition:width .4s ease;}
-
-/* ── DIVIDER ── */
 hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
-
-/* ── FOOTER ── */
 .footer{margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--border);font-size:.68rem;color:var(--text3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
-
-@media(max-width:960px){.gsb{grid-template-columns:1fr;}.g4{grid-template-columns:1fr 1fr;}}
-@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr;}}
-
-/* ── CALENDARIO ── */
+@media(max-width:960px){.gsb{grid-template-columns:1fr;}.g4,.g5{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.g2,.g3,.g4,.g5{grid-template-columns:1fr;}}
 .cal-wrap{user-select:none;}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
 .cal-nav button{background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);border-radius:var(--r);padding:2px 7px;cursor:pointer;font-size:.72rem;}
@@ -153,7 +108,6 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 .cal-day.fv-high::after{background:#39d353;}
 .cal-day.fv-mid::after{background:#e3b341;}
 .cal-day.fv-low::after{background:#f85149;}
-/* colori selezione multi — fino a 4 giorni */
 .sel-0{background:#1a5fa3!important;}
 .sel-1{background:#4a2080!important;}
 .sel-2{background:#7a3010!important;}
@@ -167,8 +121,8 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 <div class="hdr">
   <div class="hdr-top">
     <div>
-      <h1>Simulazione <span>ITES</span> — Data Center Bellocchi</h1>
-      <p>Ice-cool Thermal Energy Storage · Surplus FV → produzione ghiaccio → raffreddamento rack serali</p>
+      <h1>Simulazione <span>ITES</span> — Data Center v2</h1>
+      <p>Modello completo: involucro + calore rack + servizi · FV → servizi → chiller → ghiaccio · Cooling 365 gg/anno · Set-point 27°C</p>
     </div>
     <div class="hdr-meta">
       Sito: Bellocchi (PU) · 43.85°N 12.98°E<br>
@@ -180,7 +134,9 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
     <span class="badge bg">FV max 1.040 kWp</span>
     <span class="badge bb">PVGIS v5.2 API</span>
     <span class="badge bt">ITES λ = 334 kJ/kg</span>
-    <span class="badge ba">Perdite 14%</span>
+    <span class="badge ba">27°C set-point</span>
+    <span class="badge br">Cooling 24/7/365</span>
+    <span class="badge bp">Involucro ex-frigo</span>
   </div>
 </div>
 
@@ -197,6 +153,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
   <div class="tab active" onclick="sw('giornaliera')">Simulazione Giornaliera</div>
   <div class="tab" onclick="sw('mensile')">Analisi Mensile</div>
   <div class="tab" onclick="sw('dimensionamento')">Dimensionamento Serbatoio</div>
+  <div class="tab" onclick="sw('bilancio')">Bilancio Annuale</div>
   <div class="tab" onclick="sw('note')">Basi Teoriche</div>
 </div>
 
@@ -212,12 +169,11 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <div>
             <div class="ch"><span class="cn">Potenza installata</span><span class="cv" id="v-kwp">1040 kWp</span></div>
             <input type="range" min="200" max="1040" step="20" value="1040" id="r-kwp" oninput="resetRun()">
-            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Max installabile: 4.000 m² × 260 Wp/m² = 1.040 kWp</div>
+            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Max: 4.000 m² × 260 Wp/m² = 1.040 kWp</div>
           </div>
           <div>
-            <div class="ch"><span class="cn">Perdite sistema (PVGIS)</span><span class="cv" id="v-loss">14 %</span></div>
+            <div class="ch"><span class="cn">Perdite sistema</span><span class="cv" id="v-loss">14 %</span></div>
             <input type="range" min="10" max="22" step="1" value="14" id="r-loss" oninput="resetRun()">
-            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Range consigliato: 14–16% (impianto nuovo)</div>
           </div>
           <div>
             <div class="ct" style="margin-bottom:6px;">Seleziona giorno</div>
@@ -228,21 +184,37 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       </div>
 
       <div class="card">
-        <div class="ct">Data Center & Pompa di Calore</div>
+        <div class="ct">Data Center</div>
         <div class="cg">
           <div>
-            <div class="ch"><span class="cn">Carico base rack DC</span><span class="cv" id="v-dc">300 kW</span></div>
-            <input type="range" min="50" max="800" step="10" value="100" id="r-dc" oninput="resetRun()">
+            <div class="ch"><span class="cn">Potenza IT Rack</span><span class="cv" id="v-dc">3000 kW</span></div>
+            <input type="range" min="100" max="10000" step="100" value="3000" id="r-dc" oninput="resetRun()">
+            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Consumo elettrico IT → diventa tutto calore</div>
           </div>
           <div>
-            <div class="ch"><span class="cn">PUE Data Center</span><span class="cv" id="v-pue">1.4</span></div>
-            <input type="range" min="1.1" max="2.0" step="0.1" value="1.2" id="r-pue" oninput="resetRun()">
-            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">PUE: rapporto tot. energia / energia IT. DC AI moderni: 1.2–1.5</div>
+            <div class="ch"><span class="cn">Impianti servizio</span><span class="cv" id="v-serv">8 %</span></div>
+            <input type="range" min="2" max="20" step="1" value="8" id="r-serv" oninput="resetRun()">
+            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Luci, UPS losses, networking — producono anch'essi calore</div>
           </div>
           <div>
-            <div class="ch"><span class="cn">COP pompa di calore</span><span class="cv" id="v-cop">3.5</span></div>
-            <input type="range" min="1.5" max="5.0" step="0.1" value="3.5" id="r-cop" oninput="resetRun()">
-            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">⚠ Valore costante — nella realtà varia con T_esterna</div>
+            <div class="ch"><span class="cn">Set-point interno</span><span class="cv" id="v-setp">27 °C</span></div>
+            <input type="range" min="18" max="30" step="1" value="27" id="r-setp" oninput="resetRun()">
+          </div>
+          <div>
+            <div class="ch"><span class="cn">Involucro UA</span><span class="cv" id="v-ua">500 W/K</span></div>
+            <input type="range" min="100" max="5000" step="100" value="500" id="r-ua" oninput="resetRun()">
+            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Basso = buon isolamento (ex deposito frigo)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ct">Pompa di Calore / Chiller</div>
+        <div class="cg">
+          <div>
+            <div class="ch"><span class="cn">EER/COP nominale</span><span class="cv" id="v-cop">4.0</span></div>
+            <input type="range" min="2.0" max="6.0" step="0.1" value="4.0" id="r-cop" oninput="resetRun()">
+            <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Degrada con T esterna (−2%/°C sopra 15°C)</div>
           </div>
         </div>
       </div>
@@ -252,7 +224,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <div class="cg">
           <div>
             <div class="ch"><span class="cn">Volume contenitore</span><span class="cv" id="v-tank">60 m³</span></div>
-            <input type="range" min="5" max="300" step="5" value="60" id="r-tank" oninput="resetRun()">
+            <input type="range" min="5" max="500" step="5" value="60" id="r-tank" oninput="resetRun()">
           </div>
           <div id="tank-info" style="font-size:.70rem;color:var(--text3);line-height:1.7;"></div>
         </div>
@@ -266,8 +238,6 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 
     <!-- MAIN -->
     <div style="display:flex;flex-direction:column;gap:.8rem;">
-
-      <!-- Giorni selezionati (badge) -->
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-size:.72rem;color:var(--text3);">Giorni selezionati:</span>
         <div id="selected-badges" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
@@ -275,17 +245,17 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <span id="data-source-label" style="margin-left:auto;font-size:.65rem;color:var(--text3);">dati: stima interna</span>
       </div>
 
-      <div class="g4" id="kpi-top"></div>
+      <div class="g5" id="kpi-top"></div>
 
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div class="ct" style="margin:0;">Profilo orario — potenze (kW)</div>
+          <div class="ct" style="margin:0;">Profilo orario — potenze</div>
           <div class="leg" style="margin:0;">
-            <div class="li"><div class="ls" style="background:#39d353;"></div>FV (kW_el)</div>
-            <div class="li"><div class="ls" style="background:#58a6ff;"></div>DC (kW_el)</div>
+            <div class="li"><div class="ls" style="background:#f85149;"></div>Cooling necessario (kW_th)</div>
+            <div class="li"><div class="ls" style="background:#39d353;"></div>FV produz. (kW_el)</div>
             <div class="li"><div class="ls" style="background:#39c8c8;"></div>→ ghiaccio (kW_th)</div>
             <div class="li"><div class="ls" style="background:#a371f7;"></div>ghiaccio → (kW_th)</div>
-            <div class="li"><div class="ls" style="background:#e3b341;"></div>rete (kW_el)</div>
+            <div class="li"><div class="ls" style="background:#e3b341;"></div>rete chiller (kW_el)</div>
           </div>
         </div>
         <div id="charts-orari" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -309,43 +279,38 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 
 <!-- ═══════════════ TAB 2: MENSILE ═══════════════ -->
 <div id="panel-mensile" class="panel">
-  <div id="mensile-surplus-warn" style="display:none;background:var(--amber3);border:1px solid rgba(227,179,65,.35);border-radius:var(--r);padding:.6rem 1rem;font-size:.78rem;color:#c9a227;margin-bottom:.8rem;">
-    ⚠ <b>Surplus FV = 0 per tutti i mesi</b> — il consumo DC supera sempre la produzione FV. Per vedere ITES in funzione abbassa il <b>Carico base rack DC</b> (es. 100 kW) o aumenta la <b>Potenza FV installata</b>.
-  </div>
   <div class="ibar" style="margin-bottom:1rem;" id="mensile-source">
-    <b>Fonte dati:</b> Stime interne calibrate per Bellocchi. Premere "Carica da PVGIS" per sostituire con dati ufficiali CE.
+    <b>Fonte dati:</b> Stime interne calibrate per Bellocchi. Premere "Carica da PVGIS" per dati ufficiali CE.
   </div>
-
-
-
   <div class="g2" style="margin-bottom:1rem;">
     <div class="card">
-      <div class="ct">Produzione FV mensile vs consumo DC (kWh) <span id="mensile-src-label" style="float:right;font-size:.65rem;color:var(--text3);">stima</span></div>
+      <div class="ct">Cooling mensile vs fonti (MWh)</div>
       <div class="leg">
-        <div class="li"><div class="ls" style="background:#39d353;"></div>Produzione FV</div>
-        <div class="li"><div class="ls" style="background:rgba(88,166,255,.5);"></div>Consumo DC</div>
+        <div class="li"><div class="ls" style="background:#f85149;"></div>Cooling richiesto</div>
+        <div class="li"><div class="ls" style="background:#39d353;"></div>Cooling da PV</div>
+        <div class="li"><div class="ls" style="background:#39c8c8;"></div>Ghiaccio caricato</div>
+        <div class="li"><div class="ls" style="background:#e3b341;"></div>Rete elettrica</div>
       </div>
-      <div class="cw" style="height:210px;"><canvas id="cMensile"></canvas></div>
+      <div class="cw" style="height:240px;"><canvas id="cMensile"></canvas></div>
     </div>
     <div class="card">
-      <div class="ct">Surplus FV → ITES (kWh/mese)</div>
-      <div class="cw" style="height:210px;"><canvas id="cSurplus"></canvas></div>
+      <div class="ct">Produzione FV vs fabbisogno servizi (MWh)</div>
+      <div class="cw" style="height:240px;"><canvas id="cSurplus"></canvas></div>
     </div>
   </div>
-
   <div class="card">
     <div class="ct">Tabella mensile dettagliata</div>
     <div style="overflow-x:auto;">
       <table>
         <thead><tr>
           <th>Mese</th>
-          <th>Irragg. (kWh/m²)</th>
-          <th>Prod. FV (kWh)</th>
-          <th>Cons. DC (kWh)</th>
-          <th>Surplus (kWh)</th>
-          <th>Freddo ITES (kWh_th)</th>
-          <th>Da rete (kWh)</th>
-          <th>Autocons. %</th>
+          <th>FV (MWh)</th>
+          <th>Cooling (MWh_th)</th>
+          <th>Cool. da PV (MWh_th)</th>
+          <th>Ghiaccio ↑ (MWh_th)</th>
+          <th>Ghiaccio ↓ (MWh_th)</th>
+          <th>Rete (MWh_el)</th>
+          <th>Costo rete (k€)</th>
           <th>Fonte</th>
         </tr></thead>
         <tbody id="tb-mensile"></tbody>
@@ -359,34 +324,30 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
   <div class="ibar ibar-g" style="margin-bottom:1rem;">
     <b>Base fisica (tesi PoliTo):</b> Calore latente fusione acqua = 334 kJ/kg = 92.8 Wh/kg · Densità ghiaccio = 917 kg/m³ · 1 m³ ghiaccio ≈ 85 kWh_th
   </div>
-
-
   <div class="g2" style="margin-bottom:1rem;">
     <div class="card">
       <div class="ct">Parametri dimensionamento</div>
       <div class="cg">
         <div>
           <div class="ch"><span class="cn">Surplus FV da accumulare (kWh/giorno)</span><span class="cv" id="v-s">500</span></div>
-          <input type="range" min="50" max="2500" step="50" value="500" id="r-s" oninput="runDim()">
+          <input type="range" min="50" max="5000" step="50" value="500" id="r-s" oninput="runDim()">
         </div>
         <div>
-          <div class="ch"><span class="cn">COP pompa di calore</span><span class="cv" id="v-cd">3.5</span></div>
-          <input type="range" min="1.5" max="5.0" step="0.1" value="3.5" id="r-cd" oninput="runDim()">
+          <div class="ch"><span class="cn">COP pompa di calore</span><span class="cv" id="v-cd">4.0</span></div>
+          <input type="range" min="2.0" max="6.0" step="0.1" value="4.0" id="r-cd" oninput="runDim()">
         </div>
         <div>
-          <div class="ch"><span class="cn">Ore di scarica (sera)</span><span class="cv" id="v-os">8 ore</span></div>
+          <div class="ch"><span class="cn">Ore di scarica</span><span class="cv" id="v-os">8 ore</span></div>
           <input type="range" min="2" max="14" step="1" value="8" id="r-os" oninput="runDim()">
         </div>
         <div>
-          <div class="ch"><span class="cn">Fattore riempimento serbatoio</span><span class="cv" id="v-fi">80%</span></div>
+          <div class="ch"><span class="cn">Fattore riempimento</span><span class="cv" id="v-fi">80%</span></div>
           <input type="range" min="50" max="95" step="5" value="80" id="r-fi" oninput="runDim()">
-          <div style="font-size:.68rem;color:var(--text3);margin-top:2px;">Spazio per espansione ghiaccio (+9% vol.) e struttura interna</div>
         </div>
       </div>
     </div>
     <div class="card" id="dim-res"></div>
   </div>
-
   <div class="g3" style="margin-bottom:1rem;">
     <div class="card">
       <div class="ct">Volume (m³) vs surplus FV</div>
@@ -401,30 +362,41 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       <div class="cw" style="height:185px;"><canvas id="cDS"></canvas></div>
     </div>
   </div>
-
   <div class="card">
     <div class="ct">Tabella di sensibilità — Volume serbatoio (m³)</div>
-    <div style="font-size:.70rem;color:var(--text3);margin-bottom:.6rem;">Al variare di surplus FV giornaliero (colonne) e COP (righe). Fattore riempimento: <span id="sens-fill">80%</span>.</div>
+    <div style="font-size:.70rem;color:var(--text3);margin-bottom:.6rem;">Al variare di surplus FV (colonne) e COP (righe). Fattore riempimento: <span id="sens-fill">80%</span>.</div>
     <div style="overflow-x:auto;" id="t-sens"></div>
   </div>
 </div>
 
-<!-- ═══════════════ TAB 4: NOTE ═══════════════ -->
+<!-- ═══════════════ TAB 4: BILANCIO ANNUALE ═══════════════ -->
+<div id="panel-bilancio" class="panel">
+  <div id="bilancio-content"></div>
+</div>
+
+<!-- ═══════════════ TAB 5: NOTE ═══════════════ -->
 <div id="panel-note" class="panel">
   <div class="g2">
     <div>
       <div class="card" style="margin-bottom:.8rem;">
-        <div class="ct">Principio ITES (tesi PoliTo, cap. 2.4.2.2)</div>
+        <div class="ct">Modello fisico v2</div>
         <p style="font-size:.80rem;color:var(--text2);line-height:1.7;margin-bottom:.75rem;">
-          L'ITES sfrutta il <b style="color:var(--teal);">calore latente di fusione</b> dell'acqua. Il ciclo giornaliero prevede:
+          Il modello tiene conto di tutti i flussi termici reali del Data Center:
         </p>
-        <p style="font-size:.78rem;color:var(--text2);"><b style="color:var(--blue);">CARICA</b> (ore diurne — surplus FV)</p>
-        <p style="font-size:.75rem;color:var(--text3);margin:4px 0 4px 1rem;line-height:1.7;">La pompa di calore usa il surplus FV per solidificare l'acqua a 0°C nel serbatoio tramite serpentine di raffreddamento.</p>
-        <div class="formula">Q_carica [kWh_th] = P_surplus [kW] × COP × Δt [h]</div>
-        <p style="font-size:.78rem;color:var(--text2);margin-top:.65rem;"><b style="color:var(--green);">SCARICA</b> (ore serali/notturne)</p>
-        <p style="font-size:.75rem;color:var(--text3);margin:4px 0 4px 1rem;line-height:1.7;">Il ghiaccio fonde assorbendo il calore dei rack server. Nessun consumo elettrico aggiuntivo per il raffreddamento.</p>
-        <div class="formula">Q_scarica [kWh_th] = m [kg] × λ [Wh/kg] / 1000</div>
-        <div class="formula" style="margin-top:4px;">λ_fusione = 334 kJ/kg = 92.78 Wh/kg (acqua pura, 0°C, 1 atm)</div>
+        <div class="formula">Q_cooling = Q_rack + Q_servizi + Q_involucro</div>
+        <div style="font-size:.75rem;color:var(--text3);line-height:1.8;margin:.5rem 0 .5rem 1rem;">
+          <b style="color:var(--red);">Q_rack</b> = Potenza IT · 24h (tutto il consumo elettrico → calore)<br>
+          <b style="color:var(--amber);">Q_servizi</b> = % del carico IT (luci, UPS, networking → calore)<br>
+          <b style="color:var(--purple);">Q_involucro</b> = UA × (T_esterna − 27°C) — positivo d'estate, negativo d'inverno
+        </div>
+        <div class="formula" style="margin-top:.5rem;">Cascata energetica:</div>
+        <div style="font-size:.75rem;color:var(--text3);line-height:2;margin:.3rem 0 0 1rem;">
+          <span style="color:var(--green);">1.</span> FV → copre servizi elettrici<br>
+          <span style="color:var(--green);">2.</span> Surplus FV → chiller (× EER) → produce freddo<br>
+          <span style="color:var(--teal);">3.</span> Freddo eccedente → accumulo ghiaccio ITES<br>
+          <span style="color:var(--purple);">4.</span> Se freddo insufficiente → prima ghiaccio accumulato<br>
+          <span style="color:var(--amber);">5.</span> Se ghiaccio esaurito → rete alimenta chiller
+        </div>
       </div>
       <div class="card">
         <div class="ct">Parametri sito Bellocchi</div>
@@ -433,87 +405,96 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <tr><td>Superficie FV installabile</td><td>4.000 m²</td></tr>
           <tr><td>Densità moduli</td><td>260 Wp/m²</td></tr>
           <tr><td>Potenza FV max</td><td>1.040 kWp</td></tr>
-          <tr><td>Azimut (conv. Nord)</td><td>145° (SSE)</td></tr>
-          <tr><td>Azimut (conv. PVGIS)</td><td>−35° (SSE)</td></tr>
-          <tr><td>Inclinazione</td><td>5° (tetto shed)</td></tr>
-          <tr><td>Latitudine</td><td>43.85° N</td></tr>
-          <tr><td>Longitudine</td><td>12.98° E</td></tr>
-          <tr><td>Perdite sistema</td><td>14% (PVGIS default)</td></tr>
-          <tr><td>Tipo installazione</td><td>Roof-added (building)</td></tr>
+          <tr><td>Azimut</td><td>145° (SSE) / −35° PVGIS</td></tr>
+          <tr><td>Inclinazione</td><td>5°</td></tr>
+          <tr><td>Coordinate</td><td>43.85°N 12.98°E</td></tr>
+          <tr><td>Set-point DC</td><td>27°C costante</td></tr>
+          <tr><td>Involucro</td><td>Ex deposito frigo (UA basso)</td></tr>
         </table>
       </div>
     </div>
     <div>
       <div class="card" style="margin-bottom:.8rem;">
-        <div class="ct">Applicazione Data Center AI</div>
-        <p style="font-size:.80rem;color:var(--text2);line-height:1.7;margin-bottom:.6rem;">
-          I DC per AI sono caratterizzati da calore da smaltire <b style="color:var(--amber);">continuo 24/7</b>, estate e inverno. Questo li rende ottimali per ITES:
+        <div class="ct">Perché serve freddo anche d'inverno</div>
+        <p style="font-size:.78rem;color:var(--text2);line-height:1.8;">
+          In un Data Center da <b style="color:var(--red);">3 MW IT</b>, i rack producono 3 MW termici 24/7. 
+          Anche con T esterna a 0°C, l'involucro (ben isolato, ex-frigo) disperde solo una piccola frazione
+          (es. UA=500 W/K × ΔT=27°C = 13,5 kW). Il calore interno resta enormemente superiore:
+          serve raffreddamento attivo tutto l'anno.
         </p>
-        <ul style="font-size:.76rem;color:var(--text3);margin:0 0 0 1.1rem;line-height:2.1;">
-          <li>Carico costante → ciclo carica/scarica prevedibile e ottimizzabile</li>
-          <li>Surplus FV ore centrali → coincide con picco produzione</li>
-          <li>Scarica notturna → 8–12 ore disponibili per fusione graduale</li>
-          <li>Infrastruttura frigorifera esistente (deposito alimentare 4–6°C)</li>
-        </ul>
+        <div class="formula">
+          Inverno: 3.000 kW_th (rack) + 240 kW_th (servizi) − 13,5 kW (dispersione) ≈ 3.227 kW_th da smaltire
+        </div>
       </div>
       <div class="card" style="margin-bottom:.8rem;">
+        <div class="ct">EER variabile con temperatura</div>
+        <p style="font-size:.78rem;color:var(--text2);line-height:1.8;">
+          L'EER del chiller degrada con l'aumento della T esterna (−2% per °C sopra 15°C), 
+          come documentato nella tesi PoliTo. Questo significa che in estate il chiller è meno efficiente
+          proprio quando serve più freddo.
+        </p>
+        <div class="formula">
+          EER(T) = EER_nom × (1 − 0.02 × max(0, T_ext − 15))
+        </div>
+      </div>
+      <div class="card">
         <div class="ct">Confronto tecnologie accumulo (tesi PoliTo)</div>
         <table>
           <thead><tr><th>Tecnologia</th><th>Densità en.</th><th>Note</th></tr></thead>
-          <tr><td>ITES (ghiaccio)</td><td style="color:var(--teal);">92.8 Wh/kg</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">Latente, 0°C, basso costo</td></tr>
-          <tr><td>PCM organici</td><td style="color:var(--amber);">100–250 Wh/kg</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">T variabile, costo elevato</td></tr>
-          <tr><td>Batteria Li-ion</td><td style="color:var(--blue);">150–250 Wh/kg</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">Elettrica, cicli limitati</td></tr>
-          <tr><td>Acqua calda (sensibile)</td><td style="color:var(--red);">15–30 Wh/kg</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">Solo riscaldamento</td></tr>
+          <tr><td>ITES (ghiaccio)</td><td style="color:var(--teal);">92.8 Wh/kg</td><td style="font-family:'IBM Plex Sans';color:var(--text3);">Latente, 0°C, basso costo</td></tr>
+          <tr><td>PCM organici</td><td style="color:var(--amber);">100–250 Wh/kg</td><td style="font-family:'IBM Plex Sans';color:var(--text3);">T variabile, costo elevato</td></tr>
+          <tr><td>Batteria Li-ion</td><td style="color:var(--blue);">150–250 Wh/kg</td><td style="font-family:'IBM Plex Sans';color:var(--text3);">Elettrica, cicli limitati</td></tr>
+          <tr><td>Acqua calda</td><td style="color:var(--red);">15–30 Wh/kg</td><td style="font-family:'IBM Plex Sans';color:var(--text3);">Solo riscaldamento</td></tr>
         </table>
-      </div>
-      <div class="card">
-        <div class="ct">Passi del progetto (documento di specifica)</div>
-        <div style="font-size:.76rem;color:var(--text3);line-height:2.1;">
-          <div><span style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">1.</span> Calcolo produzione FV con PVGIS (kWh/kWp per giorno tipo)</div>
-          <div><span style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">2.</span> Identificazione surplus orario rispetto al carico DC</div>
-          <div><span style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">3.</span> Ottimizzazione: investimento PdC vs risparmio energia rete</div>
-          <div><span style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">4.</span> Calcolo ghiaccio producibile nei picchi di surplus</div>
-          <div><span style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">5.</span> Dimensionamento contenitore ITES</div>
-          <div><span style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">6.</span> Verifica velocità formazione ghiaccio (fornitore macchine)</div>
-          <div><span style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">7.</span> Verifica cinetica di fusione (ore disponibili sufficienti)</div>
-        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div style="font-size:.68rem;color:var(--text3);padding:.4rem .8rem;background:var(--bg3);border-radius:var(--r);margin-bottom:.5rem;border:1px solid var(--border);">⚠ Simulazione di pre-fattibilità · Dati PVGIS: TMY medie 2005–2020 ±10–15%/anno · COP costante (varia con T_esterna) · Non sostituisce progetto esecutivo professionale</div>
-<div class="footer">
-  <span>Simulazione ITES Data Center Bellocchi · Basata su: Tesi PoliTo — F. Scarascia (2025) · Dati FV: PVGIS v5.2 EC JRC</span>
-  <span style="color:var(--red);">⚠ Pre-fattibilità — non sostituisce progetto esecutivo professionale</span>
+<div style="font-size:.68rem;color:var(--text3);padding:.4rem .8rem;background:var(--bg3);border-radius:var(--r);margin-bottom:.5rem;border:1px solid var(--border);">
+  ⚠ Simulazione di pre-fattibilità · COP/EER variabile con T_ext · Involucro ex-frigo · Non sostituisce progetto esecutivo
 </div>
-</div><!-- /page -->
+<div class="footer">
+  <span>Simulazione ITES Data Center v2 · Tesi PoliTo — F. Scarascia (2025) · PVGIS v5.2 EC JRC</span>
+  <span style="color:var(--red);">⚠ Pre-fattibilità</span>
+</div>
+</div>
 
 <script>
 // ══════════════════════════════════════════════
 //  COSTANTI FISICHE
 // ══════════════════════════════════════════════
 const LATENTE_WH = 334000/3600; // 92.78 Wh/kg
-const RHO_ICE    = 917;          // kg/m³
+const RHO_ICE    = 917;
+const GIORNI_MESE = [31,28,31,30,31,30,31,31,30,31,30,31];
+const NOMI_MESE   = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
-// Mappa giorno anno → mese
-const GIORNI_MESE    = [31,28,31,30,31,30,31,31,30,31,30,31];
-const NOMI_MESE      = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+// Temperature orarie tipiche per mese — Pesaro/Bellocchi
+const TEMP_ORARIE = [
+  [2,1,1,0,0,0,1,3,5,7,8,9,9,10,10,9,8,6,5,4,4,3,3,2],
+  [3,2,2,1,1,1,2,4,6,8,10,11,12,12,12,11,10,8,7,6,5,4,4,3],
+  [5,5,4,3,3,3,4,6,9,11,13,14,15,15,15,14,13,11,10,9,8,7,6,6],
+  [9,8,7,7,6,6,7,9,12,14,16,17,18,18,18,17,16,14,13,12,11,10,10,9],
+  [13,12,12,11,10,10,11,14,17,19,21,22,23,23,23,22,21,19,17,16,15,14,14,13],
+  [17,16,16,15,15,14,16,18,21,23,25,27,28,28,28,27,26,24,22,21,20,19,18,17],
+  [20,19,18,18,17,17,18,21,24,26,28,30,31,31,31,30,29,27,25,24,23,22,21,20],
+  [20,19,18,18,17,17,18,21,24,26,28,30,31,31,30,30,28,26,25,23,22,21,21,20],
+  [16,16,15,14,14,13,14,17,20,22,24,25,26,26,26,25,24,22,20,19,18,17,17,16],
+  [12,11,11,10,10,9,10,12,15,17,19,20,21,21,20,19,18,16,15,14,13,13,12,12],
+  [8,7,7,6,6,5,6,8,10,12,13,14,15,15,14,13,12,11,10,9,9,8,8,8],
+  [3,3,2,2,1,1,2,3,5,7,9,10,10,10,10,9,8,7,6,5,4,4,3,3],
+];
 
-function giornoToMese(gg) {
-  let g=gg-1;
-  for(let m=0;m<12;m++){
-    if(g<GIORNI_MESE[m]) return {mese_idx:m, giorno_m:g+1};
-    g-=GIORNI_MESE[m];
-  }
-  return {mese_idx:11, giorno_m:31};
-}
-function giornoLabel(gg) {
-  const {mese_idx,giorno_m}=giornoToMese(gg);
-  return giorno_m+' '+NOMI_MESE[mese_idx];
-}
+// Tariffe orarie (€/kWh) — F1/F2/F3
+const TARIFFE = [
+  0.06,0.06,0.06,0.06,0.06,0.06,0.06,
+  0.12,
+  0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,0.18,
+  0.12,0.12,
+  0.06,0.06,0.06
+];
 
-// Profili orari mensili normalizzati (curva sin, alba/tramonto lat 43.85 az SSE)
+// Profili FV orari per mese
 const _ALBE     = [7.5,7.0,6.0,5.5,5.0,4.5,5.0,5.5,6.0,6.5,7.0,7.5];
 const _TRAMONTI = [16.5,17.5,18.5,20.0,20.5,21.0,20.5,20.0,19.0,18.0,16.5,16.0];
 const PROFILI_MENSILI = Array.from({length:12},(_,m)=>{
@@ -523,13 +504,7 @@ const PROFILI_MENSILI = Array.from({length:12},(_,m)=>{
   return p.map(v=>s>0?v/s:0);
 });
 
-let tankStates365=null; // cache pre-simulazione
-
-
-// ══════════════════════════════════════════════
-//  DATI FALLBACK (stime calibrate Bellocchi)
-//  usati quando PVGIS non è raggiungibile
-// ══════════════════════════════════════════════
+// Dati fallback kWh/kWp/giorno
 const FALLBACK_MENSILI = [
   {nome:'Gen',irr:67, kwp_kwh:2.05,giorni:31},
   {nome:'Feb',irr:86, kwp_kwh:2.62,giorni:28},
@@ -545,90 +520,221 @@ const FALLBACK_MENSILI = [
   {nome:'Dic',irr:56, kwp_kwh:1.70,giorni:31},
 ];
 
-// Profili irraggiamento orario normalizzati (0–1) per stagione
-const PROFILI = {
-  estate:   {irr:[0,0,0,0,0,0.01,0.06,0.18,0.38,0.58,0.76,0.88,0.94,0.90,0.80,0.64,0.44,0.22,0.08,0.02,0,0,0,0], label:'Luglio'},
-  primavera:{irr:[0,0,0,0,0,0,0.02,0.10,0.28,0.48,0.64,0.76,0.80,0.76,0.66,0.50,0.30,0.12,0.03,0,0,0,0,0], label:'Aprile'},
-  inverno:  {irr:[0,0,0,0,0,0,0,0.02,0.12,0.28,0.44,0.55,0.58,0.54,0.42,0.24,0.08,0.01,0,0,0,0,0,0], label:'Gennaio'},
-};
-const STAGIONE_MESE = {estate:6, primavera:3, inverno:0}; // index in MENSILI
-
-// Stato PVGIS
-let pvgisData = null; // null = fallback, array = dati reali
+let pvgisData = null;
 let pvgisLoaded = false;
-
-// Chart registry
+let tankStates365 = null;
 const charts = {};
-function destroyC(id){ if(charts[id]){charts[id].destroy();delete charts[id];} }
+function destroyC(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function getMensili(){return pvgisData||FALLBACK_MENSILI;}
+
+function giornoToMese(gg){let g=gg-1;for(let m=0;m<12;m++){if(g<GIORNI_MESE[m])return{mese_idx:m,giorno_m:g+1};g-=GIORNI_MESE[m];}return{mese_idx:11,giorno_m:31};}
+function giornoLabel(gg){const{mese_idx,giorno_m}=giornoToMese(gg);return giorno_m+' '+NOMI_MESE[mese_idx];}
+
+// ══════════════════════════════════════════════
+//  PARAMETRI CORRENTI
+// ══════════════════════════════════════════════
+function getParams() {
+  return {
+    kwp:    parseFloat(document.getElementById('r-kwp').value),
+    loss:   parseFloat(document.getElementById('r-loss').value)/100,
+    dcBase: parseFloat(document.getElementById('r-dc').value),
+    servPct:parseFloat(document.getElementById('r-serv').value)/100,
+    setP:   parseFloat(document.getElementById('r-setp').value),
+    ua:     parseFloat(document.getElementById('r-ua').value),
+    cop:    parseFloat(document.getElementById('r-cop').value),
+    tankV:  parseFloat(document.getElementById('r-tank').value),
+  };
+}
+
+function updateLabels(p) {
+  document.getElementById('v-kwp').textContent  = p.kwp+' kWp';
+  document.getElementById('v-loss').textContent = Math.round(p.loss*100)+' %';
+  document.getElementById('v-dc').textContent   = p.dcBase+' kW';
+  document.getElementById('v-serv').textContent = Math.round(p.servPct*100)+' %';
+  document.getElementById('v-setp').textContent = p.setP+' °C';
+  document.getElementById('v-ua').textContent   = p.ua+' W/K';
+  document.getElementById('v-cop').textContent  = p.cop.toFixed(1);
+  document.getElementById('v-tank').textContent = p.tankV+' m³';
+}
+
+// ══════════════════════════════════════════════
+//  MOTORE DI SIMULAZIONE v2
+// ══════════════════════════════════════════════
+// Simula una singola ora, restituisce stato aggiornato
+function simulaOra(h, mese, p, tankLevel) {
+  const tExt = TEMP_ORARIE[mese][h];
+  const tInt = p.setP;
+
+  // --- CARICHI TERMICI ---
+  const heatIT = p.dcBase;                         // kW_th (tutto elettrico → calore)
+  const servKw = p.dcBase * p.servPct;              // kW_el servizi
+  const heatServ = servKw;                          // kW_th (anche questi → calore)
+  const heatEnv = p.ua * (tExt - tInt) / 1000;     // kW_th (+estate, -inverno)
+  const coolingNeed = Math.max(0, heatIT + heatServ + heatEnv); // kW_th totale da smaltire
+
+  // --- PV PRODUZIONE ---
+  const mensili = getMensili();
+  const kwpDay = mensili[mese].kwp_kwh;
+  const lossCorr = (1 - p.loss) / (1 - 0.14);
+  const prof = PROFILI_MENSILI[mese];
+  const sumP = prof.reduce((a,b)=>a+b,0);
+  const pvKw = prof[h] / sumP * kwpDay * p.kwp * lossCorr; // kWh questa ora
+
+  // --- EER VARIABILE ---
+  const eer = Math.max(2.0, p.cop * (1 - 0.02 * Math.max(0, tExt - 15)));
+
+  // --- CASCATA ENERGETICA ---
+  // 1) PV copre prima i servizi
+  const pvAfterServ = Math.max(0, pvKw - servKw);
+  const servFromPv = Math.min(pvKw, servKw);
+  const servFromGrid = servKw - servFromPv;
+
+  // 2) Surplus PV → chiller → cooling
+  const coolingFromPvEl = pvAfterServ * eer; // kWh_th da surplus PV
+
+  const capKwh = p.tankV * RHO_ICE * LATENTE_WH / 1000;
+  let coolDeficit = coolingNeed - coolingFromPvEl;
+  let iceCharged = 0, iceUsed = 0, gridForChiller = 0, pvToGrid = 0;
+
+  if (coolDeficit <= 0) {
+    // PV copre tutto il cooling, eccesso → ghiaccio
+    const excess = Math.abs(coolDeficit);
+    const space = capKwh - tankLevel;
+    iceCharged = Math.min(excess, space);
+    tankLevel += iceCharged;
+    pvToGrid = (excess - iceCharged) / eer; // kW_el residuo → rete
+    coolDeficit = 0;
+  } else {
+    // Non basta → prima ghiaccio, poi rete
+    if (tankLevel > 0) {
+      iceUsed = Math.min(coolDeficit, tankLevel);
+      tankLevel -= iceUsed;
+      coolDeficit -= iceUsed;
+    }
+    if (coolDeficit > 0) {
+      gridForChiller = coolDeficit / eer; // kW_el rete per chiller
+      coolDeficit = 0;
+    }
+  }
+
+  // Tank losses (0.5%/h)
+  const tankLoss = tankLevel * 0.005;
+  tankLevel = Math.max(0, tankLevel - tankLoss);
+
+  // IT è sempre alimentato dalla rete (PV copre solo servizi + chiller)
+  const gridForIT = p.dcBase;
+  const totalGrid = gridForIT + gridForChiller + servFromGrid;
+  const tariff = TARIFFE[h];
+  const gridCost = totalGrid * tariff;
+
+  return {
+    h, tExt, tInt,
+    heatIT, heatServ, heatEnv: Math.round(heatEnv*10)/10,
+    coolingNeed: Math.round(coolingNeed*10)/10,
+    pvKw: Math.round(pvKw*10)/10,
+    servFromPv: Math.round(servFromPv*10)/10,
+    servFromGrid: Math.round(servFromGrid*10)/10,
+    coolingFromPv: Math.round(Math.min(coolingFromPvEl, coolingNeed)*10)/10,
+    iceCharged: Math.round(iceCharged*10)/10,
+    iceUsed: Math.round(iceUsed*10)/10,
+    tankLevel: Math.round(tankLevel*10)/10,
+    gridForIT: Math.round(gridForIT*10)/10,
+    gridForChiller: Math.round(gridForChiller*10)/10,
+    totalGrid: Math.round(totalGrid*10)/10,
+    pvToGrid: Math.round(pvToGrid*10)/10,
+    eer: Math.round(eer*100)/100,
+    tariff, gridCost: Math.round(gridCost*100)/100,
+    tankLevelRaw: tankLevel,
+  };
+}
+
+// Pre-simula 365 giorni
+function preSimula365(p) {
+  const capKwh = p.tankV * RHO_ICE * LATENTE_WH / 1000;
+  const states = new Array(366).fill(0);
+  let tank = 0;
+  let gg = 0;
+  for (let m=0; m<12; m++) {
+    for (let d=0; d<GIORNI_MESE[m]; d++) {
+      states[gg] = tank;
+      for (let h=0; h<24; h++) {
+        const r = simulaOra(h, m, p, tank);
+        tank = r.tankLevelRaw;
+      }
+      gg++;
+    }
+  }
+  states[365] = tank;
+  return states;
+}
+
+// Simula un giorno completo
+function simulaGiorno(gg, p) {
+  const {mese_idx} = giornoToMese(gg);
+  const capKwh = p.tankV * RHO_ICE * LATENTE_WH / 1000;
+  const tankInizio = tankStates365 ? Math.min(tankStates365[gg-1], capKwh) : 0;
+  let tank = tankInizio;
+  const hours = [];
+
+  for (let h=0; h<24; h++) {
+    const r = simulaOra(h, mese_idx, p, tank);
+    tank = r.tankLevelRaw;
+    hours.push(r);
+  }
+
+  const totPv = hours.reduce((s,r)=>s+r.pvKw,0);
+  const totGrid = hours.reduce((s,r)=>s+r.totalGrid,0);
+  const totCooling = hours.reduce((s,r)=>s+r.coolingNeed,0);
+  const totIceUp = hours.reduce((s,r)=>s+r.iceCharged,0);
+  const totIceDown = hours.reduce((s,r)=>s+r.iceUsed,0);
+  const totGridChiller = hours.reduce((s,r)=>s+r.gridForChiller,0);
+  const totCoolPv = hours.reduce((s,r)=>s+r.coolingFromPv,0);
+  const totCost = hours.reduce((s,r)=>s+r.gridCost,0);
+  const ghiaccioT = tank * 1000 / (LATENTE_WH * 1000);
+
+  return {
+    hours, tankInizio,
+    totPv, totGrid, totCooling, totIceUp, totIceDown,
+    totGridChiller, totCoolPv, totCost, ghiaccioT,
+    tankFine: tank, capKwh,
+  };
+}
 
 // ══════════════════════════════════════════════
 //  PVGIS LOADER
 // ══════════════════════════════════════════════
 async function loadPVGIS() {
-  const btn = document.getElementById('pvgis-btn');
-  const dot = document.getElementById('pvgis-dot');
-  const msg = document.getElementById('pvgis-msg');
-  const src = document.getElementById('pvgis-src');
-
-  btn.disabled = true;
-  dot.className = 'pvgis-dot dot-loading';
-  msg.textContent = 'Connessione a PVGIS (EC JRC)…';
-  src.textContent = '';
-
-  const kwp  = parseFloat(document.getElementById('r-kwp').value);
-  const loss = parseFloat(document.getElementById('r-loss').value);
-
+  const btn=document.getElementById('pvgis-btn'),dot=document.getElementById('pvgis-dot'),
+        msg=document.getElementById('pvgis-msg'),src=document.getElementById('pvgis-src');
+  btn.disabled=true; dot.className='pvgis-dot dot-loading'; msg.textContent='Connessione a PVGIS…'; src.textContent='';
+  const loss=parseFloat(document.getElementById('r-loss').value);
   try {
-    const url = `/api/pvgis-monthly?lat=43.85&lon=12.98&kwp=1&losses=${loss}&tilt=5&azimuth=145`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-    const json = await res.json();
-
-    // Parsing risposta PVcalc PVGIS
-    const monthly = json.outputs?.monthly?.fixed;
-    if (!monthly || monthly.length < 12) throw new Error('Risposta PVGIS non valida o incompleta');
-
-    // Struttura risposta PVGIS PVcalc (verificata):
-    // E_d = kWh/giorno per 1 kWp  ← questo usiamo come kwp_kwh
-    // E_m = kWh/mese per 1 kWp
-    // H(i)_m = kWh/m²/mese irraggiamento sul piano inclinato
-    pvgisData = monthly.map((m, i) => ({
-      nome:    FALLBACK_MENSILI[i].nome,
-      irr:     Math.round(parseFloat(m['H(i)_m'] || 0) || FALLBACK_MENSILI[i].irr),
-      kwp_kwh: parseFloat(parseFloat(m['E_d'] || 0).toFixed(4)), // kWh/kWp/giorno
-      kwp_kwh_mese: parseFloat(parseFloat(m['E_m'] || 0).toFixed(2)), // kWh/kWp/mese
-      giorni:  FALLBACK_MENSILI[i].giorni,
+    const url=`/api/pvgis-monthly?lat=43.85&lon=12.98&kwp=1&losses=${loss}&tilt=5&azimuth=145`;
+    const res=await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+    const json=await res.json();
+    const monthly=json.outputs?.monthly?.fixed;
+    if(!monthly||monthly.length<12) throw new Error('Risposta PVGIS non valida');
+    pvgisData=monthly.map((m,i)=>({
+      nome:FALLBACK_MENSILI[i].nome,
+      irr:Math.round(parseFloat(m['H(i)_m']||0)||FALLBACK_MENSILI[i].irr),
+      kwp_kwh:parseFloat(parseFloat(m['E_d']||0).toFixed(4)),
+      kwp_kwh_mese:parseFloat(parseFloat(m['E_m']||0).toFixed(2)),
+      giorni:FALLBACK_MENSILI[i].giorni,
     }));
-    console.log('PVGIS parsed OK:', pvgisData.map(m => m.nome+': '+m.kwp_kwh.toFixed(2)+' kWh/kWp/d').join(', '));
-
-    pvgisLoaded = true;
-    dot.className = 'pvgis-dot dot-ok';
-    msg.innerHTML = '✅ Dati PVGIS caricati — produzione mensile ufficiale EC JRC';
-    src.textContent = `PVGIS v5.2 · SARAH2 · Bellocchi 43.85°N 12.98°E · az −35° · tilt 5° · loss ${loss}%`;
-    document.getElementById('mensile-src-label').textContent = '✅ PVGIS v5.2';
-    document.getElementById('data-source-label').textContent = 'dati: PVGIS v5.2 (EC JRC)';
-    document.getElementById('mensile-source').innerHTML =
-      `<b>Fonte dati:</b> PVGIS v5.2 — Commissione Europea, JRC. Database SARAH2. Anno meteorologico tipico 2005–2020. Perdite sistema: ${loss}%.`;
-
+    pvgisLoaded=true;
+    dot.className='pvgis-dot dot-ok';
+    msg.innerHTML='✅ Dati PVGIS caricati — EC JRC';
+    src.textContent=`PVGIS v5.2 · SARAH2 · loss ${loss}%`;
+    document.getElementById('data-source-label').textContent='dati: PVGIS v5.2';
+    document.getElementById('mensile-source').innerHTML=`<b>Fonte dati:</b> PVGIS v5.2 — EC JRC. Database SARAH2. Perdite: ${loss}%.`;
     resetRun();
-    if (document.getElementById('panel-mensile').classList.contains('active')) runMensile();
-
   } catch(e) {
-    dot.className = 'pvgis-dot dot-error';
-    msg.innerHTML = `⛔ PVGIS non raggiungibile: <em>${e.message}</em>. Usando stime di fallback.`;
-    src.textContent = 'Se il problema persiste, verifica che il deploy Vercel sia attivo e che la serverless function /api/pvgis-monthly risponda.';
-    pvgisData = null;
-    pvgisLoaded = false;
+    dot.className='pvgis-dot dot-error';
+    msg.innerHTML=`⛔ Errore: <em>${e.message}</em>. Usando stime di fallback.`;
+    pvgisData=null; pvgisLoaded=false;
   }
-
-  btn.disabled = false;
-}
-
-// ══════════════════════════════════════════════
-//  GETTER DATI MENSILI (PVGIS o fallback)
-// ══════════════════════════════════════════════
-function getMensili() {
-  return pvgisData || FALLBACK_MENSILI;
+  btn.disabled=false;
 }
 
 // ══════════════════════════════════════════════
@@ -643,505 +749,29 @@ function sw(name) {
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='mensile') runMensile();
   if(name==='dimensionamento') runDim();
+  if(name==='bilancio') runBilancio();
 }
 
 // ══════════════════════════════════════════════
-//  PRE-SIMULAZIONE 365 GIORNI (propaga stato serbatoio)
-// ══════════════════════════════════════════════
-function preSimula365(kwp, loss, dcBase, pue, cop, tankV) {
-  const capKwh = tankV * RHO_ICE * LATENTE_WH / 1000;
-  const lossCorr = (1 - loss) / (1 - 0.14);
-  const mensili = getMensili();
-  const states = new Array(366).fill(0);  // states[0]=inizio 1gen, states[1]=inizio 2gen...
-  let tank = 0;
-
-  let giornoAbs = 0;
-  for(let m=0; m<12; m++){
-    const ed = (mensili[m].kwp_kwh || 1.32);
-    const prof = PROFILI_MENSILI[m];
-    const sumProf = prof.reduce((a,b)=>a+b,0);
-
-    for(let g=0; g<GIORNI_MESE[m]; g++){
-      states[giornoAbs] = tank;
-
-      // Simula giorno
-      for(let h=0; h<24; h++){
-        const fv_h = prof[h] / sumProf * ed * kwp * lossCorr;
-        let f = 1.0;
-        if(h>=8&&h<=18) f=1.20; else if(h>=19&&h<=23) f=0.90;
-        const dc_h = dcBase * pue * f;
-        const surplus = fv_h - dc_h;
-
-        if(surplus >= 0){
-          const frigExtra = surplus * cop;
-          const car = Math.min(frigExtra, capKwh - tank);
-          tank += car;
-        } else {
-          const defTh = (-surplus) * cop;
-          const daGhiaccio = Math.min(defTh, tank);
-          tank = Math.max(0, tank - daGhiaccio);
-        }
-        tank = Math.max(0, Math.min(tank, capKwh));
-      }
-      giornoAbs++;
-    }
-  }
-  states[365] = tank;
-  return states;
-}
-
-// ══════════════════════════════════════════════
-//  TAB 1: GIORNALIERA
-// ══════════════════════════════════════════════
-function run() {
-  const kwp    = parseFloat(document.getElementById('r-kwp').value);
-  const loss   = parseFloat(document.getElementById('r-loss').value)/100;
-  const giornoN= parseInt(document.getElementById('r-giorno').value);
-  const dcBase = parseFloat(document.getElementById('r-dc').value);
-  const pue    = parseFloat(document.getElementById('r-pue').value);
-  const cop    = parseFloat(document.getElementById('r-cop').value);
-  const tankV  = parseFloat(document.getElementById('r-tank').value);
-
-  const {mese_idx, giorno_m} = giornoToMese(giornoN);
-
-  document.getElementById('v-kwp').textContent    = kwp+' kWp';
-  document.getElementById('v-loss').textContent   = Math.round(loss*100)+'%';
-  document.getElementById('v-dc').textContent     = dcBase+' kW';
-  document.getElementById('v-pue').textContent    = pue.toFixed(1);
-  document.getElementById('v-cop').textContent    = cop.toFixed(1);
-  document.getElementById('v-tank').textContent   = tankV+' m³';
-  document.getElementById('v-giorno').textContent = giornoLabel(giornoN)+' (giorno '+giornoN+')';
-
-  const labels = Array.from({length:24},(_,h)=>h+':00');
-
-  // Pre-simula 365 giorni per propagare lo stato serbatoio
-  if(!tankStates365) tankStates365 = preSimula365(kwp, loss, dcBase, pue, cop, tankV);
-
-  // Profilo orario per questo mese
-  const prof = PROFILI_MENSILI[mese_idx];
-  const sumProf = prof.reduce((a,b)=>a+b,0);
-
-  // kWh/kWp/giorno da PVGIS per questo mese
-  const mensili = getMensili();
-  const kwpDay = mensili[mese_idx].kwp_kwh;
-  const lossCorr = (1 - loss) / (1 - 0.14);
-
-  const fv = prof.map(v => +(v / sumProf * kwpDay * kwp * lossCorr).toFixed(1));
-
-  // DC: carico IT × PUE = carico totale
-  const dcTot = dcBase * pue;
-  const dc = Array.from({length:24},(_,h)=>{
-    let f=1.0;
-    if(h>=8&&h<=18) f=1.20;
-    else if(h>=19&&h<=23) f=0.90;
-    return +(dcTot*f).toFixed(1);
-  });
-
-  // Stato serbatoio all'inizio di questo giorno (da pre-simulazione)
-  const tankInizio = tankStates365 ? tankStates365[giornoN-1] : 0;
-  const pctInizio  = Math.round(tankInizio / (tankV * RHO_ICE * LATENTE_WH / 1000) * 100);
-  document.getElementById('tank-prev-state').innerHTML =
-    `Inizio giornata: <b style="color:var(--teal)">${pctInizio}%</b> pieno ` +
-    `(${(tankInizio * 1000 / (LATENTE_WH * 1000)).toFixed(1)} t ghiaccio)`;
-
-  // ── MOTORE DI SIMULAZIONE (logica corretta) ──────────────────────────
-  //
-  // Ogni ora h:
-  //  1. FV produce fv[h] kW elettrici
-  //  2. Il DC richiede dc[h] kW elettrici (rack × PUE)
-  //     → fabbisogno termico rack = dcBase × profilo  [kW_th]  (il calore da smaltire = kW IT)
-  //  3. Surplus elettrico = fv[h] - dc[h]
-  //     Se surplus > 0:
-  //       - Tutta l'energia surplus va alla PdC → surplus × COP = frigorie_extra [kW_th]
-  //       - Le frigorie_extra prima caricano ghiaccio (se serbatoio non pieno)
-  //       - Quello che avanza come kWh elettrici va in rete
-  //     Se surplus < 0 (deficit elettrico):
-  //       - Il deficit viene coperto dalla rete (kWh_rete_el)
-  //       - Le frigorie mancanti per i rack = |deficit| × COP [kW_th]
-  //       - Prima si scarica il ghiaccio per coprirle
-  //       - Quello che manca ancora viene preso dalla rete × COP
-  //
-  // Nota: dc[h] = consumo elettrico totale DC (già include PUE)
-  //       fabbisogno_th[h] = dcBase × profilo_orario = calore da smaltire dai rack
-  // ──────────────────────────────────────────────────────────────────────
-
-  const massaKg  = tankV * RHO_ICE;
-  const capKwh   = massaKg * LATENTE_WH / 1000;  // kWh_th capacità serbatoio
-  let tankState  = tankInizio;                     // kWh_th ghiaccio: stato da pre-simulazione
-
-  // Arrays output orari
-  const frigDaFv    = new Array(24).fill(0); // kW_th frigorie da surplus FV → ghiaccio
-  const frigDaRete  = new Array(24).fill(0); // kW_th frigorie da rete (integrazione)
-  const frigDaGhiac = new Array(24).fill(0); // kW_th frigorie da ghiaccio scaricato
-  const reteEl      = new Array(24).fill(0); // kW elettrici da rete (deficit DC + integraz.)
-  const fvInRete    = new Array(24).fill(0); // kW elettrici FV ceduti in rete (surplus oltre ghiaccio)
-  const tankPct     = new Array(24).fill(0);
-
-  // Fabbisogno termico rack (= kW IT, il calore da smaltire)
-  const fabbTh = Array.from({length:24},(_,h)=>{
-    let f=1.0;
-    if(h>=8&&h<=18) f=1.20;
-    else if(h>=19&&h<=23) f=0.90;
-    return +(dcBase * f).toFixed(1);
-  });
-
-  for(let h=0;h<24;h++){
-    const surplusEl = fv[h] - dc[h];  // kW elettrici surplus (+) o deficit (-)
-
-    if(surplusEl >= 0){
-      // ── CASO A: FV copre tutto il DC, avanza surplus ──
-      // Il surplus elettrico va alla PdC → produce frigorie extra
-      const frigExtra = surplusEl * cop;  // kW_th frigorie in eccesso
-
-      // I rack sono già raffreddati dal FV (incluso nel dc[h])
-      // Le frigorie extra caricano il serbatoio
-      const spazio = capKwh - tankState;
-      const carKwh = Math.min(frigExtra, spazio);          // kWh_th caricati
-      tankState += carKwh;
-      frigDaFv[h] = +carKwh.toFixed(1);
-
-      // Frigorie in eccesso oltre il serbatoio → energia elettrica equivalente in rete
-      const frigRimaste = frigExtra - carKwh;
-      fvInRete[h] = +(frigRimaste / cop).toFixed(1);        // kW_el ceduti in rete
-
-    } else {
-      // ── CASO B: FV non copre il DC, c'è deficit elettrico ──
-      const deficitEl = -surplusEl;                          // kW_el mancanti
-      const deficitTh = deficitEl * cop;                     // kW_th frigorie mancanti
-
-      // 1. Prima uso il ghiaccio accumulato
-      const daGhiaccio = Math.min(deficitTh, tankState);
-      tankState = Math.max(0, tankState - daGhiaccio);
-      frigDaGhiac[h] = +daGhiaccio.toFixed(1);
-
-      // 2. Quello che manca ancora viene dalla rete
-      const ancoraThMancanti = deficitTh - daGhiaccio;
-      const reteElIntegr = +(ancoraThMancanti / cop).toFixed(1); // kW_el da rete per PdC
-
-      // 3. Rete copre anche il deficit elettrico puro (non termico)
-      // In realtà il deficit elettrico È la causa del deficit termico:
-      // mancano deficitEl kW_el alla PdC che avrebbe prodotto deficitTh kW_th
-      // Quindi l'energia da rete è esattamente deficitEl (già comprensivo di tutto)
-      reteEl[h] = +deficitEl.toFixed(1);
-      frigDaRete[h] = +(ancoraThMancanti).toFixed(1);
-    }
-
-    tankPct[h] = +((tankState / capKwh) * 100).toFixed(1);
-  }
-
-  const totFv        = fv.reduce((a,b)=>a+b,0);
-  const totDc        = dc.reduce((a,b)=>a+b,0);
-  const totRete      = reteEl.reduce((a,b)=>a+b,0);
-  const totFvInRete  = fvInRete.reduce((a,b)=>a+b,0);
-  const totCarItes   = frigDaFv.reduce((a,b)=>a+b,0);   // kWh_th ghiaccio caricato
-  const totDaGhiac   = frigDaGhiac.reduce((a,b)=>a+b,0); // kWh_th ghiaccio scaricato
-  const totDaRete    = frigDaRete.reduce((a,b)=>a+b,0);  // kWh_th da rete via PdC
-
-  // Per compatibilità con i grafici esistenti
-  const carica = frigDaFv;
-  const rete   = reteEl;
-
-  const autocons= Math.round(Math.max(0,Math.min(100,(1-totRete/totDc)*100)));
-  const ghiaccioT=((tankState / LATENTE_WH)*1000/1000).toFixed(1);
-  const totCar  = totCarItes;
-
-  document.getElementById('tank-info').innerHTML =
-    `Capac. termica: <b style="color:var(--teal)">${Math.round(capKwh)} kWh_th</b><br>` +
-    `Massa ghiaccio max: <b>${Math.round(massaKg/1000)} t</b> · Vol ghiaccio: ${tankV} m³`;
-
-  // KPI TOP
-  document.getElementById('kpi-top').innerHTML = `
-    <div class="card kpi"><div class="kv" style="color:var(--green)">${Math.round(totFv)}</div><div class="ku">kWh/giorno</div><div class="kl">Produzione FV</div></div>
-    <div class="card kpi"><div class="kv" style="color:var(--blue)">${autocons}</div><div class="ku">%</div><div class="kl">Autoconsumo</div></div>
-    <div class="card kpi"><div class="kv" style="color:var(--teal)">${ghiaccioT}</div><div class="ku">tonnellate</div><div class="kl">Ghiaccio accumulato</div></div>
-    <div class="card kpi"><div class="kv" style="color:var(--amber)">${Math.round(totRete)}</div><div class="ku">kWh/giorno</div><div class="kl">Da rete</div></div>
-  `;
-
-  // KPI SIDE
-  const rows = [
-    ['Produzione FV',          Math.round(totFv),          'kWh_el',  '#39d353'],
-    ['Consumo DC (rack × PUE)',Math.round(totDc),          'kWh_el',  '#58a6ff'],
-    ['Surplus FV (→ PdC)',     Math.round(Math.max(0,totFv-totDc)), 'kWh_el', '#39c8c8'],
-    ['Ghiaccio caricato',      Math.round(totCarItes),     'kWh_th',  '#39c8c8'],
-    ['Ghiaccio scaricato',     Math.round(totDaGhiac),     'kWh_th',  '#a371f7'],
-    ['FV ceduto in rete',      Math.round(totFvInRete),    'kWh_el',  '#39d353'],
-    ['Prelievo da rete',       Math.round(totRete),        'kWh_el',  '#e3b341'],
-    ['Integraz. rete via PdC', Math.round(totDaRete),      'kWh_th',  '#e3b341'],
-  ];
-  document.getElementById('kpi-side-content').innerHTML = rows.map(([l,v,u,c])=>
-    `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);">
-      <span style="font-size:.72rem;color:var(--text3);">${l}</span>
-      <span style="font-size:.72rem;font-family:'IBM Plex Mono',monospace;color:${c};">${v} <span style="color:var(--text3);font-size:.65rem;">${u}</span></span>
-    </div>`
-  ).join('');
-
-  // INFO BAR
-  document.getElementById('info-day').innerHTML =
-    (()=>{
-    const surplusKwh = Math.round(Math.max(0,totFv-totDc));
-    const noSurplus = surplusKwh === 0
-      ? ` · <span style="color:var(--amber);">⚠ Nessun surplus FV — il FV copre solo parte del DC. Il ghiaccio integra se disponibile, il resto dalla rete.</span>`
-      : '';
-    return `<b>${giornoLabel(giornoN)} — giorno ${giornoN}</b> · FV: ${Math.round(totFv)} kWh_el · Surplus → PdC: ${surplusKwh} kWh_el → ` +
-      `ghiaccio caricato: <b>${Math.round(totCarItes)} kWh_th</b> (${ghiaccioT} t) · ` +
-      `ghiaccio scaricato: <b>${Math.round(totDaGhiac)} kWh_th</b> · ` +
-      `Autoconsumo: <b>${autocons}%</b> · Rete: ${Math.round(totRete)} kWh_el` +
-      noSurplus +
-      (pvgisLoaded ? ' · <span style="color:var(--green);">✅ dati PVGIS</span>' : ' · <span style="color:var(--amber);">⚠ dati stimati</span>');
-  })();
-
-  // CHARTS
-  const co = {responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},
-    scales:{
-      x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10},autoSkip:true,maxTicksLimit:12}},
-      y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10}},title:{display:true,text:'kW',color:'#6e7681',font:{size:10}}}
-    }};
-
-  destroyC('cOrario');
-  charts['cOrario']=new Chart(document.getElementById('cOrario'),{type:'line',data:{labels,datasets:[
-    {label:'FV',         data:fv,          borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.07)',  fill:true,tension:.4,pointRadius:0,borderWidth:2},
-    {label:'DC',         data:dc,          borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.07)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
-    {label:'→ ghiaccio', data:carica,      borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.10)',fill:false,tension:.3,pointRadius:0,borderWidth:2},
-    {label:'ghiaccio →', data:frigDaGhiac, borderColor:'#a371f7',backgroundColor:'rgba(163,113,247,.08)',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[4,3]},
-    {label:'Rete',       data:rete,        borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:1.5},
-  ]},options:co});
-
-  destroyC('cBilancio');
-  charts['cBilancio']=new Chart(document.getElementById('cBilancio'),{type:'bar',
-    data:{labels:['Prod. FV','Cons. DC','ITES carica','Da rete'],
-      datasets:[{data:[Math.round(totFv),Math.round(totDc),Math.round(totCar),Math.round(totRete)],
-        backgroundColor:['rgba(57,211,83,.65)','rgba(88,166,255,.65)','rgba(57,200,200,.65)','rgba(227,179,65,.65)'],
-        borderColor:['#39d353','#58a6ff','#39c8c8','#e3b341'],borderWidth:1,borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:10}}},
-              y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10}},
-                 title:{display:true,text:'kWh',color:'#6e7681',font:{size:10}}}}}});
-
-  destroyC('cTank');
-  charts['cTank']=new Chart(document.getElementById('cTank'),{type:'line',
-    data:{labels,datasets:[{data:tankPct,borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.12)',fill:true,tension:.4,pointRadius:0,borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10},autoSkip:true,maxTicksLimit:8}},
-              y:{min:0,max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10}},
-                 title:{display:true,text:'% pieno',color:'#6e7681',font:{size:10}}}}}});
-}
-
-// ══════════════════════════════════════════════
-//  TAB 2: MENSILE
-// ══════════════════════════════════════════════
-function runMensile() {
-  const kwp   = parseFloat(document.getElementById('r-kwp').value);
-  const loss  = parseFloat(document.getElementById('r-loss').value)/100;
-  const dcBase= parseFloat(document.getElementById('r-dc').value);
-  const pue   = parseFloat(document.getElementById('r-pue').value);
-  const cop   = parseFloat(document.getElementById('r-cop').value);
-
-  const mensili = getMensili();
-  const labels  = mensili.map(m=>m.nome);
-  const fonte   = pvgisLoaded ? 'PVGIS' : 'stima';
-
-  // kwp_kwh = E_d (kWh/kWp/giorno), kwp_kwh_mese = E_m (kWh/kWp/mese) — da PVGIS
-  // lossCorr corregge proporzionalmente se loss != 14% (base PVGIS)
-  const lossCorr = (1 - loss) / (1 - 0.14);
-  const prodFv = mensili.map(m => {
-    const base = m.kwp_kwh_mese != null ? m.kwp_kwh_mese : m.kwp_kwh * m.giorni;
-    return Math.round(base * kwp * lossCorr);
-  });
-  const dcTot   = dcBase * pue;
-  const consDc  = mensili.map(m => Math.round(dcTot * 24 * m.giorni));
-  const surplus = mensili.map((_,i) => Math.max(0, prodFv[i]-consDc[i]));
-  // Avviso se nessun surplus in nessun mese
-  const hasSurplus = surplus.some(s => s > 0);
-  const surplusWarn = document.getElementById('mensile-surplus-warn');
-  if(surplusWarn) surplusWarn.style.display = hasSurplus ? 'none' : 'block';
-  const freddo  = surplus.map(s => Math.round(s*cop));
-  const rete    = mensili.map((_,i) => Math.max(0, consDc[i]-prodFv[i]));
-  const autoC   = mensili.map((_,i) => Math.round(Math.min(100, prodFv[i]/consDc[i]*100)));
-
-  destroyC('cMensile');
-  charts['cMensile']=new Chart(document.getElementById('cMensile'),{type:'bar',
-    data:{labels,datasets:[
-      {label:'FV',data:prodFv.map(v=>Math.round(v)),backgroundColor:'rgba(57,211,83,.55)',borderColor:'#39d353',borderWidth:1,borderRadius:3},
-      {label:'DC',data:consDc,backgroundColor:'rgba(88,166,255,.28)',borderColor:'#58a6ff',borderWidth:1,borderRadius:3}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:10}}},
-              y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10}},
-                 title:{display:true,text:'kWh',color:'#6e7681',font:{size:10}}}}}});
-
-  destroyC('cSurplus');
-  charts['cSurplus']=new Chart(document.getElementById('cSurplus'),{type:'bar',
-    data:{labels,datasets:[{data:surplus,backgroundColor:'rgba(57,200,200,.55)',borderColor:'#39c8c8',borderWidth:1,borderRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:10}}},
-              y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10}},
-                 title:{display:true,text:'kWh surplus',color:'#6e7681',font:{size:10}}}}}});
-
-  const annFv=prodFv.reduce((a,b)=>a+b,0), annDc=consDc.reduce((a,b)=>a+b,0),
-        annSurp=surplus.reduce((a,b)=>a+b,0), annFredd=freddo.reduce((a,b)=>a+b,0),
-        annRete=rete.reduce((a,b)=>a+b,0);
-
-  let html='';
-  mensili.forEach((m,i)=>{
-    const col = surplus[i]>0?'class="pos"':'class="neg"';
-    const acCol = autoC[i]>60?'#39d353':autoC[i]>30?'#e3b341':'#f85149';
-    html+=`<tr>
-      <td>${m.nome}</td>
-      <td>${m.irr}</td>
-      <td>${Math.round(prodFv[i]).toLocaleString('it-IT')}</td>
-      <td>${consDc[i].toLocaleString('it-IT')}</td>
-      <td ${col}>${surplus[i]>0?'+':''}${surplus[i].toLocaleString('it-IT')}</td>
-      <td style="color:var(--teal)">${freddo[i].toLocaleString('it-IT')}</td>
-      <td>${rete[i].toLocaleString('it-IT')}</td>
-      <td style="color:${acCol}">${autoC[i]}%</td>
-      <td><span class="badge ${pvgisLoaded?'bg':'ba'}" style="font-size:.60rem;">${fonte}</span></td>
-    </tr>`;
-  });
-  html+=`<tr style="border-top:2px solid var(--border2);font-weight:600;">
-    <td>TOTALE</td><td>—</td>
-    <td>${Math.round(annFv).toLocaleString('it-IT')}</td>
-    <td>${annDc.toLocaleString('it-IT')}</td>
-    <td class="pos">+${Math.round(annSurp).toLocaleString('it-IT')}</td>
-    <td style="color:var(--teal)">${annFredd.toLocaleString('it-IT')}</td>
-    <td>${Math.round(annRete).toLocaleString('it-IT')}</td>
-    <td>—</td><td>—</td>
-  </tr>`;
-  document.getElementById('tb-mensile').innerHTML=html;
-}
-
-// ══════════════════════════════════════════════
-//  TAB 3: DIMENSIONAMENTO
-// ══════════════════════════════════════════════
-function runDim() {
-  const surplus = parseFloat(document.getElementById('r-s').value);
-  const cop     = parseFloat(document.getElementById('r-cd').value);
-  const oreSc   = parseFloat(document.getElementById('r-os').value);
-  const fill    = parseFloat(document.getElementById('r-fi').value)/100;
-
-  document.getElementById('v-s').textContent  = surplus;
-  document.getElementById('v-cd').textContent = cop.toFixed(1);
-  document.getElementById('v-os').textContent = oreSc+' ore';
-  document.getElementById('v-fi').textContent = Math.round(fill*100)+'%';
-  document.getElementById('sens-fill').textContent = Math.round(fill*100)+'%';
-
-  const freddoKwh = surplus*cop;
-  const massaKg   = freddoKwh*1000/LATENTE_WH;
-  const volNetto  = massaKg/RHO_ICE;
-  const volTot    = volNetto/fill;
-  const potScarica= freddoKwh/oreSc;
-
-  document.getElementById('dim-res').innerHTML=`
-    <div class="ct">Risultati dimensionamento</div>
-    <div style="display:flex;flex-direction:column;gap:.75rem;">
-      <div>
-        <div style="font-size:.68rem;color:var(--text3);">Freddo prodotto</div>
-        <div style="font-size:1.7rem;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--teal);">${Math.round(freddoKwh)} <span style="font-size:.80rem;font-weight:400;">kWh_th</span></div>
-        <div class="formula" style="font-size:.68rem;margin-top:3px;">${surplus} kWh × COP ${cop.toFixed(1)} = ${Math.round(freddoKwh)} kWh_th</div>
-      </div>
-      <div>
-        <div style="font-size:.68rem;color:var(--text3);">Massa ghiaccio necessaria</div>
-        <div style="font-size:1.3rem;font-weight:500;font-family:'IBM Plex Mono',monospace;color:var(--blue);">${(massaKg/1000).toFixed(1)} <span style="font-size:.78rem;font-weight:400;">t</span></div>
-        <div class="formula" style="font-size:.68rem;margin-top:3px;">${Math.round(freddoKwh)} kWh / 92.8 Wh/kg = ${Math.round(massaKg)} kg</div>
-      </div>
-      <div>
-        <div style="font-size:.68rem;color:var(--text3);">Volume serbatoio (lordo)</div>
-        <div style="font-size:1.7rem;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--amber);">${Math.round(volTot)} <span style="font-size:.80rem;font-weight:400;">m³</span></div>
-        <div class="formula" style="font-size:.68rem;margin-top:3px;">${Math.round(massaKg)} kg / 917 kg/m³ / ${Math.round(fill*100)}% fill = ${Math.round(volTot)} m³</div>
-      </div>
-      <div>
-        <div style="font-size:.68rem;color:var(--text3);">Potenza media di scarica</div>
-        <div style="font-size:1.3rem;font-weight:500;font-family:'IBM Plex Mono',monospace;color:var(--green);">${Math.round(potScarica)} <span style="font-size:.78rem;font-weight:400;">kW_th</span></div>
-      </div>
-    </div>`;
-
-  const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-    scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:9},autoSkip:true,maxTicksLimit:6}},
-            y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9}}}}};
-
-  const sR=[100,200,300,400,500,600,800,1000,1500,2000];
-  destroyC('cDV');
-  charts['cDV']=new Chart(document.getElementById('cDV'),{type:'line',
-    data:{labels:sR.map(v=>v+''),datasets:[{data:sR.map(s=>Math.round(s*cop/LATENTE_WH*1000/RHO_ICE/fill)),
-      borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.10)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'#e3b341'}]},
-    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'m³',color:'#6e7681',font:{size:9}}}}}});
-
-  const cR=[1.5,2,2.5,3,3.5,4,4.5,5];
-  destroyC('cDC');
-  charts['cDC']=new Chart(document.getElementById('cDC'),{type:'line',
-    data:{labels:cR.map(c=>''+c),datasets:[{data:cR.map(c=>Math.round(surplus*c)),
-      borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.10)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'#39c8c8'}]},
-    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'kWh_th',color:'#6e7681',font:{size:9}}}}}});
-
-  const oreR=Array.from({length:oreSc},(_,i)=>i+1);
-  const decSum=oreR.reduce((s,h)=>s+Math.exp(-.15*(h-1)),0);
-  destroyC('cDS');
-  charts['cDS']=new Chart(document.getElementById('cDS'),{type:'bar',
-    data:{labels:oreR.map(h=>'h+'+h),datasets:[{data:oreR.map(h=>Math.round(freddoKwh*Math.exp(-.15*(h-1))/decSum)),
-      backgroundColor:'rgba(57,211,83,.5)',borderColor:'#39d353',borderWidth:1,borderRadius:3}]},
-    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'kW_th',color:'#6e7681',font:{size:9}}}}}});
-
-  // Sensibilità
-  const surpVals=[100,200,400,600,800,1200];
-  const copVals=[2.0,2.5,3.0,3.5,4.0,4.5];
-  let t=`<table><thead><tr><th style="text-align:left">COP \\ Surplus (kWh)</th>`;
-  surpVals.forEach(s=>t+=`<th>${s}</th>`);
-  t+=`</tr></thead><tbody>`;
-  copVals.forEach(c=>{
-    t+=`<tr><td>COP ${c}</td>`;
-    surpVals.forEach(s=>{
-      const v=Math.round(s*c/LATENTE_WH*1000/RHO_ICE/fill);
-      const col=v<30?'color:var(--text2)':v<100?'color:var(--green)':'color:var(--amber)';
-      t+=`<td style="${col}">${v}</td>`;
-    });
-    t+=`</tr>`;
-  });
-  t+=`</tbody></table>`;
-  document.getElementById('t-sens').innerHTML=t;
-}
-
-
-// ═══════════════════════════════════════════
-//  RESET CACHE + RUN
-// ═══════════════════════════════════════════
-function resetRun() {
-  tankStates365 = null;
-  selectedDays = [];
-  renderCalendar();
-  renderAll();
-}
-
-// ═══════════════════════════════════════════
 //  CALENDARIO
-// ═══════════════════════════════════════════
-let calMese = 6;
-let selectedDays = [196];
-const MAX_GIORNI = 4;
-const SEL_COLORS = ['#1a5fa3','#6a2090','#b44010','#0a7050'];
-const SEL_BG = ['rgba(26,95,163,0.12)','rgba(106,32,144,0.12)','rgba(180,64,16,0.12)','rgba(10,112,80,0.12)'];
+// ══════════════════════════════════════════════
+let calMese=6;
+let selectedDays=[];
+const MAX_GIORNI=4;
+const SEL_COLORS=['#1a5fa3','#6a2090','#b44010','#0a7050'];
+const SEL_BG=['rgba(26,95,163,0.12)','rgba(106,32,144,0.12)','rgba(180,64,16,0.12)','rgba(10,112,80,0.12)'];
 
-function toGiornoAnno(m, d) {
-  let g=0; for(let i=0;i<m;i++) g+=GIORNI_MESE[i]; return g+d;
-}
-
-function fvNorm(gg) {
-  const {mese_idx}=giornoToMese(gg);
-  const mensili=getMensili();
-  const maxEd=Math.max(...mensili.map(m=>m.kwp_kwh||1));
-  return (mensili[mese_idx].kwp_kwh||1)/maxEd;
-}
+function toGiornoAnno(m,d){let g=0;for(let i=0;i<m;i++)g+=GIORNI_MESE[i];return g+d;}
+function fvNorm(gg){const{mese_idx}=giornoToMese(gg);const ms=getMensili();const mx=Math.max(...ms.map(m=>m.kwp_kwh||1));return(ms[mese_idx].kwp_kwh||1)/mx;}
 
 function renderCalendar() {
-  const cont=document.getElementById('cal-container');
-  if(!cont) return;
-  const MESI_FULL=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
-    'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  const cont=document.getElementById('cal-container'); if(!cont) return;
+  const MESI_FULL=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
   const primo=new Date(2024,calMese,1).getDay();
   const off=(primo===0)?6:primo-1;
-  let h='<div class="cal-wrap">';
-  h+='<div class="cal-nav">';
+  let h='<div class="cal-wrap"><div class="cal-nav">';
   h+='<button onclick="calPrev()">&#8249;</button>';
-  h+='<span class="cal-month-label">'+MESI_FULL[calMese]+' 2024</span>';
+  h+='<span class="cal-month-label">'+MESI_FULL[calMese]+'</span>';
   h+='<button onclick="calNext()">&#8250;</button>';
   h+='</div><div class="cal-grid">';
   ['L','M','M','G','V','S','D'].forEach(d=>h+='<div class="cal-dow">'+d+'</div>');
@@ -1157,115 +787,91 @@ function renderCalendar() {
   h+='</div></div>';
   cont.innerHTML=h;
 }
-
 function calPrev(){calMese=(calMese+11)%12;renderCalendar();}
 function calNext(){calMese=(calMese+1)%12;renderCalendar();}
-
 function toggleDay(gg){
   const idx=selectedDays.indexOf(gg);
-  if(idx>=0){selectedDays.splice(idx,1);}
+  if(idx>=0) selectedDays.splice(idx,1);
   else{if(selectedDays.length>=MAX_GIORNI)selectedDays.shift();selectedDays.push(gg);}
   renderCalendar();renderAll();
 }
-
 function clearAll(){selectedDays=[];renderCalendar();renderAll();}
+function resetRun(){tankStates365=null;selectedDays=[];renderCalendar();renderAll();}
 
-// ═══════════════════════════════════════════
-//  SIMULA UN GIORNO
-// ═══════════════════════════════════════════
-function simulaGiorno(gg, kwp, loss, dcBase, pue, cop, tankV) {
-  const {mese_idx}=giornoToMese(gg);
-  const mensili=getMensili();
-  const kwpDay=mensili[mese_idx].kwp_kwh;
-  const lossCorr=(1-loss)/(1-0.14);
-  const capKwh=tankV*RHO_ICE*LATENTE_WH/1000;
-  const tankInizio=tankStates365?tankStates365[gg-1]:0;
-  const prof=PROFILI_MENSILI[mese_idx];
-  const sumP=prof.reduce((a,b)=>a+b,0);
-  const fv=prof.map(v=>+(v/sumP*kwpDay*kwp*lossCorr).toFixed(1));
-  const dcTot=dcBase*pue;
-  const dc=Array.from({length:24},(_,h)=>{
-    let f=1.0;if(h>=8&&h<=18)f=1.20;else if(h>=19&&h<=23)f=0.90;
-    return +(dcTot*f).toFixed(1);
-  });
-  let tank=Math.min(tankInizio,capKwh);
-  const carica_th=[],scarica_th=[],rete_el=[],tank_pct=[];
-  for(let h=0;h<24;h++){
-    const sur=fv[h]-dc[h];
-    if(sur>=0){
-      const fe=sur*cop,car=Math.min(fe,capKwh-tank);
-      tank+=car;carica_th.push(+car.toFixed(1));scarica_th.push(0);rete_el.push(0);
-    } else {
-      const dt=(-sur)*cop,dg=Math.min(dt,tank);
-      tank=Math.max(0,tank-dg);
-      carica_th.push(0);scarica_th.push(+dg.toFixed(1));rete_el.push(+(-sur).toFixed(1));
-    }
-    tank=Math.max(0,Math.min(tank,capKwh));
-    tank_pct.push(+(tank/capKwh*100).toFixed(1));
-  }
-  const totFv=fv.reduce((a,b)=>a+b,0),totDc=dc.reduce((a,b)=>a+b,0);
-  const totR=rete_el.reduce((a,b)=>a+b,0),totC=carica_th.reduce((a,b)=>a+b,0),totS=scarica_th.reduce((a,b)=>a+b,0);
-  return {fv,dc,carica_th,scarica_th,rete_el,tank_pct,
-    tot_fv:totFv,tot_dc:totDc,tot_rete:totR,tot_car:totC,tot_scar:totS,
-    autocons:Math.max(0,Math.min(100,(1-totR/totDc)*100)),
-    ghiaccio_t:tank*1000/(LATENTE_WH*1000),
-    surplus_el:Math.max(0,totFv-totDc)};
-}
-
-// ═══════════════════════════════════════════
-//  RENDER TUTTI I GIORNI SELEZIONATI
-// ═══════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  RENDER GIORNALIERA
+// ══════════════════════════════════════════════
 function renderAll() {
-  const kwp=parseFloat(document.getElementById('r-kwp').value);
-  const loss=parseFloat(document.getElementById('r-loss').value)/100;
-  const dcBase=parseFloat(document.getElementById('r-dc').value);
-  const pue=parseFloat(document.getElementById('r-pue').value);
-  const cop=parseFloat(document.getElementById('r-cop').value);
-  const tankV=parseFloat(document.getElementById('r-tank').value);
+  const p=getParams();
+  updateLabels(p);
 
-  document.getElementById('v-kwp').textContent=kwp+' kWp';
-  document.getElementById('v-loss').textContent=Math.round(loss*100)+'%';
-  document.getElementById('v-dc').textContent=dcBase+' kW';
-  document.getElementById('v-pue').textContent=pue.toFixed(1);
-  document.getElementById('v-cop').textContent=cop.toFixed(1);
-  document.getElementById('v-tank').textContent=tankV+' m³';
+  if(!tankStates365) tankStates365=preSimula365(p);
 
-  if(!tankStates365) tankStates365=preSimula365(kwp,loss,dcBase,pue,cop,tankV);
-
-  const capKwh=tankV*RHO_ICE*LATENTE_WH/1000;
+  const capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
   document.getElementById('tank-info').innerHTML=
     'Capac. termica: <b style="color:var(--teal)">'+Math.round(capKwh)+' kWh_th</b><br>'
-    +'Massa max: <b>'+Math.round(tankV*RHO_ICE/1000)+' t</b>';
+    +'Massa max: <b>'+Math.round(p.tankV*RHO_ICE/1000)+' t</b> · '+p.tankV+' m³';
 
   const badgeDiv=document.getElementById('selected-badges');
   if(selectedDays.length===0){
-    if(badgeDiv) badgeDiv.innerHTML='<span style="font-size:.70rem;color:var(--text3);">Clicca sul calendario per selezionare uno o più giorni (max 4)</span>';
+    badgeDiv.innerHTML='<span style="font-size:.70rem;color:var(--text3);">Clicca sul calendario per selezionare (max 4 giorni)</span>';
     document.getElementById('kpi-top').innerHTML='';
     document.getElementById('charts-orari').innerHTML='<div style="text-align:center;padding:2rem;font-size:.80rem;color:var(--text3);">Seleziona un giorno dal calendario</div>';
     document.getElementById('info-day').innerHTML='—';
-    destroyC('cBilancio');destroyC('cTank');
+    document.getElementById('kpi-side-content').innerHTML='';
     document.getElementById('tank-prev-state').innerHTML='—';
+    destroyC('cBilancio');destroyC('cTank');
     return;
   }
-  if(badgeDiv) badgeDiv.innerHTML=selectedDays.map((gg,i)=>
+
+  badgeDiv.innerHTML=selectedDays.map((gg,i)=>
     '<span style="font-size:.70rem;padding:2px 8px;border-radius:4px;background:'+SEL_COLORS[i]+';color:#fff;">'+giornoLabel(gg)+'</span>'
   ).join('');
 
-  const results=selectedDays.map(gg=>({gg,data:simulaGiorno(gg,kwp,loss,dcBase,pue,cop,tankV)}));
+  const results=selectedDays.map(gg=>({gg,data:simulaGiorno(gg,p)}));
   const primo=results[0];
-  const tankIn=tankStates365[primo.gg-1];
-  const pctIn=Math.round(tankIn/capKwh*100);
+  const pctIn=Math.round(primo.data.tankInizio/capKwh*100);
   document.getElementById('tank-prev-state').innerHTML=
-    'Inizio <b>'+giornoLabel(primo.gg)+'</b>: <b style="color:var(--teal)">'+pctIn+'%</b> pieno ('+
-    (tankIn*1000/(LATENTE_WH*1000)).toFixed(1)+' t)';
+    'Inizio <b>'+giornoLabel(primo.gg)+'</b>: <b style="color:var(--teal)">'+pctIn+'%</b>';
 
+  // KPI TOP
+  const pvPct=Math.round(primo.data.totPv/(primo.data.totPv+primo.data.totGrid)*100)||0;
   document.getElementById('kpi-top').innerHTML=`
-    <div class="card kpi"><div class="kv" style="color:var(--green)">${Math.round(primo.data.tot_fv)}</div><div class="ku">kWh_el</div><div class="kl">Produzione FV</div></div>
-    <div class="card kpi"><div class="kv" style="color:var(--blue)">${Math.round(primo.data.autocons)}</div><div class="ku">%</div><div class="kl">Autoconsumo</div></div>
-    <div class="card kpi"><div class="kv" style="color:var(--teal)">${primo.data.ghiaccio_t.toFixed(1)}</div><div class="ku">t ghiaccio</div><div class="kl">Fine giornata</div></div>
-    <div class="card kpi"><div class="kv" style="color:var(--amber)">${Math.round(primo.data.tot_rete)}</div><div class="ku">kWh_el</div><div class="kl">Da rete</div></div>`;
+    <div class="card kpi"><div class="kv" style="color:var(--red)">${(primo.data.totCooling/1000).toFixed(1)}</div><div class="ku">MWh_th</div><div class="kl">Cooling richiesto</div></div>
+    <div class="card kpi"><div class="kv" style="color:var(--green)">${Math.round(primo.data.totPv)}</div><div class="ku">kWh_el</div><div class="kl">FV prodotto</div></div>
+    <div class="card kpi"><div class="kv" style="color:var(--teal)">${primo.data.ghiaccioT.toFixed(1)}</div><div class="ku">t ghiaccio</div><div class="kl">Fine giornata</div></div>
+    <div class="card kpi"><div class="kv" style="color:var(--amber)">${(primo.data.totGrid/1000).toFixed(1)}</div><div class="ku">MWh_el</div><div class="kl">Da rete</div></div>
+    <div class="card kpi"><div class="kv" style="color:var(--amber)">${Math.round(primo.data.totCost)}</div><div class="ku">€/giorno</div><div class="kl">Costo rete</div></div>
+  `;
 
-  // Grafici orari
+  // KPI SIDE
+  const d=primo.data;
+  const rows=[
+    ['Cooling richiesto',  (d.totCooling/1000).toFixed(1),'MWh_th','#f85149'],
+    ['— da rack IT',       (p.dcBase*24/1000).toFixed(1),'MWh_th','#f85149'],
+    ['— da servizi',       (p.dcBase*p.servPct*24/1000).toFixed(1),'MWh_th','#e3b341'],
+    ['— da involucro',     (d.hours.reduce((s,r)=>s+Math.max(0,r.heatEnv),0)/1000).toFixed(2),'MWh_th','#a371f7'],
+    ['','','',''],
+    ['FV prodotto',        Math.round(d.totPv),'kWh_el','#39d353'],
+    ['Cooling da PV',      Math.round(d.totCoolPv),'kWh_th','#39d353'],
+    ['Ghiaccio caricato',  Math.round(d.totIceUp),'kWh_th','#39c8c8'],
+    ['Ghiaccio scaricato', Math.round(d.totIceDown),'kWh_th','#a371f7'],
+    ['','','',''],
+    ['Rete totale',        (d.totGrid/1000).toFixed(1),'MWh_el','#e3b341'],
+    ['— rete per IT',      (d.hours.reduce((s,r)=>s+r.gridForIT,0)/1000).toFixed(1),'MWh_el','#e3b341'],
+    ['— rete per chiller', (d.totGridChiller/1000).toFixed(2),'MWh_el','#e3b341'],
+    ['Costo rete',         Math.round(d.totCost),'€','#e3b341'],
+    ['PV autoconsumo',     pvPct,'%','#39d353'],
+  ];
+  document.getElementById('kpi-side-content').innerHTML=rows.map(([l,v,u,c])=>{
+    if(!l) return '<hr style="border:none;border-top:1px solid var(--border);margin:4px 0;">';
+    return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:.70rem;color:var(--text3);">${l}</span>
+      <span style="font-size:.70rem;font-family:'IBM Plex Mono',monospace;color:${c};">${v} <span style="color:var(--text3);font-size:.62rem;">${u}</span></span>
+    </div>`;
+  }).join('');
+
+  // CHARTS ORARI
   const chartsDiv=document.getElementById('charts-orari');
   Object.keys(charts).filter(k=>k.startsWith('cOrario')).forEach(k=>destroyC(k));
   chartsDiv.innerHTML='';
@@ -1280,39 +886,42 @@ function renderAll() {
     const wrap=document.createElement('div');
     const lbl=document.createElement('div');
     lbl.style.cssText='font-size:.70rem;color:'+color+';font-weight:600;margin-bottom:3px;';
-    lbl.textContent=giornoLabel(gg)+(results.length>1?' · giorno '+gg:'');
+    lbl.textContent=giornoLabel(gg);
     const cw=document.createElement('div');
-    cw.style.cssText='position:relative;width:100%;height:'+(results.length===1?'215':'155')+'px;';
+    cw.style.cssText='position:relative;width:100%;height:'+(results.length===1?'230':'160')+'px;';
     const cv=document.createElement('canvas');cv.id='cOrario'+i;
     cw.appendChild(cv);wrap.appendChild(lbl);wrap.appendChild(cw);
     if(i<results.length-1){const sep=document.createElement('hr');sep.style.cssText='border:none;border-top:0.5px solid var(--border);margin:5px 0;';wrap.appendChild(sep);}
     chartsDiv.appendChild(wrap);
+
     charts['cOrario'+i]=new Chart(cv,{type:'line',data:{labels,datasets:[
-      {label:'FV',   data:data.fv,        borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.06)',  fill:true, tension:.4,pointRadius:0,borderWidth:2},
-      {label:'DC',   data:data.dc,        borderColor:color,    backgroundColor:SEL_BG[i],              fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[5,3]},
-      {label:'→gh',  data:data.carica_th, borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.08)',fill:false,tension:.3,pointRadius:0,borderWidth:2},
-      {label:'gh→',  data:data.scarica_th,borderColor:'#a371f7',backgroundColor:'rgba(163,113,247,.06)',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[3,2]},
-      {label:'rete', data:data.rete_el,   borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.06)', fill:true, tension:.3,pointRadius:0,borderWidth:1.5},
+      {label:'Cooling',  data:data.hours.map(r=>r.coolingNeed), borderColor:'#f85149',backgroundColor:'rgba(248,81,73,.06)', fill:true, tension:.3,pointRadius:0,borderWidth:2},
+      {label:'FV',       data:data.hours.map(r=>r.pvKw),        borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.06)',  fill:false,tension:.4,pointRadius:0,borderWidth:2},
+      {label:'→ghiaccio',data:data.hours.map(r=>r.iceCharged),  borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.08)',fill:false,tension:.3,pointRadius:0,borderWidth:2},
+      {label:'ghiaccio→',data:data.hours.map(r=>r.iceUsed),     borderColor:'#a371f7',backgroundColor:'rgba(163,113,247,.06)',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[4,3]},
+      {label:'Rete chill',data:data.hours.map(r=>r.gridForChiller),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.06)',fill:true,tension:.3,pointRadius:0,borderWidth:1.5},
     ]},options:coOpts});
   });
 
+  // BILANCIO BAR
   destroyC('cBilancio');
   charts['cBilancio']=new Chart(document.getElementById('cBilancio'),{type:'bar',
     data:{labels:results.map(r=>giornoLabel(r.gg)),datasets:[
-      {label:'FV',    data:results.map(r=>Math.round(r.data.tot_fv)),  backgroundColor:'rgba(57,211,83,.7)', borderColor:'#39d353',borderWidth:1,borderRadius:4},
-      {label:'DC',    data:results.map(r=>Math.round(r.data.tot_dc)),  backgroundColor:'rgba(88,166,255,.4)',borderColor:'#58a6ff',borderWidth:1,borderRadius:4},
-      {label:'→ghiaccio',data:results.map(r=>Math.round(r.data.tot_car)),backgroundColor:'rgba(57,200,200,.7)',borderColor:'#39c8c8',borderWidth:1,borderRadius:4},
-      {label:'Rete',  data:results.map(r=>Math.round(r.data.tot_rete)),backgroundColor:'rgba(227,179,65,.7)',borderColor:'#e3b341',borderWidth:1,borderRadius:4},
+      {label:'Cooling',    data:results.map(r=>Math.round(r.data.totCooling)),backgroundColor:'rgba(248,81,73,.5)', borderColor:'#f85149',borderWidth:1,borderRadius:4},
+      {label:'Cool da PV', data:results.map(r=>Math.round(r.data.totCoolPv)), backgroundColor:'rgba(57,211,83,.5)',  borderColor:'#39d353',borderWidth:1,borderRadius:4},
+      {label:'Ghiaccio ↑', data:results.map(r=>Math.round(r.data.totIceUp)),  backgroundColor:'rgba(57,200,200,.5)',borderColor:'#39c8c8',borderWidth:1,borderRadius:4},
+      {label:'Ghiaccio ↓', data:results.map(r=>Math.round(r.data.totIceDown)),backgroundColor:'rgba(163,113,247,.5)',borderColor:'#a371f7',borderWidth:1,borderRadius:4},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:true,labels:{color:'#8b949e',font:{size:9},boxWidth:10}}},
       scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:10}}},
               y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9}},title:{display:true,text:'kWh',color:'#6e7681',font:{size:9}}}}}});
 
+  // TANK
   destroyC('cTank');
   charts['cTank']=new Chart(document.getElementById('cTank'),{type:'line',
     data:{labels,datasets:results.map(({gg,data},i)=>({
-      label:giornoLabel(gg),data:data.tank_pct,
+      label:giornoLabel(gg),data:data.hours.map(r=>+(r.tankLevel/capKwh*100).toFixed(1)),
       borderColor:SEL_COLORS[i],backgroundColor:SEL_BG[i],
       fill:results.length===1,tension:.4,pointRadius:0,borderWidth:2
     }))},
@@ -1321,15 +930,283 @@ function renderAll() {
       scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9},autoSkip:true,maxTicksLimit:8}},
               y:{min:0,max:100,grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9}},title:{display:true,text:'% pieno',color:'#6e7681',font:{size:9}}}}}});
 
-  const pvgBadge=pvgisLoaded?'&nbsp;<span style="color:var(--green);font-size:.70rem;">✅ PVGIS</span>':'&nbsp;<span style="color:var(--amber);font-size:.70rem;">⚠ stima</span>';
+  // INFO BAR
+  const src=pvgisLoaded?'<span style="color:var(--green);font-size:.70rem;">✅ PVGIS</span>':'<span style="color:var(--amber);font-size:.70rem;">⚠ stima</span>';
   document.getElementById('info-day').innerHTML=results.map(({gg,data},i)=>
     '<span style="color:'+SEL_COLORS[i]+';font-weight:600;">'+giornoLabel(gg)+'</span>: '
-    +'FV '+Math.round(data.tot_fv)+' kWh · ghiaccio ↑'+Math.round(data.tot_car)+' ↓'+Math.round(data.tot_scar)+' kWh_th · '
-    +'rete '+Math.round(data.tot_rete)+' kWh · auto '+Math.round(data.autocons)+'%'
-  ).join('<br>')+pvgBadge;
+    +'Cooling '+(data.totCooling/1000).toFixed(1)+' MWh_th · FV '+Math.round(data.totPv)+' kWh · '
+    +'ghiaccio ↑'+Math.round(data.totIceUp)+' ↓'+Math.round(data.totIceDown)+' kWh_th · '
+    +'rete '+(data.totGrid/1000).toFixed(1)+' MWh · €'+Math.round(data.totCost)
+  ).join('<br>')+' · '+src;
 }
 
-function run(){renderAll();}
+// ══════════════════════════════════════════════
+//  TAB 2: MENSILE
+// ══════════════════════════════════════════════
+function runMensile() {
+  const p=getParams();
+  if(!tankStates365) tankStates365=preSimula365(p);
+
+  const labels=NOMI_MESE;
+  const mData=[];
+  for(let m=0;m<12;m++){
+    let mPv=0,mGrid=0,mCooling=0,mIceUp=0,mIceDown=0,mCoolPv=0,mCost=0;
+    let ggStart=0; for(let i=0;i<m;i++) ggStart+=GIORNI_MESE[i];
+    for(let d=0;d<GIORNI_MESE[m];d++){
+      const gg=ggStart+d+1;
+      const r=simulaGiorno(gg,p);
+      mPv+=r.totPv; mGrid+=r.totGrid; mCooling+=r.totCooling;
+      mIceUp+=r.totIceUp; mIceDown+=r.totIceDown; mCoolPv+=r.totCoolPv; mCost+=r.totCost;
+    }
+    mData.push({
+      pv:mPv/1000, grid:mGrid/1000, cooling:mCooling/1000,
+      iceUp:mIceUp/1000, iceDown:mIceDown/1000, coolPv:mCoolPv/1000,
+      cost:mCost/1000
+    });
+  }
+
+  destroyC('cMensile');
+  charts['cMensile']=new Chart(document.getElementById('cMensile'),{type:'bar',
+    data:{labels,datasets:[
+      {label:'Cooling',      data:mData.map(d=>+d.cooling.toFixed(1)),backgroundColor:'rgba(248,81,73,.3)', borderColor:'#f85149',borderWidth:1,borderRadius:3},
+      {label:'Cool. da PV',  data:mData.map(d=>+d.coolPv.toFixed(1)), backgroundColor:'rgba(57,211,83,.4)', borderColor:'#39d353',borderWidth:1,borderRadius:3},
+      {label:'Ghiaccio ↑',   data:mData.map(d=>+d.iceUp.toFixed(1)),  backgroundColor:'rgba(57,200,200,.4)',borderColor:'#39c8c8',borderWidth:1,borderRadius:3},
+      {label:'Rete',         data:mData.map(d=>+d.grid.toFixed(1)),   backgroundColor:'rgba(227,179,65,.3)',borderColor:'#e3b341',borderWidth:1,borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8b949e',font:{size:9},boxWidth:10}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:10}}},
+              y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10}},title:{display:true,text:'MWh',color:'#6e7681',font:{size:10}}}}}});
+
+  destroyC('cSurplus');
+  const servMwh=mData.map((_,i)=>p.dcBase*p.servPct*24*GIORNI_MESE[i]/1000);
+  charts['cSurplus']=new Chart(document.getElementById('cSurplus'),{type:'bar',
+    data:{labels,datasets:[
+      {label:'FV',     data:mData.map(d=>+d.pv.toFixed(1)),   backgroundColor:'rgba(57,211,83,.5)', borderColor:'#39d353',borderWidth:1,borderRadius:3},
+      {label:'Servizi',data:servMwh.map(v=>+v.toFixed(1)),    backgroundColor:'rgba(227,179,65,.3)',borderColor:'#e3b341',borderWidth:1,borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8b949e',font:{size:9},boxWidth:10}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:10}}},
+              y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6e7681',font:{size:10}},title:{display:true,text:'MWh',color:'#6e7681',font:{size:10}}}}}});
+
+  // Tabella
+  const fonte=pvgisLoaded?'PVGIS':'stima';
+  const annTot={pv:0,grid:0,cooling:0,iceUp:0,iceDown:0,coolPv:0,cost:0};
+  let html='';
+  mData.forEach((d,i)=>{
+    annTot.pv+=d.pv;annTot.grid+=d.grid;annTot.cooling+=d.cooling;
+    annTot.iceUp+=d.iceUp;annTot.iceDown+=d.iceDown;annTot.coolPv+=d.coolPv;annTot.cost+=d.cost;
+    html+=`<tr>
+      <td>${NOMI_MESE[i]}</td>
+      <td>${d.pv.toFixed(1)}</td>
+      <td style="color:var(--red)">${d.cooling.toFixed(1)}</td>
+      <td style="color:var(--green)">${d.coolPv.toFixed(1)}</td>
+      <td style="color:var(--teal)">${d.iceUp.toFixed(1)}</td>
+      <td style="color:var(--purple)">${d.iceDown.toFixed(1)}</td>
+      <td style="color:var(--amber)">${d.grid.toFixed(1)}</td>
+      <td>${d.cost.toFixed(1)}</td>
+      <td><span class="badge ${pvgisLoaded?'bg':'ba'}" style="font-size:.60rem;">${fonte}</span></td>
+    </tr>`;
+  });
+  html+=`<tr style="border-top:2px solid var(--border2);font-weight:600;">
+    <td>TOTALE</td>
+    <td>${annTot.pv.toFixed(0)}</td>
+    <td style="color:var(--red)">${annTot.cooling.toFixed(0)}</td>
+    <td style="color:var(--green)">${annTot.coolPv.toFixed(0)}</td>
+    <td style="color:var(--teal)">${annTot.iceUp.toFixed(0)}</td>
+    <td style="color:var(--purple)">${annTot.iceDown.toFixed(0)}</td>
+    <td style="color:var(--amber)">${annTot.grid.toFixed(0)}</td>
+    <td>${annTot.cost.toFixed(0)}</td>
+    <td>—</td>
+  </tr>`;
+  document.getElementById('tb-mensile').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════
+//  TAB 3: DIMENSIONAMENTO
+// ══════════════════════════════════════════════
+function runDim() {
+  const surplus=parseFloat(document.getElementById('r-s').value);
+  const cop=parseFloat(document.getElementById('r-cd').value);
+  const oreSc=parseFloat(document.getElementById('r-os').value);
+  const fill=parseFloat(document.getElementById('r-fi').value)/100;
+  document.getElementById('v-s').textContent=surplus;
+  document.getElementById('v-cd').textContent=cop.toFixed(1);
+  document.getElementById('v-os').textContent=oreSc+' ore';
+  document.getElementById('v-fi').textContent=Math.round(fill*100)+'%';
+  document.getElementById('sens-fill').textContent=Math.round(fill*100)+'%';
+
+  const freddoKwh=surplus*cop, massaKg=freddoKwh*1000/LATENTE_WH, volNetto=massaKg/RHO_ICE, volTot=volNetto/fill, potScarica=freddoKwh/oreSc;
+
+  document.getElementById('dim-res').innerHTML=`
+    <div class="ct">Risultati dimensionamento</div>
+    <div style="display:flex;flex-direction:column;gap:.75rem;">
+      <div><div style="font-size:.68rem;color:var(--text3);">Freddo prodotto</div>
+        <div style="font-size:1.7rem;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--teal);">${Math.round(freddoKwh)} <span style="font-size:.80rem;">kWh_th</span></div>
+        <div class="formula" style="font-size:.68rem;">${surplus} × COP ${cop.toFixed(1)} = ${Math.round(freddoKwh)} kWh_th</div></div>
+      <div><div style="font-size:.68rem;color:var(--text3);">Massa ghiaccio</div>
+        <div style="font-size:1.3rem;font-weight:500;font-family:'IBM Plex Mono',monospace;color:var(--blue);">${(massaKg/1000).toFixed(1)} <span style="font-size:.78rem;">t</span></div></div>
+      <div><div style="font-size:.68rem;color:var(--text3);">Volume serbatoio</div>
+        <div style="font-size:1.7rem;font-weight:600;font-family:'IBM Plex Mono',monospace;color:var(--amber);">${Math.round(volTot)} <span style="font-size:.80rem;">m³</span></div></div>
+      <div><div style="font-size:.68rem;color:var(--text3);">Potenza media scarica</div>
+        <div style="font-size:1.3rem;font-weight:500;font-family:'IBM Plex Mono',monospace;color:var(--green);">${Math.round(potScarica)} <span style="font-size:.78rem;">kW_th</span></div></div>
+    </div>`;
+
+  const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false},ticks:{color:'#6e7681',font:{size:9},autoSkip:true,maxTicksLimit:6}},
+            y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#6e7681',font:{size:9}}}}};
+
+  const sR=[100,200,300,500,800,1000,1500,2000,3000,5000];
+  destroyC('cDV');
+  charts['cDV']=new Chart(document.getElementById('cDV'),{type:'line',
+    data:{labels:sR.map(v=>v+''),datasets:[{data:sR.map(s=>Math.round(s*cop/LATENTE_WH*1000/RHO_ICE/fill)),
+      borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.10)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'#e3b341'}]},
+    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'m³',color:'#6e7681',font:{size:9}}}}}});
+
+  const cR=[2.0,2.5,3.0,3.5,4.0,4.5,5.0,5.5,6.0];
+  destroyC('cDC');
+  charts['cDC']=new Chart(document.getElementById('cDC'),{type:'line',
+    data:{labels:cR.map(c=>''+c),datasets:[{data:cR.map(c=>Math.round(surplus*c)),
+      borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.10)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'#39c8c8'}]},
+    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'kWh_th',color:'#6e7681',font:{size:9}}}}}});
+
+  const oreR=Array.from({length:oreSc},(_,i)=>i+1);
+  const decSum=oreR.reduce((s,h)=>s+Math.exp(-.15*(h-1)),0);
+  destroyC('cDS');
+  charts['cDS']=new Chart(document.getElementById('cDS'),{type:'bar',
+    data:{labels:oreR.map(h=>'h+'+h),datasets:[{data:oreR.map(h=>Math.round(freddoKwh*Math.exp(-.15*(h-1))/decSum)),
+      backgroundColor:'rgba(57,211,83,.5)',borderColor:'#39d353',borderWidth:1,borderRadius:3}]},
+    options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,title:{display:true,text:'kW_th',color:'#6e7681',font:{size:9}}}}}});
+
+  const surpVals=[100,300,500,1000,2000,5000];
+  const copVals=[2.0,2.5,3.0,3.5,4.0,5.0];
+  let t='<table><thead><tr><th style="text-align:left">COP \\ Surplus</th>';
+  surpVals.forEach(s=>t+='<th>'+s+'</th>');
+  t+='</tr></thead><tbody>';
+  copVals.forEach(c=>{
+    t+='<tr><td>COP '+c+'</td>';
+    surpVals.forEach(s=>{
+      const v=Math.round(s*c/LATENTE_WH*1000/RHO_ICE/fill);
+      const col=v<30?'color:var(--text2)':v<100?'color:var(--green)':'color:var(--amber)';
+      t+='<td style="'+col+'">'+v+'</td>';
+    });
+    t+='</tr>';
+  });
+  t+='</tbody></table>';
+  document.getElementById('t-sens').innerHTML=t;
+}
+
+// ══════════════════════════════════════════════
+//  TAB 4: BILANCIO ANNUALE
+// ══════════════════════════════════════════════
+function runBilancio() {
+  const p=getParams();
+  if(!tankStates365) tankStates365=preSimula365(p);
+
+  let annPv=0,annGrid=0,annCooling=0,annIceUp=0,annIceDown=0,annCoolPv=0,annCost=0;
+  let gg=0;
+  for(let m=0;m<12;m++){
+    for(let d=0;d<GIORNI_MESE[m];d++){
+      gg++;
+      const r=simulaGiorno(gg,p);
+      annPv+=r.totPv;annGrid+=r.totGrid;annCooling+=r.totCooling;
+      annIceUp+=r.totIceUp;annIceDown+=r.totIceDown;annCoolPv+=r.totCoolPv;annCost+=r.totCost;
+    }
+  }
+
+  const itAnn=p.dcBase*8760;
+  const pue=(annGrid+annPv)/itAnn;
+  const pvPct=annPv/(annPv+annGrid)*100;
+  const capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
+  const iceMaxT=p.tankV*RHO_ICE/1000;
+
+  document.getElementById('bilancio-content').innerHTML=`
+    <div class="g4" style="margin-bottom:1rem;">
+      <div class="card kpi"><div class="kv" style="color:var(--red)">${(annCooling/1000).toFixed(0)}</div><div class="ku">MWh_th/anno</div><div class="kl">Cooling richiesto</div></div>
+      <div class="card kpi"><div class="kv" style="color:var(--green)">${(annPv/1000).toFixed(0)}</div><div class="ku">MWh_el/anno</div><div class="kl">FV prodotto</div></div>
+      <div class="card kpi"><div class="kv" style="color:var(--amber)">${(annGrid/1000).toFixed(0)}</div><div class="ku">MWh_el/anno</div><div class="kl">Rete elettrica</div></div>
+      <div class="card kpi"><div class="kv" style="color:var(--blue)">${pue.toFixed(2)}</div><div class="ku"></div><div class="kl">PUE stimato</div></div>
+    </div>
+    <div class="g2" style="margin-bottom:1rem;">
+      <div class="card">
+        <div class="ct">Carico termico annuale</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;">
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text2);">Calore IT (rack ${p.dcBase.toLocaleString()} kW × 8.760h)</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--red);">${(itAnn/1000).toLocaleString('it-IT',{maximumFractionDigits:0})} MWh</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text2);">Calore servizi (${Math.round(p.servPct*100)}% di IT)</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--amber);">${(itAnn*p.servPct/1000).toLocaleString('it-IT',{maximumFractionDigits:0})} MWh</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text2);">Involucro (UA=${p.ua} W/K)</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--purple);">variabile (±)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-weight:600;">
+            <span style="color:var(--text);">Cooling totale</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--red);">${(annCooling/1000).toLocaleString('it-IT',{maximumFractionDigits:0})} MWh_th/a</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Fonti energia</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;">
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text2);">FV prodotto (${p.kwp} kWp)</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--green);">${(annPv/1000).toLocaleString('it-IT',{maximumFractionDigits:0})} MWh</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text2);">PV autoconsumo</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--green);">${pvPct.toFixed(1)}%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+            <span style="color:var(--text2);">Rete elettrica</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--amber);">${(annGrid/1000).toLocaleString('it-IT',{maximumFractionDigits:0})} MWh</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0;font-weight:600;">
+            <span style="color:var(--text);">Costo rete annuo</span>
+            <span style="font-family:'IBM Plex Mono';color:var(--amber);">${(annCost/1000).toLocaleString('it-IT',{maximumFractionDigits:0})} k€</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ct">Sistema ITES</div>
+      <div class="g4">
+        <div style="text-align:center;padding:12px;">
+          <div style="font-size:1.4rem;font-weight:600;font-family:'IBM Plex Mono';color:var(--teal);">${(annIceUp/1000).toFixed(0)}</div>
+          <div style="font-size:.70rem;color:var(--text3);">MWh_th ghiaccio prodotto</div>
+        </div>
+        <div style="text-align:center;padding:12px;">
+          <div style="font-size:1.4rem;font-weight:600;font-family:'IBM Plex Mono';color:var(--purple);">${(annIceDown/1000).toFixed(0)}</div>
+          <div style="font-size:.70rem;color:var(--text3);">MWh_th ghiaccio usato</div>
+        </div>
+        <div style="text-align:center;padding:12px;">
+          <div style="font-size:1.4rem;font-weight:600;font-family:'IBM Plex Mono';color:var(--text);">${iceMaxT.toFixed(0)}</div>
+          <div style="font-size:.70rem;color:var(--text3);">t capacità max tank</div>
+        </div>
+        <div style="text-align:center;padding:12px;">
+          <div style="font-size:1.4rem;font-weight:600;font-family:'IBM Plex Mono';color:var(--text);">${Math.round(capKwh)}</div>
+          <div style="font-size:.70rem;color:var(--text3);">kWh_th capacità tank</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">Schema logico del sistema</div>
+      <div style="font-size:.75rem;line-height:2;color:var(--text2);font-family:'IBM Plex Mono',monospace;">
+        <span style="color:var(--green);">1.</span> FV ${p.kwp} kWp → copre servizi (${Math.round(p.dcBase*p.servPct)} kW)<br>
+        <span style="color:var(--green);">2.</span> Surplus FV → chiller (EER ${p.cop}) → freddo per rack<br>
+        <span style="color:var(--teal);">3.</span> Eccesso freddo → accumulo ghiaccio ITES (${Math.round(capKwh)} kWh)<br>
+        <span style="color:var(--purple);">4.</span> Se freddo non basta → prima ghiaccio accumulato<br>
+        <span style="color:var(--amber);">5.</span> Se ghiaccio finito → rete alimenta chiller<br>
+        <span style="color:var(--text3);">6.</span> IT ${p.dcBase.toLocaleString()} kW alimentato sempre da rete<br>
+        <div style="margin-top:8px;padding:8px 12px;background:rgba(248,81,73,.06);border:1px solid rgba(248,81,73,.1);border-radius:6px;color:var(--text3);">
+          <span style="color:var(--red);">Nota:</span> Tutto il consumo elettrico (IT + servizi) → calore. Serve cooling 365 gg/anno, anche in inverno. Involucro ex-frigo riduce scambi.
+        </div>
+      </div>
+    </div>
+  `;
+}
 
 // ═══════════════════════════════════════════
 //  INIT
@@ -1338,3 +1215,5 @@ calMese=6;
 renderCalendar();
 renderAll();
 </script>
+</body>
+</html>
