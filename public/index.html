@@ -538,17 +538,19 @@ function updateLabels(p){
   document.getElementById('v-kwp').textContent=p.kwp+' kWp';
   document.getElementById('v-loss').textContent=Math.round(p.loss*100)+' %';
   document.getElementById('v-nrack').textContent=p.nRack;
-  document.getElementById('v-setp').textContent=p.setP+' °C';
+  document.getElementById('v-setp').textContent=p.setP+' \u00b0C';
   document.getElementById('v-ua').textContent=p.ua+' W/K';
   document.getElementById('v-cop').textContent=p.cop.toFixed(1);
-  document.getElementById('v-tank').textContent=p.tankV+' m³';
-  document.getElementById('v-price').textContent=p.gridPrice.toFixed(2)+' €/kWh';
-  document.getElementById('v-feedin').textContent=p.feedIn.toFixed(2)+' €/kWh';
+  document.getElementById('v-tank').textContent=p.tankV+' m\u00b3';
+  document.getElementById('v-price').textContent=p.gridPrice.toFixed(2)+' \u20ac/kWh';
+  document.getElementById('v-feedin').textContent=p.feedIn.toFixed(2)+' \u20ac/kWh';
+  const nFile=Math.ceil(p.nRack/p.rack.perRow);
+  const rpf=Math.min(p.nRack,p.rack.perRow);
   document.getElementById('rack-summary').innerHTML=
-    'IT: <b style="color:var(--text);">'+fN(p.itKw)+' kW</b> · Calore 40%: <b style="color:var(--red);">'+fN(p.heatKw)+' kW_th</b><br>'+
-    'Tipo: '+p.rack.name+' · '+p.rack.method+'<br>'+
-    'File: '+Math.ceil(p.nRack/p.rack.perRow)+' × '+Math.min(p.nRack,p.rack.perRow)+' rack/fila<br>'+
-    'Spazio: ~'+Math.round(5500/p.nRack)+' m²/rack';
+    'IT: <b style="color:var(--text);">'+fN(p.itKw)+' kW</b> \u00b7 Calore 40%: <b style="color:var(--red);">'+fN(p.heatKw)+' kW_th</b><br>'+
+    'Tipo: '+p.rack.name+' \u00b7 '+p.rack.method+'<br>'+
+    'File: '+nFile+' \u00d7 '+rpf+' rack/fila<br>'+
+    'Spazio: ~'+Math.round(5500/p.nRack)+' m\u00b2/rack';
 }
 
 // ══════════════════════════════════════════════
