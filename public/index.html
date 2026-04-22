@@ -525,11 +525,12 @@ function simulaOra(h,mese,p,tankLevel){
   const sumP=prof.reduce((a,b)=>a+b,0);
   const pvKw=prof[h]/sumP*kwpDay*p.kwp*lossCorr;
   const eer=getEER(p.cop,tExt);
-  const totalBaseLoad=p.dcBase+servKw;
-  const pvAfterBase=Math.max(0,pvKw-totalBaseLoad);
-  const baseFromPv=Math.min(pvKw,totalBaseLoad);
-  const baseFromGrid=totalBaseLoad-baseFromPv;
-  const coolingFromPvEl=pvAfterBase*eer;
+  // IT rack è SEMPRE alimentato da rete — FV copre solo servizi ausiliari + chiller
+  const baseFromGrid=p.dcBase; // IT sempre da rete
+  const pvAfterServ=Math.max(0,pvKw-servKw);
+  const servFromPv=Math.min(pvKw,servKw);
+  const servFromGrid=servKw-servFromPv;
+  const coolingFromPvEl=pvAfterServ*eer; // tutto il surplus FV → chiller
   const capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
   let coolDeficit=coolingNeed-coolingFromPvEl;
   let iceCharged=0,iceUsed=0,gridForChiller=0,pvToGrid=0;
@@ -544,7 +545,7 @@ function simulaOra(h,mese,p,tankLevel){
     if(coolDeficit>0){gridForChiller=coolDeficit/eer;}
   }
   tankLevel=Math.max(0,tankLevel-tankLevel*0.005);
-  const totalGrid=baseFromGrid+gridForChiller;
+  const totalGrid=p.dcBase+servFromGrid+gridForChiller;
   return {
     h,tExt,
     coolingNeed:Math.round(coolingNeed*10)/10,
