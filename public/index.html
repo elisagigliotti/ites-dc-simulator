@@ -757,14 +757,21 @@ function calPrev(){calMese=(calMese+11)%12;renderCalendar();}
 function calNext(){calMese=(calMese+1)%12;renderCalendar();}
 function toggleDay(gg){const idx=selectedDays.indexOf(gg);if(idx>=0)selectedDays.splice(idx,1);else{if(selectedDays.length>=MAX_GIORNI)selectedDays.shift();selectedDays.push(gg);}renderCalendar();renderAll();}
 function clearAll(){selectedDays=[];renderCalendar();renderAll();}
-function resetRun(){tankStates365=null;selectedDays=[];renderCalendar();renderAll();}
+function resetRun(){tankStates365=null;selectedDays=[];renderCalendar();renderLabels();}
 
 // ══════════════════════════════════════════════
 //  RENDER GIORNALIERA (core tab 1)
 // ══════════════════════════════════════════════
+function renderLabels(){
+  const p=getParams();updateLabels(p);
+  const capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
+  document.getElementById('tank-info').innerHTML=
+    'Capac.: <b style="color:var(--teal)">'+Math.round(capKwh)+' kWh_th</b> · '+
+    'Massa: <b>'+Math.round(p.tankV*RHO_ICE/1000)+' t</b>';
+}
+
 function renderAll(){
   const p=getParams();updateLabels(p);
-  if(!tankStates365) tankStates365=preSimula365(p);
   const capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
   document.getElementById('tank-info').innerHTML=
     'Capac.: <b style="color:var(--teal)">'+Math.round(capKwh)+' kWh_th</b> · '+
@@ -780,6 +787,7 @@ function renderAll(){
     document.getElementById('tank-prev-state').innerHTML='—';
     destroyC('cBilancio');destroyC('cTank');return;
   }
+  if(!tankStates365) tankStates365=preSimula365(p);
   badgeDiv.innerHTML=selectedDays.map((gg,i)=>'<span style="font-size:.70rem;padding:2px 8px;border-radius:4px;background:'+SEL_COLORS[i]+';color:#fff;">'+giornoLabel(gg)+'</span>').join('');
 
   const results=selectedDays.map(gg=>({gg,data:simulaGiorno(gg,p)}));
@@ -1290,7 +1298,7 @@ function runDim(){
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-calMese=6;renderCalendar();renderAll();
+calMese=6;renderLabels();renderCalendar();
 </script>
 </body>
 </html>
