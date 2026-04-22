@@ -692,8 +692,8 @@ function renderCalendar(){
 function calPrev(){calMese=(calMese+11)%12;renderCalendar();}
 function calNext(){calMese=(calMese+1)%12;renderCalendar();}
 function toggleDay(gg){const idx=selectedDays.indexOf(gg);if(idx>=0)selectedDays.splice(idx,1);else{if(selectedDays.length>=MAX_GIORNI)selectedDays.shift();selectedDays.push(gg);}renderCalendar();renderAll();}
-function clearAll(){selectedDays=[];renderCalendar();renderAll();}
-function resetRun(){tankStates365=null;selectedDays=[];renderCalendar();renderLabels();}
+function clearAll(){selectedDays=[];renderCalendar();renderLabels();}
+function resetRun(){   tankStates365=null;   renderCalendar();   if(selectedDays.length>0) renderAll();   else renderLabels(); }
 
 function renderLabels(){
   const p=getParams();updateLabels(p);
