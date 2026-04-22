@@ -262,7 +262,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <button onclick="clearAll()" style="font-size:.68rem;padding:2px 8px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">Cancella tutto</button>
         <span id="data-source-label" style="margin-left:auto;font-size:.65rem;color:var(--text3);">dati: stima interna</span>
       </div>
-      <div class="g5" id="kpi-top"></div>
+      <div id="kpi-top" style="display:flex;flex-direction:column;gap:.6rem;"></div>
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div class="ct" style="margin:0;">Profilo orario — potenze</div>
@@ -726,14 +726,21 @@ function renderAll(){
   const pctIn=Math.round(primo.data.tankInizio/capKwh*100);
   document.getElementById('tank-prev-state').innerHTML='Inizio <b>'+giornoLabel(primo.gg)+'</b>: <b style="color:var(--teal)">'+pctIn+'%</b>';
 
-  const pvPct=Math.round(primo.data.totPv/(primo.data.totPv+primo.data.totGrid)*100)||0;
-  document.getElementById('kpi-top').innerHTML=
-    '<div class="card kpi"><div class="kv" style="color:var(--red)">'+(primo.data.totCooling/1000).toFixed(1)+'</div><div class="ku">MWh_th</div><div class="kl">Cooling 40%</div></div>'+
-    '<div class="card kpi"><div class="kv" style="color:var(--green)">'+Math.round(primo.data.totPv)+'</div><div class="ku">kWh_el</div><div class="kl">FV prodotto</div></div>'+
-    '<div class="card kpi"><div class="kv" style="color:var(--teal)">'+primo.data.ghiaccioT.toFixed(1)+'</div><div class="ku">t ghiaccio</div><div class="kl">Fine giornata</div></div>'+
-    '<div class="card kpi"><div class="kv" style="color:var(--amber)">'+(primo.data.totGrid/1000).toFixed(1)+'</div><div class="ku">MWh_el</div><div class="kl">Da rete</div></div>'+
-    '<div class="card kpi"><div class="kv" style="color:var(--amber)">'+Math.round(primo.data.totCost)+'</div><div class="ku">\u20ac/giorno</div><div class="kl">Costo netto</div></div>';
+ document.getElementById('kpi-top').innerHTML = results.map(function(item, i){
+    var d = item.data;
+    var pvPct = Math.round(d.totPv/(d.totPv+d.totGrid)*100)||0;
+    return '<div style="display:flex;flex-direction:column;gap:4px;border:1px solid '+SEL_COLORS[i]+';border-radius:var(--rl);padding:.7rem .6rem;background:var(--bg2);">'+
+      '<div style="font-size:.62rem;font-weight:600;color:'+SEL_COLORS[i]+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">'+giornoLabel(item.gg)+'</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">'+
+      '<div class="kpi" style="padding:.5rem .2rem;"><div class="kv" style="color:var(--red);font-size:1.4rem;">'+(d.totCooling/1000).toFixed(1)+'</div><div class="ku">MWh_th</div><div class="kl">Cooling</div></div>'+
+      '<div class="kpi" style="padding:.5rem .2rem;"><div class="kv" style="color:var(--green);font-size:1.4rem;">'+Math.round(d.totPv)+'</div><div class="ku">kWh_el</div><div class="kl">FV prodotto</div></div>'+
+      '<div class="kpi" style="padding:.5rem .2rem;"><div class="kv" style="color:var(--teal);font-size:1.4rem;">'+d.ghiaccioT.toFixed(1)+'</div><div class="ku">t ghiaccio</div><div class="kl">Fine giornata</div></div>'+
+      '<div class="kpi" style="padding:.5rem .2rem;"><div class="kv" style="color:var(--amber);font-size:1.4rem;">'+(d.totGrid/1000).toFixed(1)+'</div><div class="ku">MWh_el</div><div class="kl">Da rete</div></div>'+
+      '<div class="kpi" style="padding:.5rem .2rem;"><div class="kv" style="color:var(--amber);font-size:1.4rem;">'+Math.round(d.totCost)+'</div><div class="ku">\u20ac/g</div><div class="kl">Costo netto</div></div>'+
+      '</div></div>';
+  }).join('');
 
+  
   const d=primo.data;
   const rows=[
     ['Cooling 40% rack',fN1(d.totCooling/1000),'MWh_th','#f85149'],
