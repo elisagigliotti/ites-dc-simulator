@@ -265,7 +265,23 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 <!-- TAB 6: RETE -->
 <div id="panel-rete" class="panel"><div id="rete-content"></div></div>
 <!-- TAB 7: CAPEX -->
-<div id="panel-capex" class="panel"><div id="capex-content"></div></div>
+<div id="panel-capex" class="panel">
+  <div class="card" style="margin-bottom:1rem;">
+    <div class="ct">Parametri sensibilit&agrave; analisi finanziaria</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;">
+      <div><div class="ch"><span class="cn">Variazione costo FV</span><span class="cv" id="v-fvcost">0 %</span></div>
+        <input type="range" min="-30" max="30" step="5" value="0" id="r-fvcost" oninput="runCapex()">
+        <div style="font-size:.65rem;color:var(--text3);">Sensibilit&agrave; CAPEX impianto fotovoltaico</div></div>
+      <div><div class="ch"><span class="cn">Variazione tariffa energia</span><span class="cv" id="v-gridvar">0 %</span></div>
+        <input type="range" min="-30" max="50" step="5" value="0" id="r-gridvar" oninput="runCapex()">
+        <div style="font-size:.65rem;color:var(--text3);">Impatto variazione costo energia rete</div></div>
+      <div><div class="ch"><span class="cn">Ricavo teleriscaldamento</span><span class="cv" id="v-heat">0.03 &euro;/kWh</span></div>
+        <input type="range" min="0" max="0.08" step="0.01" value="0.03" id="r-heat" oninput="runCapex()">
+        <div style="font-size:.65rem;color:var(--text3);">Vendita calore residuo rack (60% non-ITES)</div></div>
+    </div>
+  </div>
+  <div id="capex-content"></div>
+</div>
 
 <!-- TAB 8: DIMENSIONAMENTO -->
 <div id="panel-dimensionamento" class="panel">
@@ -474,6 +490,20 @@ function updateLabels(p){
 
 function getEER(copNom,tExt){return Math.max(2.0,copNom*(1-0.02*Math.max(0,tExt-15)));}
 function getCOPice(copNom,tExt){return Math.max(1.8,copNom*0.85*(1-0.02*Math.max(0,tExt-15)));}
+// Feature 4: EER a carico parziale ASHRAE 90.1
+function getEERpartial(copNom,tExt,plr){
+  var base=getEER(copNom,tExt);
+  var p2=Math.max(0.1,Math.min(1,plr));
+  return Math.max(1.5,base*(0.12+0.56*p2+0.32*p2*p2));
+}
+// Feature 4: EER a carico parziale (PLR = partial load ratio)
+// Curva ASHRAE tipica: EER(PLR) = EER_nom * (0.12 + 0.56*PLR + 0.32*PLR^2) normalizzata a PLR=1
+function getEERpartial(copNom,tExt,plr){
+  var eerFull=getEER(copNom,tExt);
+  var plrClamped=Math.max(0.1,Math.min(1,plr));
+  var partialFactor=0.12+0.56*plrClamped+0.32*plrClamped*plrClamped;
+  return Math.max(1.5,eerFull*partialFactor);
+}
 
 // ===========================================================
 //  MOTORE SIMULAZIONE v4 -- con limite chiller e tariffa oraria
@@ -491,12 +521,16 @@ function simulaOra(h,mese,p,tankLevel){
   const sumP=prof.reduce((a,b)=>a+b,0);
   const pvKw=prof[h]/sumP*mensili[mese].kwp_kwh*p.kwp*lossCorr;
 
-  const eer=getEER(p.cop,tExt);
+  const eerFull=getEER(p.cop,tExt);
   const tariff=getTariff(h,p);
 
   // IT sempre da rete; FV copre servizi ausiliari + chiller
   const pvAfterServ=Math.max(0,pvKw-servKw);
   const servFromGrid=Math.max(0,servKw-pvKw);
+
+  // Feature 4: EER a carico parziale -- stima PLR in base al cooling atteso vs capacita max
+  var plrEst=Math.min(1,coolingNeed/Math.max(1,p.chillerMax));
+  const eer=getEERpartial(p.cop,tExt,plrEst);
 
   // Quanto freddo puoi produrre con surplus FV (limitato da chillerMax)
   const coolingFromPvMax=Math.min(pvAfterServ*eer, p.chillerMax);
@@ -588,8 +622,35 @@ function simulaGiorno(gg,p){
   };
 }
 
+function preSimula365warmup(p){
+  // Anno 1: partenza a vuoto
+  var s1=preSimula365(p);
+  // Anno 2: partenza dallo stato finale anno 1 (stato stazionario)
+  var startTank=s1[365];
+  var states=new Array(366).fill(0);var tank=startTank,gg=0;
+  for(var m=0;m<12;m++)for(var d=0;d<GIORNI_MESE[m];d++){
+    states[gg]=tank;
+    for(var h=0;h<24;h++){var r=simulaOra(h,m,p,tank);tank=r.tankLevelRaw;}
+    gg++;
+  }
+  states[365]=tank;return states;
+}
+
+function preSimula365warmup(p){
+  // Anno 1: stato iniziale vuoto
+  var s1=preSimula365(p);
+  // Anno 2: partenza dallo stato finale anno 1 (stato stazionario)
+  var startTank=s1[365];
+  var states=new Array(366).fill(0);var tank=startTank,gg=0;
+  for(var m=0;m<12;m++)for(var d=0;d<GIORNI_MESE[m];d++){
+    states[gg]=tank;
+    for(var h=0;h<24;h++){var r=simulaOra(h,m,p,tank);tank=r.tankLevelRaw;}
+    gg++;
+  }
+  states[365]=tank;return states;
+}
 function simula365completa(p){
-  if(!tankStates365) tankStates365=preSimula365(p);
+  if(!tankStates365) tankStates365=preSimula365warmup(p);
   if(cache365) return cache365;
   const mesi=Array.from({length:12},()=>({pv:0,grid:0,cooling:0,iceUp:0,iceDown:0,coolPv:0,cost:0,feedIn:0,pvToGrid:0}));
   // Dati giornalieri per heatmap
@@ -1144,8 +1205,19 @@ function calcNPV(cashflows,rate){
 
 function runCapex(){
   const p=getParams();const res=simula365completa(p);const ann=res.ann;
+
+  // Slider sensibilita (Feature 3)
+  const fvcostPct=parseFloat(document.getElementById('r-fvcost').value)||0;
+  const gridvarPct=parseFloat(document.getElementById('r-gridvar').value)||0;
+  const heatPrice=parseFloat(document.getElementById('r-heat').value)||0.03;
+  document.getElementById('v-fvcost').textContent=(fvcostPct>0?'+':'')+fvcostPct+' %';
+  document.getElementById('v-gridvar').textContent=(gridvarPct>0?'+':'')+gridvarPct+' %';
+  document.getElementById('v-heat').textContent=heatPrice.toFixed(2)+' \u20ac/kWh';
+
+  // Feature 3: CAPEX con variazione costo FV
+  const fvCost=850*(1+fvcostPct/100);
   const capex={};
-  capex['Impianto FV ('+fN(p.kwp)+' kWp \u00d7 850 \u20ac/kWp)']=p.kwp*850;
+  capex['Impianto FV ('+fN(p.kwp)+' kWp \u00d7 '+Math.round(fvCost)+' \u20ac/kWp)']=p.kwp*fvCost;
   capex['Accumulo ITES ('+p.tankV+' m\u00b3)']=p.tankV*RHO_ICE*LATENTE_WH/1000*120;
   capex['Chiller/PdC ('+fN(p.heatKw)+' kW_th \u00d7 350)']=p.heatKw*350;
   capex['Distribuzione cooling (CDU, tubazioni)']=p.nRack*2500;
@@ -1155,27 +1227,40 @@ function runCapex(){
   capex['BMS / Monitoring']=85000;
   capex['Ingegneria e permessi']=120000;
   const capexTot=Object.values(capex).reduce((a,b)=>a+b,0);
+
+  // Feature 3: OPEX con variazione tariffa energia
+  const annCostAdj=ann.cost*(1+gridvarPct/100);
   const opex={};
-  opex['Energia elettrica rete']=ann.cost;
+  opex['Energia elettrica rete'+(gridvarPct!==0?' (var. '+gridvarPct+'%)':'')]=annCostAdj;
   opex['Manutenzione FV']=p.kwp*12;
   opex['Manutenzione cooling']=p.heatKw*15;
   opex['Manutenzione generale (1.5%)']=capexTot*0.015;
   opex['Assicurazione (0.5%)']=capexTot*0.005;
   opex['Personale (3 FTE)']=180000;
   const opexTot=Object.values(opex).reduce((a,b)=>a+b,0);
+
   const hostingFee=0.12;
   const revenue=p.itKw*hostingFee*8760;
   const gridServ=ann.pvToGrid*p.feedIn;
-  const revTot=revenue+gridServ;
+  // Feature 5: teleriscaldamento -- 60% calore rack non raffreddato via ITES, stima 30% ore disponibili
+  const heatKwRes=p.heatKw*0.60;
+  const heatRevenue=heatPrice>0?(heatKwRes*8760*heatPrice*0.30):0;
+  const revTot=revenue+gridServ+heatRevenue;
   const cashflow=revTot-opexTot;
   const payback=cashflow>0?(capexTot/cashflow):Infinity;
-  const costNoFV=(p.dcBase+p.dcBase*p.servPct+p.heatKw/getEER(p.cop,15))*8760*p.gridPrice;
+  const costNoFV=(p.dcBase+p.dcBase*p.servPct+p.heatKw/getEER(p.cop,15))*8760*p.gridPrice*(1+gridvarPct/100);
+
   // IRR e NPV su 20 anni con crescita ricavi 2%/anno
   const cfArr=[-capexTot];
   for(let y=1;y<=20;y++) cfArr.push(cashflow*Math.pow(1.02,y-1));
   const irr=calcIRR(cfArr);
   const npv10=calcNPV(cfArr,0.10);
   const npv5=calcNPV(cfArr,0.05);
+
+  // Feature 2: Li-ion vs ITES -- stesso budget
+  const capexITES=p.tankV*RHO_ICE*LATENTE_WH/1000*120;
+  const liionKwh=capexITES/500;
+  const itesKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
 
   document.getElementById('capex-content').innerHTML=
     '<div class="g3" style="margin-bottom:1rem;">'+
@@ -1199,7 +1284,28 @@ function runCapex(){
     '<div class="card"><div class="ct">OPEX &mdash; Costi operativi/anno</div>'+
     Object.entries(opex).map(function(e){return '<div class="capex-row"><span class="capex-label">'+e[0]+'</span><span class="capex-val">'+fE(Math.round(e[1]))+'</span></div>';}).join('')+
     '<div class="capex-row" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:8px;"><span style="font-weight:700;">TOTALE OPEX</span><span style="font-weight:700;font-family:\'IBM Plex Mono\';color:var(--red);font-size:1.1rem;">'+fE(Math.round(opexTot))+'/anno</span></div></div></div>'+
-    '<div class="ibar ibar-a" style="margin-bottom:1rem;"><b>Nota revenue:</b> Tariffa hosting '+fE(hostingFee*1000)+'/MWh (ipotesi conservativa). Adattare al business model reale.</div>'+
+    '<div class="ibar ibar-a" style="margin-bottom:1rem;"><b>Nota revenue:</b> Tariffa hosting '+fE(hostingFee*1000)+'/MWh (ipotesi conservativa). Adattare al business model reale.'+
+    (heatRevenue>0?' &nbsp;|&nbsp; <b style="color:var(--orange)">Teleriscaldamento:</b> +'+fE(Math.round(heatRevenue))+'/anno':'')+
+    '</div>'+
+    '<div class="card" style="margin-bottom:1rem;"><div class="ct">Scenario C: ITES Ghiaccio vs Li-ion &mdash; stesso budget accumulo '+fE(Math.round(capexITES))+'</div>'+
+    '<div class="g2" style="margin-top:.8rem;">'+
+    '<div class="scenario-card" style="background:var(--teal3);border-color:rgba(57,200,200,.3);">'+
+    '<div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">ITES Ghiaccio (questo progetto)</div>'+
+    '<div style="font-size:1.6rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--teal);margin:8px 0;">'+fN(Math.round(itesKwh))+' kWh_th</div>'+
+    '<div style="font-size:.73rem;color:var(--text2);">Energia termica accumulabile &middot; ~'+Math.round(p.tankV*RHO_ICE/1000)+' t ghiaccio</div>'+
+    '<div style="font-size:.68rem;color:var(--text3);margin-top:5px;">120 \u20ac/kWh_th &middot; Vita utile 20+ anni &middot; Manutenzione minima</div>'+
+    '</div>'+
+    '<div class="scenario-card" style="background:var(--purple3);border-color:rgba(163,113,247,.3);">'+
+    '<div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Batteria Li-ion (alternativa)</div>'+
+    '<div style="font-size:1.6rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--purple);margin:8px 0;">'+fN(Math.round(liionKwh))+' kWh_el</div>'+
+    '<div style="font-size:.73rem;color:var(--text2);">Energia elettrica accumulabile &middot; stesso budget CAPEX</div>'+
+    '<div style="font-size:.68rem;color:var(--text3);margin-top:5px;">500 \u20ac/kWh_el &middot; Vita utile 10-12 anni &middot; Degrado ~2%/anno</div>'+
+    '</div></div>'+
+    '<div class="ibar" style="margin-top:10px;font-size:.73rem;">'+
+    '<b>Confronto:</b> Le unit\u00e0 non sono direttamente confrontabili (kWh_th vs kWh_el). '+
+    'L\u0027ITES a ghiaccio offre alta densit\u00e0 termica e costo 4x inferiore al Li-ion, ma funziona SOLO per il cooling. '+
+    'Il Li-ion consente anche peak shaving elettrico e storage FV. Per un data center con carico IT fisso e alta richiesta di raffreddamento, l\u0027ITES \u00e8 tipicamente la scelta pi\u00f9 economica.'+
+    '</div></div>'+
     '<div class="g6" style="margin-bottom:1rem;">'+
     '<div class="card kpi"><div class="kv" style="color:var(--green)">'+fE(Math.round(revTot/1000))+'k</div><div class="ku">/anno</div><div class="kl">Revenue</div></div>'+
     '<div class="card kpi"><div class="kv" style="color:'+(cashflow>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(cashflow/1000))+'k</div><div class="ku">/anno</div><div class="kl">Cash Flow</div></div>'+
