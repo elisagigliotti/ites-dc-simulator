@@ -496,21 +496,12 @@ function getEERpartial(copNom,tExt,plr){
   var p2=Math.max(0.1,Math.min(1,plr));
   return Math.max(1.5,base*(0.12+0.56*p2+0.32*p2*p2));
 }
-// Feature 4: EER a carico parziale (PLR = partial load ratio)
-// Curva ASHRAE tipica: EER(PLR) = EER_nom * (0.12 + 0.56*PLR + 0.32*PLR^2) normalizzata a PLR=1
-function getEERpartial(copNom,tExt,plr){
-  var eerFull=getEER(copNom,tExt);
-  var plrClamped=Math.max(0.1,Math.min(1,plr));
-  var partialFactor=0.12+0.56*plrClamped+0.32*plrClamped*plrClamped;
-  return Math.max(1.5,eerFull*partialFactor);
-}
-
 // ===========================================================
 //  MOTORE SIMULAZIONE v4 -- con limite chiller e tariffa oraria
 // ===========================================================
 function simulaOra(h,mese,p,tankLevel){
   const tExt=TEMP_ORARIE[mese][h];
-  const heatIT=p.heatKw; // 40% IT
+  const heatIT=p.heatKw; // 40% IT da dissipare
   const servKw=p.dcBase*p.servPct;
   const heatEnv=p.ua*(tExt-p.setP)/1000;
   const coolingNeed=Math.max(0,heatIT+servKw+heatEnv);
@@ -521,52 +512,64 @@ function simulaOra(h,mese,p,tankLevel){
   const sumP=prof.reduce((a,b)=>a+b,0);
   const pvKw=prof[h]/sumP*mensili[mese].kwp_kwh*p.kwp*lossCorr;
 
-  const eerFull=getEER(p.cop,tExt);
   const tariff=getTariff(h,p);
-
-  // IT sempre da rete; FV copre servizi ausiliari + chiller
-  const pvAfterServ=Math.max(0,pvKw-servKw);
-  const servFromGrid=Math.max(0,servKw-pvKw);
-
-  // Feature 4: EER a carico parziale -- stima PLR in base al cooling atteso vs capacita max
-  var plrEst=Math.min(1,coolingNeed/Math.max(1,p.chillerMax));
-  const eer=getEERpartial(p.cop,tExt,plrEst);
-
-  // Quanto freddo puoi produrre con surplus FV (limitato da chillerMax)
-  const coolingFromPvMax=Math.min(pvAfterServ*eer, p.chillerMax);
   const capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
 
+  // ============================================================
+  // MODELLO FISICO CORRETTO (v4.1):
+  // Priorita FV: 1) autoconsumo IT  2) cooling diretto  3) ghiaccio  4) immissione
+  // Se FV insufficiente: rete copre IT + cooling + chiller
+  // La produzione di ghiaccio e subordinata all'autoconsumo diretto
+  // ============================================================
+
+  // Step 1: FV copre prima il carico IT (autoconsumo diretto)
+  const pvForIT=Math.min(pvKw, p.dcBase+servKw);
+  const pvAfterIT=Math.max(0, pvKw-pvForIT);
+  const itFromGrid=Math.max(0, p.dcBase+servKw-pvKw);
+
+  // Step 2: EER a carico parziale (ASHRAE 90.1)
+  var plrEst=Math.min(1, coolingNeed/Math.max(1,p.chillerMax));
+  const eer=getEERpartial(p.cop,tExt,plrEst);
+
+  // Step 3: surplus FV copre cooling diretto (kWh_el -> kWh_th tramite EER)
+  const coolingFromPvMax=Math.min(pvAfterIT*eer, p.chillerMax);
   let coolDeficit=coolingNeed-coolingFromPvMax;
-  let iceCharged=0,iceUsed=0,gridForChiller=0,pvToGrid=0;
+  let iceCharged=0, iceUsed=0, gridForChiller=0, pvToGrid=0;
   let coolingFromPv=0;
+  let pvAfterCooling=0;
 
   if(coolDeficit<=0){
-    // PV copre tutto il cooling
+    // FV copre tutto il cooling
     coolingFromPv=coolingNeed;
-    const excess=Math.abs(coolDeficit);
+    const pvElUsedForCool=coolingNeed/eer;
+    pvAfterCooling=Math.max(0, pvAfterIT-pvElUsedForCool);
+    // Step 4: surplus residuo -> carica ghiaccio (limitato da spazio e chillerMax)
     const space=capKwh-tankLevel;
-    // Eccesso freddo -> ghiaccio (limitato da chillerMax residuo)
-    const canCharge=Math.min(excess, p.chillerMax-coolingNeed);
-    iceCharged=Math.max(0,Math.min(canCharge,space));
+    const chillerResidual=p.chillerMax-coolingNeed;
+    const canCharge=Math.min(pvAfterCooling*eer, chillerResidual, space);
+    iceCharged=Math.max(0, canCharge);
     tankLevel+=iceCharged;
-    // Surplus PV non usato -> rete
-    const pvUsedForCool=(coolingNeed+iceCharged)/eer;
-    pvToGrid=Math.max(0,pvAfterServ-pvUsedForCool);
+    // Step 5: FV residuo dopo ghiaccio -> immissione in rete
+    const pvElUsedForIce=iceCharged/eer;
+    pvToGrid=Math.max(0, pvAfterCooling-pvElUsedForIce);
   } else {
     coolingFromPv=coolingFromPvMax;
-    // Deficit -> prima ghiaccio poi rete
+    // Step 4: deficit cooling -> prima serbatoio poi rete
     if(tankLevel>0){iceUsed=Math.min(coolDeficit,tankLevel);tankLevel-=iceUsed;coolDeficit-=iceUsed;}
     if(coolDeficit>0){gridForChiller=coolDeficit/eer;}
   }
 
   // Perdite serbatoio 0.5%/h
   tankLevel=Math.max(0,tankLevel*(1-0.005));
-  const totalGrid=p.dcBase+servFromGrid+gridForChiller;
+  // totalGrid: IT da rete + cooling da rete (chiller)
+  const totalGrid=itFromGrid+gridForChiller;
   const gridCost=totalGrid*tariff;
   const feedInRev=pvToGrid*p.feedIn;
 
-  // PUE istantaneo
-  const pue=totalGrid>0?(totalGrid/p.dcBase):1;
+  // PUE istantaneo = consumo elettrico totale / consumo IT
+  // consumo totale = IT (da rete + da FV) + chiller da rete
+  const totalElec=p.dcBase+servKw+gridForChiller;
+  const pue=p.dcBase>0?(totalElec/p.dcBase):1;
 
   return {
     h,tExt,tariff,
@@ -623,27 +626,18 @@ function simulaGiorno(gg,p){
 }
 
 function preSimula365warmup(p){
-  // Anno 1: partenza a vuoto
-  var s1=preSimula365(p);
-  // Anno 2: partenza dallo stato finale anno 1 (stato stazionario)
-  var startTank=s1[365];
-  var states=new Array(366).fill(0);var tank=startTank,gg=0;
-  for(var m=0;m<12;m++)for(var d=0;d<GIORNI_MESE[m];d++){
-    states[gg]=tank;
-    for(var h=0;h<24;h++){var r=simulaOra(h,m,p,tank);tank=r.tankLevelRaw;}
-    gg++;
+  // Bilancio GIORNALIERO: il serbatoio continua da un giorno al successivo.
+  // Per trovare lo stato iniziale realistico del 1 gennaio (non vuoto),
+  // eseguiamo 30 giorni di pre-run a dicembre (mese 11) partendo da cap/2.
+  var capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
+  var tank=capKwh*0.5; // stima iniziale: meta pieno
+  for(var d=0;d<30;d++){
+    for(var h=0;h<24;h++){var r=simulaOra(h,11,p,tank);tank=r.tankLevelRaw;}
   }
-  states[365]=tank;return states;
-}
-
-function preSimula365warmup(p){
-  // Anno 1: stato iniziale vuoto
-  var s1=preSimula365(p);
-  // Anno 2: partenza dallo stato finale anno 1 (stato stazionario)
-  var startTank=s1[365];
-  var states=new Array(366).fill(0);var tank=startTank,gg=0;
+  // Ora simula i 365 giorni con continuita giornaliera
+  var states=new Array(366).fill(0);var gg=0;
   for(var m=0;m<12;m++)for(var d=0;d<GIORNI_MESE[m];d++){
-    states[gg]=tank;
+    states[gg]=tank; // livello a inizio giornata
     for(var h=0;h<24;h++){var r=simulaOra(h,m,p,tank);tank=r.tankLevelRaw;}
     gg++;
   }
