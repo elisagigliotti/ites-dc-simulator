@@ -320,7 +320,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <tr><td>ITES ghiaccio</td><td style="color:var(--teal)">92.8 Wh/kg</td><td style="color:var(--green)">Basso</td></tr>
           <tr><td>PCM organici</td><td style="color:var(--amber)">100-250</td><td style="color:var(--amber)">Alto</td></tr>
           <tr><td>IceBrick</td><td style="color:var(--teal)">85 kWh/m&#179;</td><td style="color:var(--amber)">Medio</td></tr>
-          
+          <tr><td>Batteria Li-ion</td><td style="color:var(--blue)">150-250</td><td style="color:var(--red)">Alto</td></tr>
         </table>
       </div>
       <div class="card"><div class="ct">Surplus ITES &mdash; strategie</div>
@@ -360,11 +360,11 @@ function getTariffMult(h,dowIndex){
 }
 
 const RACK_TYPES={
-  ai_gpu:{name:'AI/GPU (H100/B200)',kw:40,cooling:0.40,pue_base:1.30,method:'Rear-Door HX + Liquid',perRow:10},
-  ai_mixed:{name:'AI Misto GPU+CPU',kw:25,cooling:0.40,pue_base:1.25,method:'Hot/Cold Aisle + ITES',perRow:12},
-  hpc:{name:'HPC Computing',kw:20,cooling:0.40,pue_base:1.20,method:'In-Row + ITES',perRow:14},
-  cloud:{name:'Cloud Standard',kw:10,cooling:0.40,pue_base:1.15,method:'Raised Floor + ITES',perRow:16},
-  colo:{name:'Colocation Mixed',kw:7,cooling:0.40,pue_base:1.12,method:'Containment + ITES',perRow:18}
+  ai_gpu:{name:'AI/GPU (H100/B200)',kw:40,cooling:0.40,pue_base:1.30,method:'Rear-Door HX + Liquid',perRow:5},
+  ai_mixed:{name:'AI Misto GPU+CPU',kw:25,cooling:0.40,pue_base:1.25,method:'Hot/Cold Aisle + ITES',perRow:6},
+  hpc:{name:'HPC Computing',kw:20,cooling:0.40,pue_base:1.20,method:'In-Row + ITES',perRow:7},
+  cloud:{name:'Cloud Standard',kw:10,cooling:0.40,pue_base:1.15,method:'Raised Floor + ITES',perRow:8},
+  colo:{name:'Colocation Mixed',kw:7,cooling:0.40,pue_base:1.12,method:'Containment + ITES',perRow:8}
 };
 
 const TEMP_ORARIE=[
@@ -617,8 +617,9 @@ function renderAll(){
 
 function runRack(){
   const p=getParams(),nFile=Math.ceil(p.nRack/p.rack.perRow),rackPerFila=Math.min(p.nRack,p.rack.perRow);
+  const nFileViz=Math.max(nFile,2),rackPerFilaViz=Math.ceil(p.nRack/nFileViz);
   let rackViz='';
-  for(let f=0;f<nFile;f++){const n=Math.min(rackPerFila,p.nRack-f*p.rack.perRow),isCold=f%2===0;rackViz+='<div style="width:100%;text-align:center;margin:6px 0;"><div class="aisle-label" style="background:'+(isCold?'rgba(57,200,200,.1);color:var(--teal)':'rgba(248,81,73,.1);color:var(--red)')+'">'+(isCold?'CORRIDOIO FREDDO 18-22\u00b0C':'CORRIDOIO CALDO 35-45\u00b0C')+'</div><div class="rack-viz">';for(let r=0;r<n;r++)rackViz+='<div class="rack-unit" style="background:linear-gradient(180deg,'+(isCold?'#0f2a4a,#081828':'#4a1010,#280808')+')" title="Rack '+(f*rackPerFila+r+1)+': '+p.rack.kw+' kW"><span style="color:'+(isCold?'var(--teal)':'var(--red)')+'">&#9642;</span></div>';rackViz+='</div></div>';}
+  for(let f=0;f<nFileViz;f++){const n=Math.max(0,Math.min(rackPerFilaViz,p.nRack-f*rackPerFilaViz)),isCold=f%2===0;if(n===0)continue;rackViz+='<div style="width:100%;text-align:center;margin:6px 0;"><div class="aisle-label" style="background:'+(isCold?'rgba(57,200,200,.1);color:var(--teal)':'rgba(248,81,73,.1);color:var(--red)')+'">'+(isCold?'CORRIDOIO FREDDO 18-22\u00b0C':'CORRIDOIO CALDO 35-45\u00b0C')+'</div><div class="rack-viz">';for(let r=0;r<n;r++)rackViz+='<div class="rack-unit" style="background:linear-gradient(180deg,'+(isCold?'#0f2a4a,#081828':'#4a1010,#280808')+')" title="Rack '+(f*rackPerFilaViz+r+1)+': '+p.rack.kw+' kW"><span style="color:'+(isCold?'var(--teal)':'var(--red)')+'">&#9642;</span></div>';rackViz+='</div></div>';}
   document.getElementById('rack-content').innerHTML='<div class="g2" style="margin-bottom:1rem;"><div class="card"><div class="ct">Layout \u2014 '+p.nRack+' Rack '+p.rack.name+'</div>'+rackViz+'<div style="font-size:.68rem;color:var(--text3);text-align:center;margin-top:8px;">Tubazioni ITES (0-5\u00b0C) \u2192 CDU in-row \u2192 Rear-Door HX</div></div><div class="card"><div class="ct">Configurazione</div><div style="display:flex;flex-direction:column;gap:8px;"><div class="capex-row"><span class="capex-label">Tipo rack</span><span class="capex-val" style="color:var(--blue);">'+p.rack.name+'</span></div><div class="capex-row"><span class="capex-label">N\u00b0 rack</span><span class="capex-val">'+p.nRack+'</span></div><div class="capex-row"><span class="capex-label">Potenza per rack</span><span class="capex-val">'+p.rack.kw+' kW</span></div><div class="capex-row"><span class="capex-label">Potenza IT totale</span><span class="capex-val" style="color:var(--amber);">'+fN(p.itKw)+' kW</span></div><div class="capex-row"><span class="capex-label">Calore 40% da dissipare</span><span class="capex-val" style="color:var(--red);">'+fN(p.heatKw)+' kW_th</span></div><div class="capex-row"><span class="capex-label">Chiller max</span><span class="capex-val" style="color:var(--teal);">'+p.chillerMax+' kW_th</span></div><div class="capex-row"><span class="capex-label">File corridoi</span><span class="capex-val">'+nFile+' \u00d7 '+rackPerFila+'</span></div><div class="capex-row"><span class="capex-label">Metodo cooling</span><span class="capex-val" style="color:var(--teal);">'+p.rack.method+'</span></div><div class="capex-row"><span class="capex-label">PUE baseline</span><span class="capex-val">'+p.rack.pue_base+'</span></div></div>'+(p.rack.kw>=30?'<div class="ibar ibar-a" style="margin-top:12px;"><b>Alta densit\u00e0:</b> Per rack &gt;30 kW valutare liquid cooling diretto su chip.</div>':'')+'</div></div><div class="card"><div class="ct">Strategia raffreddamento puntuale</div><div class="g3"><div><b style="color:var(--teal)">Hot-Spot Management</b><p style="font-size:.76rem;color:var(--text2);margin-top:4px;line-height:1.7;">Il calore \u00e8 concentrato nei chip CPU/GPU. Ogni rack '+p.rack.name+' genera '+fN(p.rack.kw*0.40)+' kW_th da punti specifici.</p></div><div><b style="color:var(--blue)">Rear-Door Heat Exchanger</b><p style="font-size:.76rem;color:var(--text2);margin-top:4px;line-height:1.7;">Acqua ghiacciata ITES (0-5\u00b0C) in scambiatori sul retro rack. Efficienza &gt;90%.</p></div><div><b style="color:var(--green)">ITES come Buffer</b><p style="font-size:.76rem;color:var(--text2);margin-top:4px;line-height:1.7;">Serbatoio '+p.tankV+' m\u00b3 = '+fN(p.tankV*RHO_ICE*LATENTE_WH/1000)+' kWh_th. Assorbe picchi (max '+p.chillerMax+' kW_th).</p></div></div></div>';
 }
 
