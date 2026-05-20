@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ITES Data Center &#8212; Studio Pre-Fattibilit&agrave; Investitore v4</title>
+<title>ITES Data Center &#8212; Studio Pre-Fattibilit&agrave; Investitore v5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -124,7 +124,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 <div class="hdr">
   <div class="hdr-top">
     <div>
-      <h1>Studio Pre-Fattibilit&agrave; <span>ITES</span> &mdash; Data Center <span style="font-size:.75rem;color:var(--text3);">v4</span></h1>
+      <h1>Studio Pre-Fattibilit&agrave; <span>ITES</span> &mdash; Data Center <span style="font-size:.75rem;color:var(--text3);">v5</span></h1>
       <p>Ice Thermal Energy Storage + FV 1 MWp &middot; 40% calore rack &middot; Tariffa oraria F1/F2/F3 &middot; CO&#8322; &middot; Heatmap &middot; IRR &middot; Giorni critici</p>
     </div>
     <div class="hdr-meta">Sito: Bellocchi (PU) &middot; 43.85&deg;N 12.98&deg;E<br>Capannone ex-frigo: 5.500 m&sup2; &middot; H 6m<br>FV: 4.000 m&sup2; &times; 260 Wp/m&sup2; = 1.040 kWp<br>Azimut 145&deg; (SSE) &middot; Inclinazione 5&deg;</div>
@@ -196,7 +196,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       <div class="card">
         <div class="ct">Serbatoio ITES</div>
         <div class="cg">
-          <div><div class="ch"><span class="cn">Volume contenitore</span><span class="cv" id="v-tank">300 m&#179;</span></div><input type="range" min="5" max="500" step="5" value="300" id="r-tank" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Volume contenitore</span><span class="cv" id="v-tank">300 m&#179;</span></div><input type="range" min="5" max="1500" step="10" value="300" id="r-tank" oninput="resetRun()"></div>
           <div id="tank-info" style="font-size:.70rem;color:var(--text3);line-height:1.7;"></div>
         </div>
       </div>
@@ -336,10 +336,10 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 </div>
 
 <div style="font-size:.68rem;color:var(--text3);padding:.4rem .8rem;background:var(--bg3);border-radius:var(--r);margin-bottom:.5rem;border:1px solid var(--border);">
-  Simulazione di pre-fattibilit&agrave; v4 &middot; Tariffa oraria F1/F2/F3 &middot; COP variabile &middot; Potenza chiller limitata &middot; CO&#8322; &middot; IRR &middot; Non sostituisce progetto esecutivo
+  Simulazione di pre-fattibilit&agrave; v5 &middot; Tariffa oraria F1/F2/F3 &middot; COP variabile &middot; Potenza chiller limitata &middot; CO&#8322; &middot; IRR &middot; Non sostituisce progetto esecutivo
 </div>
 <div class="footer">
-  <span>ITES Data Center v4 &middot; Tesi PoliTo F. Scarascia 2025 &middot; PVGIS v5.2 &middot; GSE tariffa F1/F2/F3</span>
+  <span>ITES Data Center v5 &middot; Tesi PoliTo F. Scarascia 2025 &middot; PVGIS v5.2 &middot; GSE tariffa F1/F2/F3</span>
   <span style="color:var(--red);">Pre-fattibilit&agrave;</span>
 </div>
 </div>
@@ -468,7 +468,7 @@ function simulaOra(h,mese,p,tankLevel){
   tankLevel=Math.max(0,tankLevel*(1-0.005));
   const totalGrid=itFromGrid+gridForChiller,gridCost=totalGrid*tariff,feedInRev=pvToGrid*p.feedIn;
   const totalElec=p.dcBase+servKw+gridForChiller,pue=p.dcBase>0?(totalElec/p.dcBase):1;
-  return{h,tExt,tariff,coolingNeed:Math.round(coolingNeed*10)/10,pvKw:Math.round(pvKw*10)/10,heatEnv:Math.round(heatEnv*10)/10,coolingFromPv:Math.round(coolingFromPv*10)/10,iceCharged:Math.round(iceCharged*10)/10,iceUsed:Math.round(iceUsed*10)/10,tankLevel:Math.round(tankLevel*10)/10,gridForChiller:Math.round(gridForChiller*10)/10,totalGrid:Math.round(totalGrid*10)/10,pvToGrid:Math.round(pvToGrid*10)/10,eer:Math.round(eer*100)/100,gridCost:Math.round(gridCost*100)/100,feedInRev:Math.round(feedInRev*100)/100,pue:Math.round(pue*100)/100,tankLevelRaw:tankLevel};
+  const pvStart=pvKw>0.5;return{h,tExt,tariff,itKw:p.dcBase,pvStart,coolingNeed:Math.round(coolingNeed*10)/10,pvKw:Math.round(pvKw*10)/10,heatEnv:Math.round(heatEnv*10)/10,coolingFromPv:Math.round(coolingFromPv*10)/10,iceCharged:Math.round(iceCharged*10)/10,iceUsed:Math.round(iceUsed*10)/10,tankLevel:Math.round(tankLevel*10)/10,gridForChiller:Math.round(gridForChiller*10)/10,totalGrid:Math.round(totalGrid*10)/10,pvToGrid:Math.round(pvToGrid*10)/10,eer:Math.round(eer*100)/100,gridCost:Math.round(gridCost*100)/100,feedInRev:Math.round(feedInRev*100)/100,pue:Math.round(pue*100)/100,tankLevelRaw:tankLevel};
 }
 
 function preSimula365(p){
@@ -482,7 +482,7 @@ function simulaGiorno(gg,p){
   const tankInizio=tankStates365?Math.min(tankStates365[gg-1],capKwh):0;
   let tank=tankInizio;const hours=[];
   for(let h=0;h<24;h++){const r=simulaOra(h,mese_idx,p,tank);tank=r.tankLevelRaw;hours.push(r);}
-  return{hours,tankInizio,capKwh,totPv:hours.reduce((s,r)=>s+r.pvKw,0),totGrid:hours.reduce((s,r)=>s+r.totalGrid,0),totCooling:hours.reduce((s,r)=>s+r.coolingNeed,0),totIceUp:hours.reduce((s,r)=>s+r.iceCharged,0),totIceDown:hours.reduce((s,r)=>s+r.iceUsed,0),totCoolPv:hours.reduce((s,r)=>s+r.coolingFromPv,0),totCost:hours.reduce((s,r)=>s+r.gridCost,0),totFeedIn:hours.reduce((s,r)=>s+r.feedInRev,0),totPvToGrid:hours.reduce((s,r)=>s+r.pvToGrid,0),ghiaccioT:tank*1000/(LATENTE_WH*1000),tankFine:tank,tankMin:Math.min(...hours.map(r=>r.tankLevel)),pueAvg:hours.reduce((s,r)=>s+r.pue,0)/24};
+  return{hours,tankInizio,capKwh,totPv:hours.reduce((s,r)=>s+r.pvKw,0),totGrid:hours.reduce((s,r)=>s+r.totalGrid,0),totCooling:hours.reduce((s,r)=>s+r.coolingNeed,0),totIceUp:hours.reduce((s,r)=>s+r.iceCharged,0),totIceDown:hours.reduce((s,r)=>s+r.iceUsed,0),totCoolPv:hours.reduce((s,r)=>s+r.coolingFromPv,0),totCost:hours.reduce((s,r)=>s+r.gridCost,0),totFeedIn:hours.reduce((s,r)=>s+r.feedInRev,0),totPvToGrid:hours.reduce((s,r)=>s+r.pvToGrid,0),ghiaccioT:tank*1000/(LATENTE_WH*1000),tankFine:tank,tankMin:Math.min(...hours.map(r=>r.tankLevel)),pueAvg:hours.reduce((s,r)=>s+r.pue,0)/24,totGridChill:hours.reduce((s,r)=>s+r.gridForChiller,0)};
 }
 
 function preSimula365warmup(p){
@@ -593,15 +593,23 @@ function renderAll(){
   const chartsDiv=document.getElementById('charts-orari');
   Object.keys(charts).filter(k=>k.startsWith('cOrario')).forEach(k=>destroyC(k));chartsDiv.innerHTML='';
   const labels=Array.from({length:24},(_,h)=>h+':00');
-  const coOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:12}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}}}}};
+  const coOpts={responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',labels:{color:'#4a5568',font:{size:7.5},boxWidth:8,usePointStyle:true}},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:12}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}}}}};
   results.forEach(function(item,i){
     var gg=item.gg,data=item.data,wrap=document.createElement('div');
     var lbl=document.createElement('div');lbl.style.cssText='font-size:.70rem;color:'+SEL_COLORS[i]+';font-weight:600;margin-bottom:3px;';lbl.textContent=giornoLabel(gg);
-    var cw=document.createElement('div');cw.style.cssText='position:relative;width:100%;height:'+(results.length===1?'200':'150')+'px;';
+    var cw=document.createElement('div');cw.style.cssText='position:relative;width:100%;height:'+(results.length===1?'280':'200')+'px;';
     var cv=document.createElement('canvas');cv.id='cOrario'+i;cw.appendChild(cv);wrap.appendChild(lbl);wrap.appendChild(cw);
     if(i<results.length-1){var sep=document.createElement('hr');sep.style.cssText='border:none;border-top:0.5px solid var(--border);margin:5px 0;';wrap.appendChild(sep);}
     chartsDiv.appendChild(wrap);
-    charts['cOrario'+i]=new Chart(cv,{type:'line',data:{labels,datasets:[{label:'Fabbisogno raffreddamento',data:data.hours.map(r=>r.coolingNeed),borderColor:'#f85149',backgroundColor:'rgba(248,81,73,.06)',fill:true,tension:.3,pointRadius:0,borderWidth:2},{label:'FV',data:data.hours.map(r=>r.pvKw),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.06)',fill:false,tension:.4,pointRadius:0,borderWidth:2},{label:'Produzione ghiaccio (FV→ITES)',data:data.hours.map(r=>r.iceCharged),borderColor:'#39c8c8',fill:false,tension:.3,pointRadius:0,borderWidth:2},{label:'Utilizzo ghiaccio (ITES→Cooling)',data:data.hours.map(r=>r.iceUsed),borderColor:'#a371f7',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[4,3]},{label:'Rete chill',data:data.hours.map(r=>r.gridForChiller),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.06)',fill:true,tension:.3,pointRadius:0,borderWidth:1.5}]},options:coOpts});
+    charts['cOrario'+i]=new Chart(cv,{type:'line',data:{labels,datasets:[
+  {label:'Rack IT (costante)',data:data.hours.map(r=>p.dcBase),borderColor:'#f85149',fill:false,tension:0,pointRadius:0,borderWidth:2,borderDash:[6,3]},
+  {label:'Cooling rack',data:data.hours.map(r=>r.coolingNeed),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,.07)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
+  {label:'FV prodotto',data:data.hours.map(r=>r.pvKw),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.08)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5},
+  {label:'Prelievo rete',data:data.hours.map(r=>r.totalGrid),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
+  {label:'Ghiaccio+ (prod)',data:data.hours.map(r=>r.iceCharged),borderColor:'#39c8c8',fill:false,tension:.3,pointRadius:0,borderWidth:2},
+  {label:'Ghiaccio- (uso)',data:data.hours.map(r=>r.iceUsed),borderColor:'#a371f7',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[4,3]},
+  {label:'FV venduto rete',data:data.hours.map(r=>r.pvToGrid),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[2,4]}
+]},options:coOpts});
   });
   destroyC('cBilancio');
   charts['cBilancio']=new Chart(document.getElementById('cBilancio'),{type:'bar',data:{labels:results.map(r=>giornoLabel(r.gg)),datasets:[{label:'Cooling',data:results.map(r=>Math.round(r.data.totCooling)),backgroundColor:'rgba(248,81,73,.5)',borderColor:'#f85149',borderWidth:1,borderRadius:4},{label:'Cool PV',data:results.map(r=>Math.round(r.data.totCoolPv)),backgroundColor:'rgba(57,211,83,.5)',borderColor:'#39d353',borderWidth:1,borderRadius:4},{label:'Produzione ghiaccio',data:results.map(r=>Math.round(r.data.totIceUp)),backgroundColor:'rgba(57,200,200,.5)',borderColor:'#39c8c8',borderWidth:1,borderRadius:4},{label:'Utilizzo ghiaccio',data:results.map(r=>Math.round(r.data.totIceDown)),backgroundColor:'rgba(163,113,247,.5)',borderColor:'#a371f7',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}}}}}});
@@ -612,7 +620,20 @@ function renderAll(){
   destroyC('cCostoOrario');
   const primo0=results[0],costiOrari=primo0.data.hours.map(r=>r.gridCost),tariffColors=primo0.data.hours.map(r=>r.tariff>p.gridPrice*1.1?'rgba(248,81,73,.7)':r.tariff<p.gridPrice*0.9?'rgba(57,211,83,.7)':'rgba(227,179,65,.7)');
   charts['cCostoOrario']=new Chart(document.getElementById('cCostoOrario'),{type:'bar',data:{labels,datasets:[{label:'Costo/h',data:costiOrari,backgroundColor:tariffColors,borderWidth:0,borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:8}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'\u20ac/h',color:'#718096',font:{size:9}}}}}});
-  document.getElementById('info-day').innerHTML=results.map(function(item,i){var d=item.data;return '<span style="color:'+SEL_COLORS[i]+';font-weight:600;">'+giornoLabel(item.gg)+'</span>: Cool '+(d.totCooling/1000).toFixed(1)+' MWh \u00b7 FV '+fN(d.totPv)+' kWh \u00b7 Tank min '+Math.round(d.tankMin/d.capKwh*100)+'% \u00b7 PUE '+d.pueAvg.toFixed(2)+' \u00b7 '+fE(d.totCost);}).join('<br>');
+  document.getElementById('info-day').innerHTML=results.map(function(item,i){var d=item.data;
+  var cN=Math.round(d.totCost-d.totFeedIn),cSF=Math.round((d.totCooling/Math.max(1.5,p.cop)+p.dcBase*24*(1+p.servPct))*p.gridPrice),risp=cSF-cN;
+  return '<span style="color:'+SEL_COLORS[i]+';font-weight:600;">'+giornoLabel(item.gg)+'</span>'
+    +' · Rack IT: <b>'+fN(Math.round(p.dcBase*24))+' kWh</b>'
+    +' · Cooling: '+(d.totCooling/1000).toFixed(1)+' MWh_th'
+    +' · FV: '+fN(Math.round(d.totPv))+' kWh'
+    +' · FV venduto: '+fN(Math.round(d.totPvToGrid))+' kWh'
+    +' · Ghiaccio ↑'+fN(Math.round(d.totIceUp))+' ↓'+fN(Math.round(d.totIceDown))+' kWh_th'
+    +' · Residuo: '+Math.round(d.tankFine/d.capKwh*100)+'%'
+    +' · <b style="color:var(--amber);">Costo netto: '+fE(cN)+'</b>'
+    +' <span style="color:var(--text3);text-decoration:line-through;">'+fE(cSF)+'</span>'
+    +' <b style="color:'+(risp>0?'var(--green)':'var(--red)')+'"> Risparmio: '+(risp>0?'+':'')+fE(risp)+'</b>';
+}).join('<br>');
+buildRecapTable(results,p);
 }
 
 function runRack(){
@@ -769,6 +790,60 @@ function runDim(){
   tbl+='</tbody></table>';document.getElementById('t-sens').innerHTML=tbl;
 }
 
+function buildRecapTable(results,p){
+  var sec=document.getElementById('recap-section');if(!sec||results.length===0){if(sec)sec.innerHTML='';return;}
+  var d=results[0].data,capKwh=d.capKwh;
+  var cN=Math.round(d.totCost-d.totFeedIn);
+  var cSF=Math.round((d.totCooling/Math.max(1.5,p.cop)+p.dcBase*24*(1+p.servPct))*p.gridPrice);
+  var risp=cSF-cN;var rispA=risp*365;
+  var pvSH=d.hours.findIndex(function(r){return r.pvStart;});var pvEH=-1;
+  for(var hx=23;hx>=0;hx--){if(d.hours[hx].pvStart){pvEH=hx;break;}}
+  var iceCH=d.hours.filter(function(r){return r.iceCharged>1;}).map(function(r){return r.h;});
+  var iceUH=d.hours.filter(function(r){return r.iceUsed>1;}).map(function(r){return r.h;});
+  var pvElCool=d.totCoolPv/Math.max(1.5,p.cop),pvElIce=d.totIceUp/Math.max(1.5,p.cop);
+  var pvElIT=Math.max(0,d.totPv-pvElCool-pvElIce-d.totPvToGrid);
+  var pvUtil=d.totPv>0?Math.round((pvElIT+pvElCool+pvElIce)/d.totPv*100):0;
+  var iceRes=Math.round(d.tankFine/capKwh*100);
+  var pvStr=pvSH>=0?(pvSH+':00 \u2192 '+pvEH+':00'):'non disponibile';
+  var iceCStr=iceCH.length>0?(iceCH[0]+':00 \u2192 '+iceCH[iceCH.length-1]+':00'):'non avvenuta';
+  var iceUStr=iceUH.length>0?(iceUH[0]+':00 \u2192 '+iceUH[iceUH.length-1]+':00'):'non necessario';
+  sec.innerHTML='<div class="card" style="border:2px solid var(--border2);">'
+    +'<div class="ct" style="font-size:.78rem;">Riepilogo giornata \u2014 '+giornoLabel(results[0].gg)+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1rem;">'
+    +'<div><div style="font-size:.66rem;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:.4rem;">Flussi energetici</div>'
+    +'<table style="font-size:.82rem;"><tbody>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Consumo rack IT (24h)</td><td style="color:var(--red);font-weight:600;">'+fN(Math.round(p.dcBase*24))+' kWh_el</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Fabbisogno cooling rack</td><td style="color:#ff6b35;font-weight:600;">'+fN(Math.round(d.totCooling))+' kWh_th</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">FV prodotto</td><td style="color:var(--green);font-weight:600;">'+fN(Math.round(d.totPv))+' kWh_el</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">&nbsp;&nbsp;&#x21b3; di cui per IT/servizi</td><td style="color:var(--green);">'+fN(Math.round(pvElIT))+' kWh_el</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">&nbsp;&nbsp;&#x21b3; di cui per cooling</td><td style="color:var(--green);">'+fN(Math.round(pvElCool))+' kWh_el</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">&nbsp;&nbsp;&#x21b3; di cui per prod. ghiaccio</td><td style="color:var(--teal);">'+fN(Math.round(pvElIce))+' kWh_el</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">&nbsp;&nbsp;&#x21b3; di cui venduto in rete</td><td style="color:var(--blue);">'+fN(Math.round(d.totPvToGrid))+' kWh_el</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Utilizzo FV totale</td><td style="color:'+(pvUtil>=90?'var(--green)':pvUtil>=70?'var(--amber)':'var(--red)')+'">'+pvUtil+'%</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Prelievo da rete</td><td style="color:var(--amber);font-weight:600;">'+fN(Math.round(d.totGrid))+' kWh_el</td></tr>'
+    +'</tbody></table></div>'
+    +'<div><div style="font-size:.66rem;font-weight:700;color:var(--text2);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:.4rem;">Ghiaccio &amp; Costi</div>'
+    +'<table style="font-size:.82rem;"><tbody>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Ghiaccio prodotto</td><td style="color:var(--teal);font-weight:600;">'+fN(Math.round(d.totIceUp))+' kWh_th</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Ghiaccio utilizzato per cooling</td><td style="color:var(--purple);font-weight:600;">'+fN(Math.round(d.totIceDown))+' kWh_th</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Residuo a fine giornata (portato domani)</td><td style="color:var(--teal);">'+fN(Math.round(d.tankFine))+' kWh_th ('+iceRes+'%)</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Cedimento termico giornaliero</td><td style="color:var(--text2);">\u22480.5%/h \u00b7 ~12%/24h</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:6px 8px 4px 0;border-top:1px solid var(--border);"><b>Costo SENZA FV+ITES</b></td><td style="color:var(--red);font-weight:700;border-top:1px solid var(--border);">'+fE(cSF)+'</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;"><b>Costo CON FV+ITES</b></td><td style="color:var(--green);font-weight:700;">'+fE(cN)+'</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;"><b>Risparmio giornata</b></td><td style="color:'+(risp>0?'var(--green)':'var(--red)')+'";font-weight:700;">'+(risp>0?'+':'')+fE(risp)+'</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Proiezione risparmio annuo</td><td style="color:'+(rispA>0?'var(--green)':'var(--red)')+'";font-size:.88rem;">'+(rispA>0?'+':'')+fE(rispA)+'</td></tr>'
+    +'<tr><td style="color:var(--text3);font-family:\'IBM Plex Sans\';padding:4px 8px 4px 0;">Ricavo vendita FV</td><td style="color:var(--blue);">'+fE(Math.round(d.totFeedIn))+'</td></tr>'
+    +'</tbody></table></div>'
+    +'</div>'
+    +'<div style="background:var(--bg3);border-radius:var(--r);padding:.65rem 1rem;font-size:.70rem;color:var(--text2);display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.6rem;">'
+    +'<span><b style="color:var(--green);">FV attivo:</b> '+pvStr+'</span>'
+    +'<span><b style="color:var(--teal);">Ghiaccio prodotto:</b> '+iceCStr+'</span>'
+    +'<span><b style="color:var(--purple);">Ghiaccio usato:</b> '+iceUStr+'</span>'
+    +'<span><b style="color:var(--blue);">FV venduto:</b> '+fN(Math.round(d.totPvToGrid))+' kWh</span>'
+    +'</div>'
+    +'<div class="ibar ibar-g" style="margin-top:.6rem;font-size:.70rem;"><b>Cedimento ghiaccio:</b> Il serbatoio perde \u22480.5%/h per dispersione termica. Il ghiaccio residuo passa al giorno successivo (max 24h, poi si considera consumato). Il modello applica il decadimento ora per ora durante la simulazione annuale.</div>'
+    +'</div>';
+}
 function exportCSV(){
   if(selectedDays.length===0){alert('Seleziona almeno un giorno dal calendario.');return;}
   const p=getParams();if(!tankStates365)tankStates365=preSimula365(p);
