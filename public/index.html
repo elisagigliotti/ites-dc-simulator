@@ -595,10 +595,42 @@ function renderAll(){
     var d=item.data,critAlert=d.tankMin<capKwh*0.20?'<span style="color:var(--red);font-size:.65rem;margin-left:6px;">\u26a0 tank sotto 20%</span>':'';
     return '<div style="border:1px solid '+SEL_COLORS[i]+';border-radius:var(--rl);padding:.7rem .6rem;background:var(--bg2);"><div style="font-size:.62rem;font-weight:600;color:'+SEL_COLORS[i]+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+giornoLabel(item.gg)+critAlert+'</div><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--red);font-size:1.3rem;">'+(d.totCooling/1000).toFixed(1)+'</div><div class="ku">MWh_th</div><div class="kl">Cooling</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--green);font-size:1.3rem;">'+Math.round(d.totPv)+'</div><div class="ku">kWh_el</div><div class="kl">FV</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--teal);font-size:1.3rem;">'+d.ghiaccioT.toFixed(1)+'</div><div class="ku">t</div><div class="kl">Ghiaccio</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.3rem;">'+(d.totGrid/1000).toFixed(1)+'</div><div class="ku">MWh_el</div><div class="kl">Rete</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.3rem;">'+Math.round(d.totCost)+'</div><div class="ku">\u20ac</div><div class="kl">Costo</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--blue);font-size:1.3rem;">'+d.pueAvg.toFixed(2)+'</div><div class="ku"></div><div class="kl">PUE</div></div></div></div>';
   }).join('');
-  var pvPct=Math.round(primo.data.totPv/(primo.data.totPv+primo.data.totGrid)*100)||0;
-  const d=primo.data,co2saved=Math.round(d.totPv*CO2_FACTOR);
-  const rows=[['Cooling 40% rack',fN1(d.totCooling/1000),'MWh_th','#f85149'],['FV prodotto',fN(d.totPv),'kWh_el','#39d353'],['Cooling da PV',fN(d.totCoolPv),'kWh_th','#39d353'],['Ghiaccio carica',fN(d.totIceUp),'kWh_th','#39c8c8'],['Ghiaccio scarica',fN(d.totIceDown),'kWh_th','#a371f7'],['','','',''],['Rete totale',fN1(d.totGrid/1000),'MWh_el','#e3b341'],['Costo rete',fE(d.totCost),'','#e3b341'],['Ricavo feed-in',fE(d.totFeedIn),'','#39d353'],['PUE medio',d.pueAvg.toFixed(2),'','#58a6ff'],['CO\u2082 evitata',co2saved,'kg','#39d353'],['PV quota',pvPct,'%','#39d353']];
-  document.getElementById('kpi-side-content').innerHTML=rows.map(function(row){var l=row[0],v=row[1],u=row[2],c=row[3];if(!l)return '<hr style="border:none;border-top:1px solid var(--border);margin:4px 0;">';return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);"><span style="font-size:.70rem;color:var(--text3);">'+l+'</span><span style="font-size:.70rem;font-family:\'IBM Plex Mono\',monospace;color:'+c+';">'+v+' <span style="color:var(--text3);font-size:.62rem;">'+u+'</span></span></div>';}).join('');
+  document.getElementById('kpi-side-content').innerHTML=results.map(function(item,idx){
+    var d=item.data;
+    var pvPct=Math.round(d.totPv/(d.totPv+d.totGrid)*100)||0;
+    var co2s=Math.round(d.totPv*CO2_FACTOR);
+    var cSF=Math.round((d.totCooling/Math.max(1.5,p.cop)+p.dcBase*24*(1+p.servPct))*p.gridPrice);
+    var cN=Math.round(d.totCost-d.totFeedIn);
+    var risp=cSF-cN;
+    var rows=[
+      ['Rack IT (24h)',fN(Math.round(p.dcBase*24)),'kWh_el','#f85149'],
+      ['Cooling rack',fN1(d.totCooling/1000),'MWh_th','#ff6b35'],
+      ['FV prodotto',fN(Math.round(d.totPv)),'kWh_el','#39d353'],
+      ['Cooling da FV',fN(Math.round(d.totCoolPv)),'kWh_th','#39d353'],
+      ['Ghiaccio+ prodotto',fN(Math.round(d.totIceUp)),'kWh_th','#39c8c8'],
+      ['Ghiaccio− usato',fN(Math.round(d.totIceDown)),'kWh_th','#a371f7'],
+      ['FV venduto rete',fN(Math.round(d.totPvToGrid)),'kWh_el','#58a6ff'],
+      ['','','',''],
+      ['Prelievo rete',fN1(d.totGrid/1000),'MWh_el','#e3b341'],
+      ['Costo rete',fE(d.totCost),'','#e3b341'],
+      ['Ricavo feed-in',fE(d.totFeedIn),'',d.totFeedIn>0?'#39d353':'#718096'],
+      ['Costo netto',fE(cN),'','var(--red)'],
+      ['Costo senza FV+ITES',fE(cSF),'','#718096'],
+      ['Risparmio',fE(risp),'',risp>0?'#39d353':'#f85149'],
+      ['','','',''],
+      ['PUE medio',d.pueAvg.toFixed(2),'','#58a6ff'],
+      ['CO₂ evitata',co2s,'kg','#39d353'],
+      ['FV autoconsumato',pvPct,'%','#39d353']
+    ];
+    var sepTop=idx>0?'<div style="height:1px;background:var(--border2);margin:8px 0 5px;"></div>':'';
+    var hdr='<div style="font-size:.64rem;font-weight:700;color:'+SEL_COLORS[idx]+';text-transform:uppercase;padding:3px 0 4px;border-bottom:2px solid '+SEL_COLORS[idx]+';margin-bottom:3px;">'+giornoLabel(item.gg)+'</div>';
+    var rowsHtml=rows.map(function(row){
+      var l=row[0],v=row[1],u=row[2],c=row[3];
+      if(!l)return '<hr style="border:none;border-top:1px solid var(--border);margin:3px 0;">';
+      return '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border);"><span style="font-size:.68rem;color:var(--text3);">'+l+'</span><span style="font-size:.68rem;font-family:\'IBM Plex Mono\',monospace;color:'+c+';">'+v+'<span style="color:var(--text3);font-size:.60rem;margin-left:2px;">'+u+'</span></span></div>';
+    }).join('');
+    return sepTop+hdr+rowsHtml;
+  }).join('');
   const chartsDiv=document.getElementById('charts-orari');
   Object.keys(charts).filter(k=>k.startsWith('cOrario')).forEach(k=>destroyC(k));chartsDiv.innerHTML='';
   const labels=Array.from({length:24},(_,h)=>h+':00');
