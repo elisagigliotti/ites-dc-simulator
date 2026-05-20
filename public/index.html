@@ -198,9 +198,9 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <div class="cg">
           <div><div class="ch"><span class="cn">Volume contenitore</span><span class="cv" id="v-tank">300 m&#179;</span></div><input type="range" min="5" max="1500" step="10" value="300" id="r-tank" oninput="resetRun()"></div>
           <div id="tank-info" style="font-size:.70rem;color:var(--text3);line-height:1.7;"></div>
-          <button onclick="autoDimTank()" style="width:100%;padding:7px;border-radius:var(--r);border:1.5px solid var(--teal);background:var(--teal3);color:var(--teal);font-size:.76rem;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">&#9654; Dimensiona automaticamente</button>
-          <div id="auto-dim-result" style="font-size:.68rem;color:var(--text3);line-height:1.6;"></div>
         </div>
+        <button onclick="autoDimTank()" id="btn-autodim" style="width:100%;margin-top:.7rem;padding:8px;border-radius:var(--r);border:2px solid var(--teal);background:var(--teal3);color:var(--teal);font-size:.78rem;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;"><span id="autodim-spinner" style="display:none;">&#9696;</span>&#9654; Ottimizza serbatoio</button>
+        <div id="auto-dim-result" style="font-size:.68rem;color:var(--text3);line-height:1.6;margin-top:.4rem;"></div>
       </div>
       <div class="card">
         <div class="ct">Tariffe energia</div>
@@ -905,34 +905,116 @@ function buildRecapTable(results,p){
     +'</div>';
 }
 function autoDimTank(){
-  var p=getParams();
-  var gg=selectedDays.length>0?selectedDays[0]:207;
-  var mi=giornoToMese(gg).mese_idx;
-  var eerMedio=getEER(p.cop,TEMP_MEDIE[mi]);
-  var coolingNotti=0,surplusGiorno=0;
-  var mensili=getMensili();
-  for(var h=0;h<24;h++){
-    var tExt=TEMP_ORARIE[mi][h];
-    var need=Math.max(0,p.heatKw+p.dcBase*p.servPct+p.ua*(tExt-p.setP)/1000);
-    var prof=PROFILI_MENSILI[mi],sumP=prof.reduce(function(a,b){return a+b;},0);
-    var pvKw=sumP>0?prof[h]/sumP*mensili[mi].kwp_kwh*p.kwp*(1-p.loss)/(1-0.14):0;
-    var pvAfterIT=Math.max(0,pvKw-(p.dcBase*(1+p.servPct)));
-    var pvCool=Math.min(pvAfterIT*eerMedio,p.chillerMax);
-    if(pvKw<5){coolingNotti+=need;}
-    else{var surp=pvCool-need;if(surp>0)surplusGiorno+=surp;}
-  }
-  var massaKg=coolingNotti*1000/LATENTE_WH;
-  var volBase=massaKg/RHO_ICE/0.80;
-  var volSug=Math.min(1500,Math.max(50,Math.ceil(volBase/10)*10));
-  var capKwh=volSug*RHO_ICE*LATENTE_WH/1000;
-  document.getElementById('r-tank').value=volSug;
-  resetRun();
-  document.getElementById('auto-dim-result').innerHTML=
-    '<b style="color:var(--teal);">Volume suggerito: '+volSug+' m³</b> · '
-    +Math.round(capKwh)+' kWh_th · '+Math.round(volSug*RHO_ICE/1000)+' t<br>'
-    +'Cooling notturno coperto: <b>'+Math.round(coolingNotti)+' kWh_th</b><br>'
-    +'Surplus FV disponibile: '+Math.round(surplusGiorno)+' kWh_th<br>'
-    +'Riferimento: '+giornoLabel(gg)+' (T media '+TEMP_MEDIE[mi]+'°C)';
+  // Logica: trova il volume minimo che elimina i giorni critici (tank < 20%)
+  // tramite simulazione annuale binaria. Considera tutti i giorni selezionati
+  // come vincoli aggiuntivi (il tank deve reggere in tutti quei giorni).
+  var btn=document.getElementById('btn-autodim');
+  var spinner=document.getElementById('autodim-spinner');
+  var res=document.getElementById('auto-dim-result');
+  btn.disabled=true;spinner.style.display='inline';
+  res.innerHTML='<span style="color:var(--teal);">Simulazione in corso…</span>';
+
+  setTimeout(function(){
+    var p=getParams();
+    var origVol=p.tankV;
+
+    // Funzione che conta i giorni critici per un dato volume
+    function countCritical(vol){
+      var pTest=Object.assign({},p,{tankV:vol});
+      var capKwh=vol*RHO_ICE*LATENTE_WH/1000;
+      // warm-up rapido: 7 giorni dicembre
+      var tank=capKwh*0.3;
+      for(var d=0;d<7;d++){var io=tank;for(var h=0;h<24;h++){var r=simulaOra(h,11,pTest,tank,io);tank=r.tankLevelRaw;io=Math.max(0,io-r.coolingFromOldIce);}}
+      var critici=0,totCost=0,minTankPct=100;
+      var gg=0;
+      for(var m=0;m<12;m++){
+        for(var dd=0;dd<GIORNI_MESE[m];dd++){
+          gg++;
+          var io2=tank,dayMin=capKwh;
+          for(var h=0;h<24;h++){var r=simulaOra(h,m,pTest,tank,io2);tank=r.tankLevelRaw;io2=Math.max(0,io2-r.coolingFromOldIce);dayMin=Math.min(dayMin,r.tankLevel);}
+          var pct=dayMin/capKwh*100;
+          if(pct<20)critici++;
+          if(pct<minTankPct)minTankPct=pct;
+        }
+      }
+      return{critici:critici,minPct:Math.round(minTankPct)};
+    }
+
+    // Conta anche il costo annuo e risparmio per volume ottimale
+    function simAnnoCosto(vol){
+      var pTest=Object.assign({},p,{tankV:vol});
+      var capKwh=vol*RHO_ICE*LATENTE_WH/1000;
+      var tank=capKwh*0.3,totCost=0,totPv=0,totGrid=0;
+      for(var d=0;d<7;d++){var io=tank;for(var h=0;h<24;h++){var r=simulaOra(h,11,pTest,tank,io);tank=r.tankLevelRaw;io=Math.max(0,io-r.coolingFromOldIce);}}
+      for(var m=0;m<12;m++){
+        for(var dd=0;dd<GIORNI_MESE[m];dd++){
+          var io2=tank;
+          for(var h=0;h<24;h++){var r=simulaOra(h,m,pTest,tank,io2);tank=r.tankLevelRaw;io2=Math.max(0,io2-r.coolingFromOldIce);totCost+=r.gridCost;totPv+=r.pvKw;totGrid+=r.totalGrid;}
+        }
+      }
+      return{cost:totCost,pv:totPv,grid:totGrid};
+    }
+
+    // Ricerca binaria: trova il volume minimo con 0 giorni critici
+    var lo=50,hi=1500,volOttimo=hi;
+    var r0=countCritical(hi);
+    if(r0.critici===0){
+      // ci sono giorni critici anche a 1500? poco probabile ma gestito
+      // scende finche' trova il minimo senza critici
+      while(lo<hi-10){
+        var mid=Math.round((lo+hi)/2/10)*10;
+        var rc=countCritical(mid);
+        if(rc.critici===0){volOttimo=mid;hi=mid;}
+        else{lo=mid;}
+      }
+    } else {
+      volOttimo=1500; // anche al max ha giorni critici
+    }
+
+    // Verifica anche vincolo sui giorni selezionati
+    var vincoloGiorni='';
+    if(selectedDays.length>0){
+      var pOtt=Object.assign({},p,{tankV:volOttimo});
+      var capOtt=volOttimo*RHO_ICE*LATENTE_WH/1000;
+      // pre-simula per avere tankStates
+      var tst=preSimula365(pOtt);
+      var falliti=selectedDays.filter(function(gg){
+        var ti=Math.min(tst[gg-1],capOtt),tank2=ti,io2=ti;
+        var minT=capOtt;
+        var mi=giornoToMese(gg).mese_idx;
+        for(var h=0;h<24;h++){var r=simulaOra(h,mi,pOtt,tank2,io2);tank2=r.tankLevelRaw;io2=Math.max(0,io2-r.coolingFromOldIce);minT=Math.min(minT,r.tankLevel);}
+        return minT/capOtt*100<20;
+      });
+      if(falliti.length>0){
+        vincoloGiorni=' · <span style="color:var(--amber);">Attenzione: '+falliti.map(giornoLabel).join(', ')+' ancora critici</span>';
+      } else {
+        vincoloGiorni=' · <span style="color:var(--green);">Tutti i giorni selezionati coperti ✔</span>';
+      }
+    }
+
+    // Calcola risparmio tra volOttimo e volume attuale
+    var costoOttimo=simAnnoCosto(volOttimo);
+    var costoOrig=simAnnoCosto(origVol);
+    var deltaCosto=Math.round(costoOrig.cost-costoOttimo.cost);
+    var capOtt=volOttimo*RHO_ICE*LATENTE_WH/1000;
+    var rCrit=countCritical(volOttimo);
+
+    // Imposta lo slider
+    document.getElementById('r-tank').value=volOttimo;
+    resetRun();
+
+    res.innerHTML=
+      '<b style="color:var(--teal);font-size:.80rem;">Volume ottimale: '+volOttimo+' m³</b>'
+      +' · '+Math.round(capOtt)+' kWh_th'
+      +' · '+Math.round(volOttimo*RHO_ICE/1000)+' t ghiaccio<br>'
+      +'Giorni critici (tank&lt;20%): <b style="color:'+(rCrit.critici===0?'var(--green)':'var(--red)')+';">'+rCrit.critici+' giorni/anno</b>'
+      +' · Min serbatoio: '+rCrit.minPct+'%<br>'
+      +(deltaCosto!==0?'Risparmio vs '+origVol+' m³: <b style="color:'+(deltaCosto>0?'var(--green)':'var(--red)')+';">'+(deltaCosto>0?'+':'')+'€'+Math.round(deltaCosto)+'/anno</b><br>':'')
+      +'Metodo: simulazione annuale completa (8.760 ore)'
+      +vincoloGiorni;
+
+    btn.disabled=false;spinner.style.display='none';
+  },50); // tiny delay per permettere al browser di aggiornare il DOM
 }
 
 function exportCSV(){
