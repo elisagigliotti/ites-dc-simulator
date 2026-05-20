@@ -198,6 +198,8 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <div class="cg">
           <div><div class="ch"><span class="cn">Volume contenitore</span><span class="cv" id="v-tank">300 m&#179;</span></div><input type="range" min="5" max="1500" step="10" value="300" id="r-tank" oninput="resetRun()"></div>
           <div id="tank-info" style="font-size:.70rem;color:var(--text3);line-height:1.7;"></div>
+          <button onclick="autoDimTank()" style="width:100%;padding:7px;border-radius:var(--r);border:1.5px solid var(--teal);background:var(--teal3);color:var(--teal);font-size:.76rem;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">&#9654; Dimensiona automaticamente</button>
+          <div id="auto-dim-result" style="font-size:.68rem;color:var(--text3);line-height:1.6;"></div>
         </div>
       </div>
       <div class="card">
@@ -451,7 +453,8 @@ function getEER(copNom,tExt){return Math.max(2.0,copNom*(1-0.02*Math.max(0,tExt-
 function getCOPice(copNom,tExt){return Math.max(1.8,copNom*0.85*(1-0.02*Math.max(0,tExt-15)));}
 function getEERpartial(copNom,tExt,plr){var base=getEER(copNom,tExt);var p2=Math.max(0.1,Math.min(1,plr));return Math.max(1.5,base*(0.12+0.56*p2+0.32*p2*p2));}
 
-function simulaOra(h,mese,p,tankLevel){
+function simulaOra(h,mese,p,tankLevel,iceOldKwh){
+  var iceOld=Math.min(iceOldKwh||0,tankLevel);
   const tExt=TEMP_ORARIE[mese][h];
   const heatIT=p.heatKw,servKw=p.dcBase*p.servPct,heatEnv=p.ua*(tExt-p.setP)/1000;
   const coolingNeed=Math.max(0,heatIT+servKw+heatEnv);
@@ -463,42 +466,45 @@ function simulaOra(h,mese,p,tankLevel){
   const itFromGrid=Math.max(0,p.dcBase+servKw-pvKw);
   var plrEst=Math.min(1,coolingNeed/Math.max(1,p.chillerMax));
   const eer=getEERpartial(p.cop,tExt,plrEst);
-  const coolingFromPvMax=Math.min(pvAfterIT*eer,p.chillerMax);
-  let coolDeficit=coolingNeed-coolingFromPvMax,iceCharged=0,iceUsed=0,gridForChiller=0,pvToGrid=0,coolingFromPv=0,pvAfterCooling=0;
-  if(coolDeficit<=0){
-    coolingFromPv=coolingNeed;const pvElUsedForCool=coolingNeed/eer;pvAfterCooling=Math.max(0,pvAfterIT-pvElUsedForCool);
-    const space=capKwh-tankLevel,chillerResidual=p.chillerMax-coolingNeed,canCharge=Math.min(pvAfterCooling*eer,chillerResidual,space);
-    iceCharged=Math.max(0,canCharge);tankLevel+=iceCharged;const pvElUsedForIce=iceCharged/eer;pvToGrid=Math.max(0,pvAfterCooling-pvElUsedForIce);
-  } else {
-    coolingFromPv=coolingFromPvMax;
-    if(tankLevel>0){iceUsed=Math.min(coolDeficit,tankLevel);tankLevel-=iceUsed;coolDeficit-=iceUsed;}
-    if(coolDeficit>0){gridForChiller=coolDeficit/eer;}
-  }
+  let coolDeficit=coolingNeed,iceCharged=0,iceUsed=0,gridForChiller=0,pvToGrid=0,coolingFromPv=0,coolingFromOldIce=0;
+  // STEP 1: usa prima il ghiaccio vecchio (>24h)
+  if(iceOld>0&&coolDeficit>0){var useOld=Math.min(iceOld,coolDeficit,tankLevel);coolingFromOldIce=useOld;iceUsed+=useOld;tankLevel-=useOld;coolDeficit-=useOld;iceOld-=useOld;}
+  // STEP 2: FV per cooling rimanente
+  const coolingFromPvMax=Math.min(pvAfterIT*eer,p.chillerMax,coolDeficit);
+  if(coolingFromPvMax>0){coolingFromPv=coolingFromPvMax;var pvElUsedForCool=coolingFromPv/eer;var pvAfterCooling=Math.max(0,pvAfterIT-pvElUsedForCool);coolDeficit-=coolingFromPv;
+    if(coolDeficit<=0){const space=capKwh-tankLevel,chillerResidual=p.chillerMax-coolingNeed,canCharge=Math.min(pvAfterCooling*eer,chillerResidual,space);
+      iceCharged=Math.max(0,canCharge);tankLevel+=iceCharged;const pvElUsedForIce=iceCharged/eer;pvToGrid=Math.max(0,pvAfterCooling-pvElUsedForIce);}}
+  // STEP 3: ghiaccio nuovo dal tank per deficit residuo
+  if(coolDeficit>0&&tankLevel>0){var useNew=Math.min(coolDeficit,tankLevel);iceUsed+=useNew;tankLevel-=useNew;coolDeficit-=useNew;}
+  // STEP 4: rete per il resto
+  if(coolDeficit>0){gridForChiller=coolDeficit/eer;}
   tankLevel=Math.max(0,tankLevel*(1-0.005));
   const totalGrid=itFromGrid+gridForChiller,gridCost=totalGrid*tariff,feedInRev=pvToGrid*p.feedIn;
   const totalElec=p.dcBase+servKw+gridForChiller,pue=p.dcBase>0?(totalElec/p.dcBase):1;
-  const pvStart=pvKw>0.5;return{h,tExt,tariff,itKw:p.dcBase,pvStart,coolingNeed:Math.round(coolingNeed*10)/10,pvKw:Math.round(pvKw*10)/10,heatEnv:Math.round(heatEnv*10)/10,coolingFromPv:Math.round(coolingFromPv*10)/10,iceCharged:Math.round(iceCharged*10)/10,iceUsed:Math.round(iceUsed*10)/10,tankLevel:Math.round(tankLevel*10)/10,gridForChiller:Math.round(gridForChiller*10)/10,totalGrid:Math.round(totalGrid*10)/10,pvToGrid:Math.round(pvToGrid*10)/10,eer:Math.round(eer*100)/100,gridCost:Math.round(gridCost*100)/100,feedInRev:Math.round(feedInRev*100)/100,pue:Math.round(pue*100)/100,tankLevelRaw:tankLevel};
+  const pvStart=pvKw>0.5;return{h,tExt,tariff,itKw:p.dcBase,pvStart,coolingFromOldIce:Math.round(coolingFromOldIce*10)/10,coolingNeed:Math.round(coolingNeed*10)/10,pvKw:Math.round(pvKw*10)/10,heatEnv:Math.round(heatEnv*10)/10,coolingFromPv:Math.round(coolingFromPv*10)/10,iceCharged:Math.round(iceCharged*10)/10,iceUsed:Math.round(iceUsed*10)/10,tankLevel:Math.round(tankLevel*10)/10,gridForChiller:Math.round(gridForChiller*10)/10,totalGrid:Math.round(totalGrid*10)/10,pvToGrid:Math.round(pvToGrid*10)/10,eer:Math.round(eer*100)/100,gridCost:Math.round(gridCost*100)/100,feedInRev:Math.round(feedInRev*100)/100,pue:Math.round(pue*100)/100,tankLevelRaw:tankLevel};
 }
 
 function preSimula365(p){
   const states=new Array(366).fill(0);let tank=0,gg=0;
-  for(let m=0;m<12;m++)for(let d=0;d<GIORNI_MESE[m];d++){states[gg]=tank;for(let h=0;h<24;h++){const r=simulaOra(h,m,p,tank);tank=r.tankLevelRaw;}gg++;}
+  for(let m=0;m<12;m++)for(let d=0;d<GIORNI_MESE[m];d++){
+    states[gg]=tank;var io=tank;
+    for(let h=0;h<24;h++){const r=simulaOra(h,m,p,tank,io);tank=r.tankLevelRaw;io=Math.max(0,io-r.coolingFromOldIce);}gg++;}
   states[365]=tank;return states;
 }
 
 function simulaGiorno(gg,p){
   const{mese_idx}=giornoToMese(gg),capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
   const tankInizio=tankStates365?Math.min(tankStates365[gg-1],capKwh):0;
-  let tank=tankInizio;const hours=[];
-  for(let h=0;h<24;h++){const r=simulaOra(h,mese_idx,p,tank);tank=r.tankLevelRaw;hours.push(r);}
-  return{hours,tankInizio,capKwh,totPv:hours.reduce((s,r)=>s+r.pvKw,0),totGrid:hours.reduce((s,r)=>s+r.totalGrid,0),totCooling:hours.reduce((s,r)=>s+r.coolingNeed,0),totIceUp:hours.reduce((s,r)=>s+r.iceCharged,0),totIceDown:hours.reduce((s,r)=>s+r.iceUsed,0),totCoolPv:hours.reduce((s,r)=>s+r.coolingFromPv,0),totCost:hours.reduce((s,r)=>s+r.gridCost,0),totFeedIn:hours.reduce((s,r)=>s+r.feedInRev,0),totPvToGrid:hours.reduce((s,r)=>s+r.pvToGrid,0),ghiaccioT:tank*1000/(LATENTE_WH*1000),tankFine:tank,tankMin:Math.min(...hours.map(r=>r.tankLevel)),pueAvg:hours.reduce((s,r)=>s+r.pue,0)/24,totGridChill:hours.reduce((s,r)=>s+r.gridForChiller,0)};
+  let tank=tankInizio,iceOldDay=tankInizio;const hours=[];
+  for(let h=0;h<24;h++){const r=simulaOra(h,mese_idx,p,tank,iceOldDay);tank=r.tankLevelRaw;iceOldDay=Math.max(0,iceOldDay-r.coolingFromOldIce);hours.push(r);}
+  return{hours,tankInizio,capKwh,totPv:hours.reduce((s,r)=>s+r.pvKw,0),totGrid:hours.reduce((s,r)=>s+r.totalGrid,0),totCooling:hours.reduce((s,r)=>s+r.coolingNeed,0),totIceUp:hours.reduce((s,r)=>s+r.iceCharged,0),totIceDown:hours.reduce((s,r)=>s+r.iceUsed,0),totCoolPv:hours.reduce((s,r)=>s+r.coolingFromPv,0),totCost:hours.reduce((s,r)=>s+r.gridCost,0),totFeedIn:hours.reduce((s,r)=>s+r.feedInRev,0),totPvToGrid:hours.reduce((s,r)=>s+r.pvToGrid,0),ghiaccioT:tank*1000/(LATENTE_WH*1000),tankFine:tank,tankMin:Math.min(...hours.map(r=>r.tankLevel)),pueAvg:hours.reduce((s,r)=>s+r.pue,0)/24,totGridChill:hours.reduce((s,r)=>s+r.gridForChiller,0),totCoolOldIce:hours.reduce((s,r)=>s+r.coolingFromOldIce,0)};
 }
 
 function preSimula365warmup(p){
   var capKwh=p.tankV*RHO_ICE*LATENTE_WH/1000,tank=capKwh*0.5;
-  for(var d=0;d<30;d++)for(var h=0;h<24;h++){var r=simulaOra(h,11,p,tank);tank=r.tankLevelRaw;}
+  for(var d=0;d<30;d++){var io0=tank;for(var h=0;h<24;h++){var r=simulaOra(h,11,p,tank,io0);tank=r.tankLevelRaw;io0=Math.max(0,io0-r.coolingFromOldIce);}}
   var states=new Array(366).fill(0),gg=0;
-  for(var m=0;m<12;m++)for(var d=0;d<GIORNI_MESE[m];d++){states[gg]=tank;for(var h=0;h<24;h++){var r=simulaOra(h,m,p,tank);tank=r.tankLevelRaw;}gg++;}
+  for(var m=0;m<12;m++)for(var d=0;d<GIORNI_MESE[m];d++){states[gg]=tank;var io2=tank;for(var h=0;h<24;h++){var r=simulaOra(h,m,p,tank,io2);tank=r.tankLevelRaw;io2=Math.max(0,io2-r.coolingFromOldIce);}gg++;}
   states[365]=tank;return states;
 }
 
@@ -809,8 +815,18 @@ function runCapex(){
   const costNoFV=(p.dcBase+p.dcBase*p.servPct+p.heatKw/getEER(p.cop,15))*8760*p.gridPrice*(1+gridvarPct/100);
   const cfArr=[-capexTot];for(let y=1;y<=20;y++)cfArr.push(cashflow*Math.pow(1.02,y-1));
   const irr=calcIRR(cfArr),npv10=calcNPV(cfArr,0.10),npv5=calcNPV(cfArr,0.05);
+  var breakevenAnno=null;var bkCum=-capexTot;
+  for(var by=1;by<=20;by++){bkCum+=cashflow*Math.pow(1.02,by-1);if(bkCum>=0&&breakevenAnno===null)breakevenAnno=by;}
   const capexITES=p.tankV*RHO_ICE*LATENTE_WH/1000*120,liionKwh=capexITES/500,itesKwh=p.tankV*RHO_ICE*LATENTE_WH/1000;
-  document.getElementById('capex-content').innerHTML='<div class="g3" style="margin-bottom:1rem;"><div class="scenario-card" style="background:var(--red3);border-color:rgba(248,81,73,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Scenario A: Solo Rete</div><div style="font-size:1.4rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--red);margin:8px 0;">'+fE(costNoFV)+'/anno</div><div style="font-size:.72rem;color:var(--text2);">Nessun FV, nessun ITES</div></div><div class="scenario-card best"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Scenario B: FV + ITES</div><div style="font-size:1.4rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--green);margin:8px 0;">'+fE(ann.cost)+'/anno</div><div style="font-size:.72rem;color:var(--text2);">Con accumulo ghiaccio</div></div><div class="scenario-card" style="background:var(--teal3);border-color:rgba(57,200,200,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Risparmio annuo</div><div style="font-size:1.4rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--teal);margin:8px 0;">'+fE(costNoFV-ann.cost)+'</div><div style="font-size:.72rem;color:var(--text2);">'+Math.round((1-ann.cost/costNoFV)*100)+'% riduzione costi energia</div></div></div><div class="g2" style="margin-bottom:1rem;"><div class="card"><div class="ct">CAPEX &mdash; Investimento iniziale</div>'+Object.entries(capex).map(function(e){return '<div class="capex-row"><span class="capex-label">'+e[0]+'</span><span class="capex-val">'+fE(e[1])+'</span></div>';}).join('')+'<div class="capex-row" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:8px;"><span style="font-weight:700;">TOTALE CAPEX</span><span style="font-weight:700;font-family:\'IBM Plex Mono\';color:var(--blue);font-size:1.1rem;">'+fE(capexTot)+'</span></div></div><div class="card"><div class="ct">OPEX &mdash; Costi operativi/anno</div>'+Object.entries(opex).map(function(e){return '<div class="capex-row"><span class="capex-label">'+e[0]+'</span><span class="capex-val">'+fE(Math.round(e[1]))+'</span></div>';}).join('')+'<div class="capex-row" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:8px;"><span style="font-weight:700;">TOTALE OPEX</span><span style="font-weight:700;font-family:\'IBM Plex Mono\';color:var(--red);font-size:1.1rem;">'+fE(Math.round(opexTot))+'/anno</span></div></div></div><div class="ibar ibar-a" style="margin-bottom:1rem;"><b>Nota revenue:</b> Tariffa hosting '+fE(hostingFee*1000)+'/MWh (ipotesi conservativa).'+(heatRevenue>0?' &nbsp;|&nbsp; <b style="color:var(--orange)">Teleriscaldamento:</b> +'+fE(Math.round(heatRevenue))+'/anno':'')+' </div><div class="card" style="margin-bottom:1rem;"><div class="ct">Scenario C: ITES Ghiaccio vs Li-ion &mdash; stesso budget accumulo '+fE(Math.round(capexITES))+'</div><div class="g2" style="margin-top:.8rem;"><div class="scenario-card" style="background:var(--teal3);border-color:rgba(57,200,200,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">ITES Ghiaccio (questo progetto)</div><div style="font-size:1.6rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--teal);margin:8px 0;">'+fN(Math.round(itesKwh))+' kWh_th</div><div style="font-size:.73rem;color:var(--text2);">~'+Math.round(p.tankV*RHO_ICE/1000)+' t ghiaccio</div><div style="font-size:.68rem;color:var(--text3);margin-top:5px;">120 \u20ac/kWh_th &middot; Vita utile 20+ anni</div></div><div class="scenario-card" style="background:var(--purple3);border-color:rgba(163,113,247,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Batteria Li-ion (alternativa)</div><div style="font-size:1.6rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--purple);margin:8px 0;">'+fN(Math.round(liionKwh))+' kWh_el</div><div style="font-size:.73rem;color:var(--text2);">Stesso budget CAPEX</div><div style="font-size:.68rem;color:var(--text3);margin-top:5px;">500 \u20ac/kWh_el &middot; Vita utile 10-12 anni</div></div></div><div class="ibar" style="margin-top:10px;font-size:.73rem;"><b>Confronto:</b> Le unit\u00e0 non sono direttamente confrontabili (kWh_th vs kWh_el). L\'ITES funziona SOLO per il cooling ma ha costo 4x inferiore al Li-ion per data center con alto fabbisogno termico.</div></div><div class="g6" style="margin-bottom:1rem;"><div class="card kpi"><div class="kv" style="color:var(--green)">'+fE(Math.round(revTot/1000))+'k</div><div class="ku">/anno</div><div class="kl">Revenue</div></div><div class="card kpi"><div class="kv" style="color:'+(cashflow>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(cashflow/1000))+'k</div><div class="ku">/anno</div><div class="kl">Cash Flow</div></div><div class="card kpi"><div class="kv" style="color:var(--blue)">'+(payback<50?payback.toFixed(1):'\u221e')+'</div><div class="ku">anni</div><div class="kl">Payback</div></div><div class="card kpi"><div class="kv" style="color:var(--purple)">'+(isFinite(irr)&&irr>-0.5?(irr*100).toFixed(1)+'\u2009%':'\u2014')+'</div><div class="ku"></div><div class="kl">IRR 20a</div></div><div class="card kpi"><div class="kv" style="color:'+(npv10>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(npv10/1000))+'k</div><div class="ku">@10%</div><div class="kl">NPV</div></div><div class="card kpi"><div class="kv" style="color:'+(npv5>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(npv5/1000))+'k</div><div class="ku">@5%</div><div class="kl">NPV</div></div></div><div class="card"><div class="ct">Proiezione Cash Flow 20 Anni (+2%/anno)</div><div class="cw" style="height:280px;"><canvas id="cCashflow"></canvas></div></div>';
+  document.getElementById('capex-content').innerHTML='<div class="g3" style="margin-bottom:1rem;"><div class="scenario-card" style="background:var(--red3);border-color:rgba(248,81,73,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Scenario A: Solo Rete</div><div style="font-size:1.4rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--red);margin:8px 0;">'+fE(costNoFV)+'/anno</div><div style="font-size:.72rem;color:var(--text2);">Nessun FV, nessun ITES</div></div><div class="scenario-card best"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Scenario B: FV + ITES</div><div style="font-size:1.4rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--green);margin:8px 0;">'+fE(ann.cost)+'/anno</div><div style="font-size:.72rem;color:var(--text2);">Con accumulo ghiaccio</div></div><div class="scenario-card" style="background:var(--teal3);border-color:rgba(57,200,200,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Risparmio annuo</div><div style="font-size:1.4rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--teal);margin:8px 0;">'+fE(costNoFV-ann.cost)+'</div><div style="font-size:.72rem;color:var(--text2);">'+Math.round((1-ann.cost/costNoFV)*100)+'% riduzione costi energia</div></div></div><div class="g2" style="margin-bottom:1rem;"><div class="card"><div class="ct">CAPEX &mdash; Investimento iniziale</div>'+Object.entries(capex).map(function(e){return '<div class="capex-row"><span class="capex-label">'+e[0]+'</span><span class="capex-val">'+fE(e[1])+'</span></div>';}).join('')+'<div class="capex-row" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:8px;"><span style="font-weight:700;">TOTALE CAPEX</span><span style="font-weight:700;font-family:\'IBM Plex Mono\';color:var(--blue);font-size:1.1rem;">'+fE(capexTot)+'</span></div></div><div class="card"><div class="ct">OPEX &mdash; Costi operativi/anno</div>'+Object.entries(opex).map(function(e){return '<div class="capex-row"><span class="capex-label">'+e[0]+'</span><span class="capex-val">'+fE(Math.round(e[1]))+'</span></div>';}).join('')+'<div class="capex-row" style="border-top:2px solid var(--border2);margin-top:6px;padding-top:8px;"><span style="font-weight:700;">TOTALE OPEX</span><span style="font-weight:700;font-family:\'IBM Plex Mono\';color:var(--red);font-size:1.1rem;">'+fE(Math.round(opexTot))+'/anno</span></div></div></div><div class="ibar ibar-a" style="margin-bottom:1rem;"><b>Nota revenue:</b> Tariffa hosting '+fE(hostingFee*1000)+'/MWh (ipotesi conservativa).'+(heatRevenue>0?' &nbsp;|&nbsp; <b style="color:var(--orange)">Teleriscaldamento:</b> +'+fE(Math.round(heatRevenue))+'/anno':'')+' </div><div class="card" style="margin-bottom:1rem;"><div class="ct">Scenario C: ITES Ghiaccio vs Li-ion &mdash; stesso budget accumulo '+fE(Math.round(capexITES))+'</div><div class="g2" style="margin-top:.8rem;"><div class="scenario-card" style="background:var(--teal3);border-color:rgba(57,200,200,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">ITES Ghiaccio (questo progetto)</div><div style="font-size:1.6rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--teal);margin:8px 0;">'+fN(Math.round(itesKwh))+' kWh_th</div><div style="font-size:.73rem;color:var(--text2);">~'+Math.round(p.tankV*RHO_ICE/1000)+' t ghiaccio</div><div style="font-size:.68rem;color:var(--text3);margin-top:5px;">120 \u20ac/kWh_th &middot; Vita utile 20+ anni</div></div><div class="scenario-card" style="background:var(--purple3);border-color:rgba(163,113,247,.3);"><div style="font-size:.68rem;color:var(--text3);text-transform:uppercase;">Batteria Li-ion (alternativa)</div><div style="font-size:1.6rem;font-weight:700;font-family:\'IBM Plex Mono\';color:var(--purple);margin:8px 0;">'+fN(Math.round(liionKwh))+' kWh_el</div><div style="font-size:.73rem;color:var(--text2);">Stesso budget CAPEX</div><div style="font-size:.68rem;color:var(--text3);margin-top:5px;">500 \u20ac/kWh_el &middot; Vita utile 10-12 anni</div></div></div><div class="ibar" style="margin-top:10px;font-size:.73rem;"><b>Confronto:</b> Le unit\u00e0 non sono direttamente confrontabili (kWh_th vs kWh_el). L\'ITES funziona SOLO per il cooling ma ha costo 4x inferiore al Li-ion per data center con alto fabbisogno termico.</div></div><div class="g6" style="margin-bottom:1rem;"><div class="card kpi"><div class="kv" style="color:var(--green)">'+fE(Math.round(revTot/1000))+'k</div><div class="ku">/anno</div><div class="kl">Revenue</div></div><div class="card kpi"><div class="kv" style="color:'+(cashflow>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(cashflow/1000))+'k</div><div class="ku">/anno</div><div class="kl">Cash Flow</div></div><div class="card kpi"><div class="kv" style="color:var(--blue)">'+(payback<50?payback.toFixed(1):'\u221e')+'</div><div class="ku">anni</div><div class="kl">Payback</div></div><div class="card kpi"><div class="kv" style="color:var(--purple)">'+(isFinite(irr)&&irr>-0.5?(irr*100).toFixed(1)+'\u2009%':'\u2014')+'</div><div class="ku"></div><div class="kl">IRR 20a</div></div><div class="card kpi"><div class="kv" style="color:'+(npv10>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(npv10/1000))+'k</div><div class="ku">@10%</div><div class="kl">NPV</div></div><div class="card kpi"><div class="kv" style="color:'+(npv5>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(npv5/1000))+'k</div><div class="ku">@5%</div><div class="kl">NPV</div></div></div><div class="card"><div class="ct">Proiezione Cash Flow 20 Anni (+2%/anno)</div><div class="cw" style="height:250px;"><canvas id="cCashflow"></canvas></div></div>'
+  +'<div class="card" style="margin-top:1rem;border-left:4px solid '+(breakevenAnno?'var(--green)':'var(--red)')+';">'
+  +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem;">'
+  +'<div class="ct" style="margin:0;">Grafico Breakeven</div>'
+  +'<div style="font-size:.85rem;font-weight:700;font-family:\'IBM Plex Mono\';color:'+(breakevenAnno?'var(--green)':'var(--red)')+';">'+(breakevenAnno?'\u2714 Breakeven anno '+breakevenAnno:'\u00d7 Non raggiunto in 20a')+'</div>'
+  +'</div>'
+  +'<div style="font-size:.68rem;color:var(--text3);margin-bottom:.5rem;">Curva cumulativa: punti verdi = utile, rossi = ancora in perdita. La linea tratteggiata indica lo zero.</div>'
+  +'<div class="cw" style="height:200px;"><canvas id="cBreakeven"></canvas></div>'
+  +'</div>';
   destroyC('cCashflow');
   const cfData20=Array.from({length:21},function(_,y){return{year:'A'+y,cf:cfArr[y],cum:cfArr.slice(0,y+1).reduce((a,b)=>a+b,0)};});
   charts['cCashflow']=new Chart(document.getElementById('cCashflow'),{type:'bar',data:{labels:cfData20.map(d=>d.year),datasets:[{label:'Cash Flow',data:cfData20.map(d=>d.cf),backgroundColor:cfData20.map(d=>d.cf<0?'rgba(248,81,73,.5)':'rgba(57,211,83,.5)'),borderColor:cfData20.map(d=>d.cf<0?'#f85149':'#39d353'),borderWidth:1,borderRadius:3},{label:'Cumulativo',data:cfData20.map(d=>d.cum),type:'line',borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.06)',fill:false,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return (v/1000000).toFixed(1)+'M';}}}}}});
@@ -888,6 +904,37 @@ function buildRecapTable(results,p){
     +'<div class="ibar ibar-g" style="margin-top:.6rem;font-size:.70rem;"><b>Cedimento ghiaccio:</b> Il serbatoio perde \u22480.5%/h per dispersione termica. Il ghiaccio residuo passa al giorno successivo (max 24h, poi si considera consumato). Il modello applica il decadimento ora per ora durante la simulazione annuale.</div>'
     +'</div>';
 }
+function autoDimTank(){
+  var p=getParams();
+  var gg=selectedDays.length>0?selectedDays[0]:207;
+  var mi=giornoToMese(gg).mese_idx;
+  var eerMedio=getEER(p.cop,TEMP_MEDIE[mi]);
+  var coolingNotti=0,surplusGiorno=0;
+  var mensili=getMensili();
+  for(var h=0;h<24;h++){
+    var tExt=TEMP_ORARIE[mi][h];
+    var need=Math.max(0,p.heatKw+p.dcBase*p.servPct+p.ua*(tExt-p.setP)/1000);
+    var prof=PROFILI_MENSILI[mi],sumP=prof.reduce(function(a,b){return a+b;},0);
+    var pvKw=sumP>0?prof[h]/sumP*mensili[mi].kwp_kwh*p.kwp*(1-p.loss)/(1-0.14):0;
+    var pvAfterIT=Math.max(0,pvKw-(p.dcBase*(1+p.servPct)));
+    var pvCool=Math.min(pvAfterIT*eerMedio,p.chillerMax);
+    if(pvKw<5){coolingNotti+=need;}
+    else{var surp=pvCool-need;if(surp>0)surplusGiorno+=surp;}
+  }
+  var massaKg=coolingNotti*1000/LATENTE_WH;
+  var volBase=massaKg/RHO_ICE/0.80;
+  var volSug=Math.min(1500,Math.max(50,Math.ceil(volBase/10)*10));
+  var capKwh=volSug*RHO_ICE*LATENTE_WH/1000;
+  document.getElementById('r-tank').value=volSug;
+  resetRun();
+  document.getElementById('auto-dim-result').innerHTML=
+    '<b style="color:var(--teal);">Volume suggerito: '+volSug+' m³</b> · '
+    +Math.round(capKwh)+' kWh_th · '+Math.round(volSug*RHO_ICE/1000)+' t<br>'
+    +'Cooling notturno coperto: <b>'+Math.round(coolingNotti)+' kWh_th</b><br>'
+    +'Surplus FV disponibile: '+Math.round(surplusGiorno)+' kWh_th<br>'
+    +'Riferimento: '+giornoLabel(gg)+' (T media '+TEMP_MEDIE[mi]+'°C)';
+}
+
 function exportCSV(){
   if(selectedDays.length===0){alert('Seleziona almeno un giorno dal calendario.');return;}
   const p=getParams();if(!tankStates365)tankStates365=preSimula365(p);
