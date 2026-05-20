@@ -217,18 +217,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       <div class="card" id="kpi-side">
         <div class="ct">Bilancio giornaliero</div>
         <div id="kpi-side-content"></div>
-        <div style="margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--border);">
-          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:.5rem;">Legenda grafico</div>
-          <div style="display:flex;flex-direction:column;gap:5px;">
-            <div style="display:flex;align-items:flex-start;gap:7px;"><div style="flex-shrink:0;width:18px;border-top:2px dashed #f85149;margin-top:6px;"></div><span style="font-size:.68rem;color:var(--text2);line-height:1.4;"><b style="color:#f85149;">Rack IT</b> &mdash; Consumo IT costante 24h. Non varia: i server girano sempre indipendentemente dal FV.</span></div>
-            <div style="display:flex;align-items:flex-start;gap:7px;"><div style="flex-shrink:0;width:18px;height:8px;background:#ff6b35;opacity:.75;margin-top:3px;border-radius:2px;"></div><span style="font-size:.68rem;color:var(--text2);line-height:1.4;"><b style="color:#ff6b35;">Cooling rack</b> &mdash; Calore da dissipare (40% IT + servizi + involucro). Cresce con la temperatura esterna.</span></div>
-            <div style="display:flex;align-items:flex-start;gap:7px;"><div style="flex-shrink:0;width:18px;height:8px;background:#39d353;opacity:.75;margin-top:3px;border-radius:2px;"></div><span style="font-size:.68rem;color:var(--text2);line-height:1.4;"><b style="color:#39d353;">FV prodotto</b> &mdash; Potenza fotovoltaica istantanea. Zero di notte, picco a mezzogiorno. Priorit&agrave;: 1) IT, 2) cooling, 3) ghiaccio, 4) rete.</span></div>
-            <div style="display:flex;align-items:flex-start;gap:7px;"><div style="flex-shrink:0;width:18px;height:8px;background:#e3b341;opacity:.75;margin-top:3px;border-radius:2px;"></div><span style="font-size:.68rem;color:var(--text2);line-height:1.4;"><b style="color:#e3b341;">Prelievo rete</b> &mdash; Energia acquistata dalla rete quando FV non basta. Di notte copre tutto il carico.</span></div>
-            <div style="display:flex;align-items:flex-start;gap:7px;"><div style="flex-shrink:0;width:18px;border-top:2px solid #39c8c8;margin-top:6px;"></div><span style="font-size:.68rem;color:var(--text2);line-height:1.4;"><b style="color:#39c8c8;">Ghiaccio+ (produzione)</b> &mdash; Freddo accumulato nel serbatoio con il surplus FV dopo aver coperto il cooling. Solo quando FV avanza.</span></div>
-            <div style="display:flex;align-items:flex-start;gap:7px;"><div style="flex-shrink:0;width:18px;border-top:2px dashed #a371f7;margin-top:6px;"></div><span style="font-size:.68rem;color:var(--text2);line-height:1.4;"><b style="color:#a371f7;">Ghiaccio&minus; (utilizzo)</b> &mdash; Freddo prelevato dal serbatoio per coprire deficit di cooling (es. notte o picchi di caldo estivo).</span></div>
-            <div style="display:flex;align-items:flex-start;gap:7px;"><div style="flex-shrink:0;width:18px;border-top:2px dotted #58a6ff;margin-top:6px;"></div><span style="font-size:.68rem;color:var(--text2);line-height:1.4;"><b style="color:#58a6ff;">FV venduto</b> &mdash; Surplus FV che non serve n&eacute; al cooling n&eacute; al ghiaccio: immesso in rete al prezzo feed-in.</span></div>
-          </div>
-        </div>
+
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:.8rem;">
@@ -245,6 +234,18 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <div class="ct" style="margin:0;">Profilo orario &mdash; potenze</div>
         </div>
         <div id="charts-orari" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <div style="margin-top:.8rem;padding:.7rem .9rem;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);">
+          <div style="font-size:.60rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:.5rem;">Legenda grafico</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 1.2rem;">
+            <div style="display:flex;align-items:flex-start;gap:6px;"><div style="flex-shrink:0;width:16px;border-top:2px dashed #f85149;margin-top:6px;"></div><span style="font-size:.65rem;color:var(--text2);line-height:1.35;"><b style="color:#f85149;">Rack IT</b> &mdash; Consumo IT costante 24h. Non varia mai.</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px;"><div style="flex-shrink:0;width:16px;height:8px;background:#ff6b35;opacity:.75;margin-top:3px;border-radius:2px;"></div><span style="font-size:.65rem;color:var(--text2);line-height:1.35;"><b style="color:#ff6b35;">Cooling rack</b> &mdash; Calore da dissipare (40% IT + servizi + involucro). Varia con T esterna.</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px;"><div style="flex-shrink:0;width:16px;height:8px;background:#39d353;opacity:.75;margin-top:3px;border-radius:2px;"></div><span style="font-size:.65rem;color:var(--text2);line-height:1.35;"><b style="color:#39d353;">FV prodotto</b> &mdash; Potenza FV istantanea. Priorit&agrave;: IT &rarr; cooling &rarr; ghiaccio &rarr; rete.</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px;"><div style="flex-shrink:0;width:16px;height:8px;background:#e3b341;opacity:.75;margin-top:3px;border-radius:2px;"></div><span style="font-size:.65rem;color:var(--text2);line-height:1.35;"><b style="color:#e3b341;">Prelievo rete</b> &mdash; Energia acquistata quando FV non basta. Di notte copre tutto.</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px;"><div style="flex-shrink:0;width:16px;border-top:2px solid #39c8c8;margin-top:6px;"></div><span style="font-size:.65rem;color:var(--text2);line-height:1.35;"><b style="color:#39c8c8;">Ghiaccio+ (prod.)</b> &mdash; Freddo accumulato nel serbatoio con il surplus FV dopo aver coperto il cooling.</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px;"><div style="flex-shrink:0;width:16px;border-top:2px dashed #a371f7;margin-top:6px;"></div><span style="font-size:.65rem;color:var(--text2);line-height:1.35;"><b style="color:#a371f7;">Ghiaccio&minus; (uso)</b> &mdash; Freddo prelevato dal serbatoio per coprire deficit di cooling (notte / picchi estivi).</span></div>
+            <div style="display:flex;align-items:flex-start;gap:6px;"><div style="flex-shrink:0;width:16px;border-top:2px dotted #58a6ff;margin-top:6px;"></div><span style="font-size:.65rem;color:var(--text2);line-height:1.35;"><b style="color:#58a6ff;">FV venduto</b> &mdash; Surplus FV immesso in rete al prezzo feed-in dopo aver soddisfatto tutto.</span></div>
+          </div>
+        </div>
       </div>
       <div class="g2">
         <div class="card"><div class="ct">Bilancio energetico (kWh/giorno)</div><div class="cw" style="height:190px;"><canvas id="cBilancio"></canvas></div></div>
