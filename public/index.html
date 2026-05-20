@@ -214,11 +214,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <div id="tariff-info" style="font-size:.68rem;color:var(--text3);line-height:1.6;"></div>
         </div>
       </div>
-      <div class="card" id="kpi-side">
-        <div class="ct">Bilancio giornaliero</div>
-        <div id="kpi-side-content"></div>
 
-      </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:.8rem;">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -256,6 +252,10 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <div class="card"><div class="ct">Costo orario rete (&euro;/h) &middot; tariffa F1/F2/F3</div><div class="cw" style="height:150px;"><canvas id="cCostoOrario"></canvas></div></div>
       </div>
       <div class="ibar" id="info-day">&mdash;</div>
+      <div class="card" id="kpi-side">
+        <div class="ct">Bilancio giornaliero</div>
+        <div id="kpi-side-content"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -595,7 +595,9 @@ function renderAll(){
     var d=item.data,critAlert=d.tankMin<capKwh*0.20?'<span style="color:var(--red);font-size:.65rem;margin-left:6px;">\u26a0 tank sotto 20%</span>':'';
     return '<div style="border:1px solid '+SEL_COLORS[i]+';border-radius:var(--rl);padding:.7rem .6rem;background:var(--bg2);"><div style="font-size:.62rem;font-weight:600;color:'+SEL_COLORS[i]+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+giornoLabel(item.gg)+critAlert+'</div><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--red);font-size:1.3rem;">'+(d.totCooling/1000).toFixed(1)+'</div><div class="ku">MWh_th</div><div class="kl">Cooling</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--green);font-size:1.3rem;">'+Math.round(d.totPv)+'</div><div class="ku">kWh_el</div><div class="kl">FV</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--teal);font-size:1.3rem;">'+d.ghiaccioT.toFixed(1)+'</div><div class="ku">t</div><div class="kl">Ghiaccio</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.3rem;">'+(d.totGrid/1000).toFixed(1)+'</div><div class="ku">MWh_el</div><div class="kl">Rete</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.3rem;">'+Math.round(d.totCost)+'</div><div class="ku">\u20ac</div><div class="kl">Costo</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--blue);font-size:1.3rem;">'+d.pueAvg.toFixed(2)+'</div><div class="ku"></div><div class="kl">PUE</div></div></div></div>';
   }).join('');
-  document.getElementById('kpi-side-content').innerHTML=results.map(function(item,idx){
+  var nCols=Math.min(results.length,2);
+  var gridWrap='<div style="display:grid;grid-template-columns:repeat('+nCols+',1fr);gap:.8rem;">';
+  document.getElementById('kpi-side-content').innerHTML=gridWrap+results.map(function(item,idx){
     var d=item.data;
     var pvPct=Math.round(d.totPv/(d.totPv+d.totGrid)*100)||0;
     var co2s=Math.round(d.totPv*CO2_FACTOR);
@@ -629,8 +631,9 @@ function renderAll(){
       if(!l)return '<hr style="border:none;border-top:1px solid var(--border);margin:3px 0;">';
       return '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border);"><span style="font-size:.68rem;color:var(--text3);">'+l+'</span><span style="font-size:.68rem;font-family:\'IBM Plex Mono\',monospace;color:'+c+';">'+v+'<span style="color:var(--text3);font-size:.60rem;margin-left:2px;">'+u+'</span></span></div>';
     }).join('');
-    return sepTop+hdr+rowsHtml;
-  }).join('');
+    var colStyle='border:1px solid '+SEL_COLORS[idx]+';border-radius:var(--r);padding:.7rem .8rem;';
+    return '<div style="'+colStyle+'">'+hdr+rowsHtml+'</div>';
+  }).join('')+'</div>';
   const chartsDiv=document.getElementById('charts-orari');
   Object.keys(charts).filter(k=>k.startsWith('cOrario')).forEach(k=>destroyC(k));chartsDiv.innerHTML='';
   const labels=Array.from({length:24},(_,h)=>h+':00');
