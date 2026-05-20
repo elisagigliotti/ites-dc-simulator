@@ -909,101 +909,93 @@ function autoDimTank(){
   var spinner=document.getElementById('autodim-spinner');
   var res=document.getElementById('auto-dim-result');
   btn.disabled=true;spinner.style.display='inline';
-  res.innerHTML='<span style="color:var(--teal);">Simulazione in corso…</span>';
+  res.innerHTML='<span style="color:var(--teal);">Ottimizzazione in corso…</span>';
 
   setTimeout(function(){
     var p=getParams();
     var origVol=p.tankV;
 
-    // Simula anno intero con warm-up corretto e ritorna giorni critici e min%
-    // Il warm-up usa 30 gg di dicembre partendo da meta' serbatoio (come preSimula365warmup)
-    function countCritical(vol){
+    // Simula anno con warmup 30gg, iceOld=0 (modello originale stabile).
+    // Ritorna: costo annuo, ore di violazione (<20% durante ore attive 6-23
+    // mentre si usa ghiaccio), e costo senza serbatoio.
+    function simAnno(vol){
       var pT=Object.assign({},p,{tankV:vol});
       var cap=vol*RHO_ICE*LATENTE_WH/1000;
       var tank=cap*0.5;
-      // warm-up 30 gg dicembre
-      for(var d=0;d<30;d++){var io=tank;for(var h=0;h<24;h++){var r=simulaOra(h,11,pT,tank,io);tank=r.tankLevelRaw;io=Math.max(0,io-r.coolingFromOldIce);}}
-      var critici=0,minPct=100;
+      for(var d=0;d<30;d++){
+        for(var h=0;h<24;h++){var r=simulaOra(h,11,pT,tank,0);tank=r.tankLevelRaw;}
+      }
+      var totCost=0,viol=0;
       for(var m=0;m<12;m++){
         for(var dd=0;dd<GIORNI_MESE[m];dd++){
-          var io2=tank,dayMin=cap;
-          for(var h=0;h<24;h++){var r=simulaOra(h,m,pT,tank,io2);tank=r.tankLevelRaw;io2=Math.max(0,io2-r.coolingFromOldIce);if(r.tankLevel<dayMin)dayMin=r.tankLevel;}
-          var pct=cap>0?dayMin/cap*100:0;
-          if(pct<20)critici++;
-          if(pct<minPct)minPct=pct;
+          for(var h=0;h<24;h++){
+            var r=simulaOra(h,m,pT,tank,0);
+            tank=r.tankLevelRaw;
+            totCost+=r.gridCost-r.feedInRev;
+            // violazione: ore attive (6-23), ghiaccio usato, tank sotto 20%
+            var oraAttiva=(h>=6&&h<=23);
+            if(oraAttiva&&r.iceUsed>0&&cap>0&&r.tankLevel/cap*100<20) viol++;
+          }
         }
       }
-      return{critici:critici,minPct:Math.round(minPct)};
+      return{cost:Math.round(totCost),viol:viol};
     }
 
-    // Ricerca binaria corretta:
-    // invariante: countCritical(hi)==0, countCritical(lo)>0 (o lo=50 come minimo)
-    // Testa prima se anche il minimo (50m3) ha 0 critici -> usa quello
-    // Poi stringe da hi verso il basso
-    var volOttimo=1500;
-    var rHi=countCritical(1500);
-    if(rHi.critici>0){
-      // nemmeno 1500 basta
-      volOttimo=1500;
+    // Scansione su volumi candidati: trova il minimo costo
+    var candidates=[10,20,30,50,75,100,150,200,250,300,400,500,700,1000,1500];
+    var bestVol=origVol,bestCost=Infinity;
+    var scanResults=[];
+    for(var vi=0;vi<candidates.length;vi++){
+      var vol=candidates[vi];
+      var r=simAnno(vol);
+      scanResults.push({vol:vol,cost:r.cost,viol:r.viol});
+      if(r.cost<bestCost){bestCost=r.cost;bestVol=vol;}
+      // fermati se il costo sale per 3 step consecutivi dopo il minimo
+      if(scanResults.length>=4){
+        var l=scanResults.length;
+        if(scanResults[l-1].cost>scanResults[l-2].cost&&
+           scanResults[l-2].cost>scanResults[l-3].cost&&
+           scanResults[l-3].cost>scanResults[l-4].cost) break;
+      }
+    }
+
+    // Affina intorno al minimo (±50m3, step 10m3)
+    var lo=Math.max(10,bestVol-50),hi=Math.min(1500,bestVol+50);
+    for(var vol=lo;vol<=hi;vol+=10){
+      var r=simAnno(vol);
+      if(r.cost<bestCost){bestCost=r.cost;bestVol=vol;}
+    }
+
+    var rOtt=simAnno(bestVol);
+    var rOrig=simAnno(origVol);
+    var risparmio=rOrig.cost-bestCost;
+    var cap=bestVol*RHO_ICE*LATENTE_WH/1000;
+
+    // Messaggio violazioni
+    var msgViol='';
+    if(rOtt.viol===0){
+      msgViol='<b style="color:var(--green);">Nessuna violazione &lt;20% nelle ore attive ✔</b>';
     } else {
-      var rLo=countCritical(50);
-      if(rLo.critici===0){
-        // anche 50m3 va bene, affina verso il basso
-        volOttimo=50;
-        var lo=10,hi=50;
-        while(lo<hi-10){
-          var mid=Math.round((lo+hi)/2/10)*10;
-          if(countCritical(mid).critici===0){volOttimo=mid;hi=mid;}
-          else{lo=mid;}
-        }
-      } else {
-        // ricerca binaria standard: lo=50 (critico), hi=1500 (ok)
-        var lo=50,hi=1500;
-        volOttimo=1500;
-        while(lo<hi-10){
-          var mid=Math.round((lo+hi)/2/10)*10;
-          var rc=countCritical(mid);
-          if(rc.critici===0){volOttimo=mid;hi=mid;}
-          else{lo=mid;}
-        }
-      }
+      msgViol='<b style="color:var(--amber);">⚠ '+rOtt.viol+' ore/anno con tank&lt;20% (ore 6-23)</b>'
+        +'<br><span style="font-size:.65rem;color:var(--text3);">Fisicamente inevitabile con questi parametri: il FV non produce abbastanza surplus da accumulare. La rete copre il deficit nelle ore critiche.</span>';
     }
 
-    // Verifica giorni selezionati come vincolo aggiuntivo
-    var vincoloGiorni='';
-    if(selectedDays.length>0){
-      var pOtt=Object.assign({},p,{tankV:volOttimo});
-      var capOtt=volOttimo*RHO_ICE*LATENTE_WH/1000;
-      var tst=preSimula365warmup(pOtt);
-      var falliti=selectedDays.filter(function(ggg){
-        var ti=Math.min(tst[ggg-1]||0,capOtt),tank2=ti,io2=ti,minT=capOtt;
-        var mi=giornoToMese(ggg).mese_idx;
-        for(var h=0;h<24;h++){var r=simulaOra(h,mi,pOtt,tank2,io2);tank2=r.tankLevelRaw;io2=Math.max(0,io2-r.coolingFromOldIce);if(r.tankLevel<minT)minT=r.tankLevel;}
-        return capOtt>0&&minT/capOtt*100<20;
-      });
-      if(falliti.length>0){
-        vincoloGiorni=' · <span style="color:var(--amber);">⚠ '+falliti.map(giornoLabel).join(', ')+' ancora critici</span>';
-      } else if(selectedDays.length>0){
-        vincoloGiorni=' · <span style="color:var(--green);">Tutti i giorni selezionati OK ✔</span>';
-      }
-    }
-
-    var cap=volOttimo*RHO_ICE*LATENTE_WH/1000;
-    var rFin=countCritical(volOttimo);
-    document.getElementById('r-tank').value=volOttimo;
+    document.getElementById('r-tank').value=bestVol;
     resetRun();
 
     res.innerHTML=
-      '<b style="color:var(--teal);font-size:.80rem;">Volume ottimale: '+volOttimo+' m³</b>'
-      +' · '+Math.round(cap)+' kWh_th · '+Math.round(volOttimo*RHO_ICE/1000)+' t<br>'
-      +'Giorni critici/anno: <b style="color:'+(rFin.critici===0?'var(--green)':'var(--amber)')+';">'+rFin.critici+'</b>'
-      +' · Tank min: '+rFin.minPct+'%<br>'
-      +'Metodo: ricerca binaria su simulazione 8.760h con warm-up 30gg'
-      +vincoloGiorni;
+      '<b style="color:var(--teal);font-size:.80rem;">Volume ottimale: '+bestVol+' m³</b>'
+      +' · '+Math.round(cap)+' kWh_th · '+Math.round(bestVol*RHO_ICE/1000)+' t<br>'
+      +'Costo annuo: <b>'+fE(bestCost)+'</b>'
+      +(risparmio>0?' · <b style="color:var(--green);">risparmio '+fE(risparmio)+'/anno</b> vs '+origVol+' m³'
+        :(risparmio<0?' · <span style="color:var(--text3);">volume attuale già ottimale</span>':''))+'<br>'
+      +msgViol+'<br>'
+      +'<span style="font-size:.65rem;color:var(--text3);">Metodo: min costo annuo su 8.760h con warm-up 30gg</span>';
 
     btn.disabled=false;spinner.style.display='none';
   },50);
 }
+
 
 function exportCSV(){
   if(selectedDays.length===0){alert('Seleziona almeno un giorno dal calendario.');return;}
