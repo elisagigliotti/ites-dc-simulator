@@ -280,7 +280,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 <div id="panel-capex" class="panel">
   <div class="card" style="margin-bottom:1rem;">
     <div class="ct">Parametri sensibilit&agrave; analisi finanziaria</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1rem;">
       <div><div class="ch"><span class="cn">Variazione costo FV</span><span class="cv" id="v-fvcost">0 %</span></div>
         <input type="range" min="-30" max="30" step="5" value="0" id="r-fvcost" oninput="runCapex()">
         <div style="font-size:.65rem;color:var(--text3);">Sensibilit&agrave; CAPEX impianto fotovoltaico</div></div>
@@ -290,6 +290,17 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       <div><div class="ch"><span class="cn">Ricavo teleriscaldamento</span><span class="cv" id="v-heat">0.03 &euro;/kWh</span></div>
         <input type="range" min="0" max="0.08" step="0.01" value="0.03" id="r-heat" oninput="runCapex()">
         <div style="font-size:.65rem;color:var(--text3);">Vendita calore residuo rack (60% non-ITES)</div></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:1rem;">
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);margin-bottom:.8rem;">Leve principali per il breakeven</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+        <div><div class="ch"><span class="cn">Tariffa hosting IT</span><span class="cv" id="v-hosting">0.12 &euro;/kWh</span></div>
+          <input type="range" min="0.05" max="0.30" step="0.01" value="0.12" id="r-hosting" oninput="runCapex()">
+          <div style="font-size:.65rem;color:var(--text3);">Ricavo per kWh IT erogato (mercato: 0.10&ndash;0.25 &euro;/kWh)</div></div>
+        <div><div class="ch"><span class="cn">N&deg; rack (override CAPEX)</span><span class="cv" id="v-capex-nrack">20</span></div>
+          <input type="range" min="5" max="200" step="5" value="20" id="r-capex-nrack" oninput="runCapex()">
+          <div style="font-size:.65rem;color:var(--text3);">Rack totali del data center (indipendente dalla simulazione giornaliera)</div></div>
+      </div>
     </div>
   </div>
   <div id="capex-content"></div>
@@ -884,8 +895,8 @@ function runCapex(){
   const annCostAdj=ann.cost*(1+gridvarPct/100),opex={};
   opex['Energia elettrica rete'+(gridvarPct!==0?' (var. '+gridvarPct+'%)':'')]=annCostAdj;opex['Manutenzione FV']=p.kwp*12;opex['Manutenzione cooling']=p.heatKw*15;opex['Manutenzione generale (1.5%)']=capexTot*0.015;opex['Assicurazione (0.5%)']=capexTot*0.005;opex['Personale (3 FTE)']=180000;
   const opexTot=Object.values(opex).reduce((a,b)=>a+b,0);
-  const hostingFee=0.12,revenue=p.itKw*hostingFee*8760,gridServ=ann.pvToGrid*p.feedIn,heatKwRes=p.heatKw*0.60,heatRevenue=heatPrice>0?(heatKwRes*8760*heatPrice*0.30):0,revTot=revenue+gridServ+heatRevenue,cashflow=revTot-opexTot,payback=cashflow>0?(capexTot/cashflow):Infinity;
-  const costNoFV=(p.dcBase+p.dcBase*p.servPct+p.heatKw/getEER(p.cop,15))*8760*p.gridPrice*(1+gridvarPct/100);
+  const hostingFee=parseFloat(document.getElementById('r-hosting').value)||0.12;document.getElementById('v-hosting').textContent=hostingFee.toFixed(2)+' €/kWh';const nRackCapex=parseInt(document.getElementById('r-capex-nrack').value)||p.nRack;document.getElementById('v-capex-nrack').textContent=nRackCapex;const itKwCapex=nRackCapex*p.rack.kw;const revenue=itKwCapex*hostingFee*8760,gridServ=ann.pvToGrid*p.feedIn,heatKwRes=p.heatKw*0.60,heatRevenue=heatPrice>0?(heatKwRes*8760*heatPrice*0.30):0,revTot=revenue+gridServ+heatRevenue,cashflow=revTot-opexTot,payback=cashflow>0?(capexTot/cashflow):Infinity;
+  const heatKwCapex=itKwCapex*p.coolFrac;const costNoFV=(itKwCapex+itKwCapex*p.servPct+heatKwCapex/getEER(p.cop,15))*8760*p.gridPrice*(1+gridvarPct/100);
   const cfArr=[-capexTot];for(let y=1;y<=20;y++)cfArr.push(cashflow*Math.pow(1.02,y-1));
   const irr=calcIRR(cfArr),npv10=calcNPV(cfArr,0.10),npv5=calcNPV(cfArr,0.05);
   var breakevenAnno=null;var bkCum=-capexTot;
@@ -899,6 +910,14 @@ function runCapex(){
   +'</div>'
   +'<div style="font-size:.68rem;color:var(--text3);margin-bottom:.5rem;">Curva cumulativa: punti verdi = utile, rossi = ancora in perdita. La linea tratteggiata indica lo zero.</div>'
   +'<div class="cw" style="height:200px;"><canvas id="cBreakeven"></canvas></div>'
+  +'</div>'
+  +'<div class="card" style="margin-top:1rem;border:2px solid var(--blue3);">'
+  +'<div class="ct">Sensitivity Analysis &mdash; Payback (anni) per N&deg; rack e tariffa hosting</div>'
+  +'<div style="font-size:.68rem;color:var(--text3);margin-bottom:.5rem;">Ogni linea = scenario rack diverso &middot; Asse X = tariffa hosting &middot; Asse Y = anni di payback &middot; Punti senza valore = payback &gt; 20 anni</div>'
+  +'<div style="background:var(--amber3);border-radius:var(--r);padding:.5rem .8rem;font-size:.70rem;color:var(--amber);margin-bottom:.6rem;">'
+  +'<b>Le due leve principali:</b> aumentare il numero di rack (più fatturato) o la tariffa hosting (prezzo di mercato). Agisci sui cursori in alto per aggiornare.'
+  +'</div>'
+  +'<div class="cw" style="height:260px;"><canvas id="cSensitivity"></canvas></div>'
   +'</div>';
   var _cfArr2=cfArr,_bkAnno2=breakevenAnno;
   setTimeout(function(){
@@ -911,6 +930,50 @@ function runCapex(){
     if(bkEl){
       var cumVals=cfData20.map(function(d){return Math.round(d.cum/1000);});
       charts['cBreakeven']=new Chart(bkEl,{type:'line',data:{labels:cfData20.map(function(d){return d.year;}),datasets:[{label:'Cumulativo (k€)',data:cumVals,borderColor:'#58a6ff',fill:false,tension:.3,borderWidth:2.5,segment:{borderColor:function(ctx){return cumVals[ctx.p1DataIndex]>=0?'#39d353':'#f85149';}},pointRadius:4,pointBackgroundColor:cumVals.map(function(v){return v>=0?'#39d353':'#f85149';})},{label:'Zero',data:cfData20.map(function(){return 0;}),borderColor:'rgba(0,0,0,0.25)',borderDash:[5,4],pointRadius:0,borderWidth:1.5,fill:false}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:function(ctx){return '€'+Math.round(ctx.parsed.y)+'k';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return v+'k€';}},title:{display:true,text:'k€',color:'#718096',font:{size:9}}}}}});
+    }
+
+    // ── SENSITIVITY ANALYSIS: grafico breakeven per combinazioni rack/hosting ──
+    destroyC('cSensitivity');
+    var sensEl=document.getElementById('cSensitivity');
+    if(sensEl){
+      var hostingVals=[0.08,0.10,0.12,0.15,0.18,0.20,0.25];
+      var rackScenari=[
+        {label:'20 rack ('+fN(20*p.rack.kw)+' kW)',nRack:20},
+        {label:'50 rack ('+fN(50*p.rack.kw)+' kW)',nRack:50},
+        {label:'100 rack ('+fN(100*p.rack.kw)+' kW)',nRack:100},
+        {label:'150 rack ('+fN(150*p.rack.kw)+' kW)',nRack:150}
+      ];
+      var sensColors=['#f85149','#e3b341','#39d353','#58a6ff'];
+      var sensDatasets=rackScenari.map(function(sc,si){
+        var paybacks=hostingVals.map(function(hf){
+          var itKwSc=sc.nRack*p.rack.kw;
+          var heatKwSc=itKwSc*p.coolFrac;
+          var capexSc={};
+          capexSc['FV']=p.kwp*850;capexSc['ITES']=p.tankV*RHO_ICE*LATENTE_WH/1000*120;
+          capexSc['Chiller']=heatKwSc*350;capexSc['CDU']=sc.nRack*2500;
+          capexSc['Capannone']=350000;capexSc['Elettrica']=itKwSc*180;
+          capexSc['Rack']=sc.nRack*4500;capexSc['BMS']=85000;capexSc['Ingegneria']=120000;
+          var capTot=Object.values(capexSc).reduce(function(a,b){return a+b;},0);
+          var revAnn=itKwSc*hf*8760+ann.pvToGrid*p.feedIn;
+          var opexAnn=ann.cost+p.kwp*12+heatKwSc*15+capTot*0.015+capTot*0.005+180000;
+          var cf=revAnn-opexAnn;
+          return cf>0?Math.round(capTot/cf*10)/10:null;
+        });
+        return{label:sc.label,data:paybacks,borderColor:sensColors[si],backgroundColor:'transparent',
+          pointRadius:5,borderWidth:2,tension:.3,
+          pointStyle:paybacks.map(function(v){return v&&v<=20?'circle':'crossRot';}),
+          pointBackgroundColor:paybacks.map(function(v){return v&&v<=20?sensColors[si]:'rgba(0,0,0,0.2)';})};
+      });
+      charts['cSensitivity']=new Chart(sensEl,{type:'line',
+        data:{labels:hostingVals.map(function(h){return '€'+h.toFixed(2)+'/kWh';}),datasets:sensDatasets},
+        options:{responsive:true,maintainAspectRatio:false,
+          interaction:{mode:'index',intersect:false},
+          plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},
+            tooltip:{callbacks:{label:function(ctx){var v=ctx.parsed.y;return ctx.dataset.label+': '+(v?v.toFixed(1)+' anni payback':'× Non raggiunto');}}}},
+          scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},
+            y:{min:0,max:25,grid:{color:'rgba(0,0,0,0.06)'},
+              ticks:{color:'#718096',font:{size:9},callback:function(v){return v+'a';}},
+              title:{display:true,text:'Anni payback',color:'#718096',font:{size:9}}}}}});
     }
   },80);
 }
