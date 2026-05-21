@@ -22,16 +22,16 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:15px;}
-body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+body{font-family:sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
 .page{max-width:1440px;margin:0 auto;padding:1.5rem;}
 .hdr{border-bottom:2px solid var(--border2);padding-bottom:1.4rem;margin-bottom:1.4rem;background:linear-gradient(135deg,#1d6fb8 0%,#0e7490 100%);margin:-1.5rem -1.5rem 1.4rem;padding:1.8rem 2rem 1.4rem;border-radius:0;}
 .hdr-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
 .hdr h1{font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;color:#ffffff;}
 .hdr h1 span{color:#7dd3fc;}
 .hdr p{font-size:0.88rem;color:rgba(255,255,255,0.80);margin-top:4px;}
-.hdr-meta{font-size:0.75rem;color:rgba(255,255,255,0.70);font-family:'IBM Plex Mono',monospace;text-align:right;line-height:1.9;}
+.hdr-meta{font-size:0.75rem;color:rgba(255,255,255,0.70);font-family:monospace;text-align:right;line-height:1.9;}
 .badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:.9rem;}
-.badge{font-size:0.68rem;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:4px;border:1px solid;}
+.badge{font-size:0.68rem;font-family:monospace;padding:2px 7px;border-radius:4px;border:1px solid;}
 .bg{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);color:#ffffff;}
 .bb{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);color:#ffffff;}
 .bt{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.4);color:#ffffff;}
@@ -44,7 +44,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .dot-idle{background:var(--text3);} .dot-loading{background:var(--amber);animation:pulse 1s infinite;}
 .dot-ok{background:var(--green);} .dot-error{background:var(--red);}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.pvgis-btn{margin-left:auto;background:var(--blue);border:none;color:#ffffff;border-radius:var(--r);padding:7px 16px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;box-shadow:0 2px 6px rgba(29,111,184,0.3);}
+.pvgis-btn{margin-left:auto;background:var(--blue);border:none;color:#ffffff;border-radius:var(--r);padding:7px 16px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:sans-serif;box-shadow:0 2px 6px rgba(29,111,184,0.3);}
 .pvgis-btn:hover{background:#155e9e;} .pvgis-btn:disabled{opacity:.4;cursor:not-allowed;}
 .tabs{display:flex;border-bottom:2px solid var(--border2);margin-bottom:1.5rem;overflow-x:auto;background:var(--bg3);border-radius:var(--r) var(--r) 0 0;padding:4px 4px 0;gap:3px;}
 .tab{padding:.6rem 1rem;font-size:0.82rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:var(--text2);transition:all .15s;white-space:nowrap;}
@@ -59,16 +59,16 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.3rem 1.4rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
 .ct{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:.7rem;}
 .kpi{text-align:center;padding:.9rem .5rem;}
-.kv{font-size:2rem;font-weight:700;font-family:'IBM Plex Mono',monospace;line-height:1;}
+.kv{font-size:2rem;font-weight:700;font-family:monospace;line-height:1;}
 .ku{font-size:.85rem;color:var(--text2);margin-top:4px;font-weight:600;}
 .kl{font-size:.80rem;color:var(--text2);margin-top:5px;text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
 .cg{display:flex;flex-direction:column;gap:.85rem;}
 .ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
-.cn{font-size:.85rem;color:var(--text);font-weight:600;} .cv{font-size:.85rem;font-family:'IBM Plex Mono',monospace;color:var(--amber);font-weight:700;}
+.cn{font-size:.85rem;color:var(--text);font-weight:600;} .cv{font-size:.85rem;font-family:monospace;color:var(--amber);font-weight:700;}
 input[type=range]{width:100%;-webkit-appearance:none;background:transparent;cursor:pointer;height:20px;}
 input[type=range]::-webkit-slider-runnable-track{height:5px;background:#c8d3de;border-radius:3px;border:none;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:#1d6fb8;border-radius:4px;margin-top:-6px;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.20);}
-select{background:#ffffff;border:1px solid #a0aec0;color:var(--text);border-radius:var(--r);padding:7px 10px;font-size:.88rem;font-family:'IBM Plex Sans',sans-serif;width:100%;cursor:pointer;font-weight:600;}
+select{background:#ffffff;border:1px solid #a0aec0;color:var(--text);border-radius:var(--r);padding:7px 10px;font-size:.88rem;font-family:sans-serif;width:100%;cursor:pointer;font-weight:600;}
 .cw{position:relative;width:100%;}
 .leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;}
 .li{display:flex;align-items:center;gap:5px;font-size:.70rem;color:var(--text2);}
@@ -76,10 +76,10 @@ select{background:#ffffff;border:1px solid #a0aec0;color:var(--text);border-radi
 table{width:100%;border-collapse:collapse;font-size:.88rem;}
 th{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem;color:var(--text2);padding:8px 10px;text-align:right;border-bottom:2px solid var(--border2);}
 th:first-child{text-align:left;} th{background:#f1f5f9;}
-td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;}
-td:first-child{font-family:'IBM Plex Sans',sans-serif;color:var(--text2);text-align:left;}
+td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);color:var(--text);font-family:monospace;}
+td:first-child{font-family:sans-serif;color:var(--text2);text-align:left;}
 tr:last-child td{border-bottom:none;} tr:hover td{background:var(--bg3);}
-.formula{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:.6rem .9rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--teal);margin:.4rem 0;}
+.formula{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:.6rem .9rem;font-family:monospace;font-size:.75rem;color:var(--teal);margin:.4rem 0;}
 .ibar{border-left:3px solid var(--blue);background:var(--blue3);border-radius:0 var(--r) var(--r) 0;padding:.6rem .9rem;font-size:.76rem;color:var(--text2);}
 .ibar b{color:var(--blue);}
 .ibar-g{border-left-color:var(--green);background:var(--green3);} .ibar-g b{color:var(--green);}
@@ -92,7 +92,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 .aisle-label{font-size:.58rem;text-align:center;padding:2px 0;border-radius:3px;margin:2px 0;width:100%;}
 .capex-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0;font-size:.90rem;}
 .capex-row:last-child{border-bottom:none;} .capex-label{color:var(--text2);}
-.capex-val{font-family:'IBM Plex Mono',monospace;font-weight:500;}
+.capex-val{font-family:monospace;font-weight:500;}
 .scenario-card{padding:16px;border-radius:var(--rl);border:1px solid var(--border);position:relative;}
 .scenario-card.best{border-color:#16a34a;background:#f0fdf4;}
 .heatmap-wrap{overflow-x:auto;}
@@ -139,7 +139,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 <div class="pvgis-bar" id="pvgis-bar">
   <div class="pvgis-dot dot-idle" id="pvgis-dot"></div>
   <span id="pvgis-msg">Dati PVGIS non ancora caricati &mdash; premere "Carica da PVGIS"</span>
-  <span id="pvgis-src" style="font-size:.68rem;color:var(--text3);font-family:'IBM Plex Mono',monospace;"></span>
+  <span id="pvgis-src" style="font-size:.68rem;color:var(--text3);font-family:monospace;"></span>
   <button class="pvgis-btn" id="pvgis-btn" onclick="loadPVGIS()">&#11015; Carica da PVGIS</button>
 </div>
 
@@ -161,9 +161,9 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       <div class="card">
         <div class="ct">Impianto FV &mdash; Bellocchi</div>
         <div class="cg">
-          <div><div class="ch"><span class="cn">Potenza installata</span><span class="cv" id="v-kwp">2000 kWp</span></div><input type="range" min="200" max="3000" step="20" value="2000" id="r-kwp" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Potenza installata</span><span class="cv" id="v-kwp">1040 kWp</span></div><input type="range" min="200" max="3000" step="20" value="1040" id="r-kwp" oninput="resetRun()"></div>
           <div><div class="ch"><span class="cn">Perdite sistema</span><span class="cv" id="v-loss">14 %</span></div><input type="range" min="10" max="22" step="1" value="14" id="r-loss" oninput="resetRun()"></div>
-          <div><div class="ct" style="margin-bottom:6px;">Seleziona giorno</div><div id="cal-container"></div><div style="font-size:.70rem;color:var(--text3);margin-top:6px;" id="tank-prev-state">&mdash;</div></div>
+          <div><div class="ct" style="margin-bottom:6px;">Seleziona giorno</div><div id="cal-container"></div></div>
         </div>
       </div>
       <div class="card">
@@ -199,8 +199,9 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <div><div class="ch"><span class="cn">Volume contenitore</span><span class="cv" id="v-tank">300 m&#179;</span></div><input type="range" min="5" max="1500" step="10" value="300" id="r-tank" oninput="resetRun()"></div>
           <div id="tank-info" style="font-size:.70rem;color:var(--text3);line-height:1.7;"></div>
         </div>
-        <button onclick="autoDimTank()" id="btn-autodim" style="width:100%;margin-top:.7rem;padding:8px;border-radius:var(--r);border:2px solid var(--teal);background:var(--teal3);color:var(--teal);font-size:.78rem;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;"><span id="autodim-spinner" style="display:none;">&#9696;</span>&#9654; Ottimizza serbatoio</button>
+        <button onclick="autoDimTank()" id="btn-autodim" style="width:100%;margin-top:.7rem;padding:8px;border-radius:var(--r);border:2px solid var(--teal);background:var(--teal3);color:var(--teal);font-size:.78rem;font-weight:700;cursor:pointer;font-family:sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;"><span id="autodim-spinner" style="display:none;">&#9696;</span>&#9654; Ottimizza serbatoio</button>
         <div id="auto-dim-result" style="font-size:.68rem;color:var(--text3);line-height:1.6;margin-top:.4rem;"></div>
+        <div id="tank-prev-state" style="font-size:.70rem;color:var(--text3);line-height:1.6;margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border);"></div>
       </div>
       <div class="card">
         <div class="ct">Tariffe energia</div>
@@ -230,6 +231,13 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div class="ct" style="margin:0;">Profilo orario &mdash; potenze</div>
+          <div class="leg" style="margin:0;">
+            <div class="li"><div class="ls" style="background:#f85149;"></div>Cooling</div>
+            <div class="li"><div class="ls" style="background:#39d353;"></div>FV</div>
+            <div class="li"><div class="ls" style="background:#39c8c8;"></div>Produzione ghiaccio (FV→ITES)</div>
+            <div class="li"><div class="ls" style="background:#a371f7;"></div>ghiaccio-</div>
+            <div class="li"><div class="ls" style="background:#e3b341;"></div>rete chiller</div>
+          </div>
         </div>
         <div id="charts-orari" style="display:flex;flex-direction:column;gap:8px;"></div>
         <div style="margin-top:.8rem;padding:.7rem .9rem;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);">
@@ -302,6 +310,30 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
     <div class="card"><div class="ct">Potenza scarica oraria</div><div class="cw" style="height:185px;"><canvas id="cDS"></canvas></div></div>
   </div>
   <div class="card"><div class="ct">Tabella sensibilit&agrave; &mdash; Volume m&#179;</div><div style="font-size:.70rem;color:var(--text3);margin-bottom:.6rem;">Riempimento: <span id="sens-fill">80%</span></div><div style="overflow-x:auto;" id="t-sens"></div></div>
+
+  <div class="card" style="margin-top:1rem;border:2px solid var(--teal);">
+    <div class="ct" style="color:var(--teal);">Ottimizzazione ITES &mdash; Scenari di carico IT</div>
+    <div class="ibar ibar-g" style="margin-bottom:1rem;font-size:.74rem;"><b>Obiettivo:</b> Per ogni scenario di carico IT, trova il volume del serbatoio che minimizza il costo annuo della bolletta. Usa i parametri FV/COP/tariffa dalla simulazione principale.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <div class="ch"><span class="cn">Carico IT minimo</span><span class="cv" id="v-opt-itmin">50 kW</span></div>
+        <input type="range" min="20" max="500" step="10" value="50" id="r-opt-itmin" oninput="document.getElementById('v-opt-itmin').textContent=this.value+' kW'">
+      </div>
+      <div>
+        <div class="ch"><span class="cn">Carico IT massimo</span><span class="cv" id="v-opt-itmax">1000 kW</span></div>
+        <input type="range" min="100" max="2000" step="50" value="1000" id="r-opt-itmax" oninput="document.getElementById('v-opt-itmax').textContent=this.value+' kW'">
+      </div>
+      <div>
+        <div class="ch"><span class="cn">Numero scenari</span><span class="cv" id="v-opt-nscen">6</span></div>
+        <input type="range" min="3" max="10" step="1" value="6" id="r-opt-nscen" oninput="document.getElementById('v-opt-nscen').textContent=this.value">
+      </div>
+    </div>
+    <button onclick="runOttimizzazione()" id="btn-ottimizza" style="width:100%;padding:10px;border-radius:var(--r);border:2px solid var(--teal);background:var(--teal);color:#fff;font-size:.84rem;font-weight:700;cursor:pointer;font-family:sans-serif;margin-bottom:1rem;">
+      &#9654; Avvia ottimizzazione scenari
+    </button>
+    <div id="opt-progress" style="font-size:.72rem;color:var(--text3);margin-bottom:.5rem;"></div>
+    <div id="opt-results"></div>
+  </div>
 </div>
 
 <div id="panel-note" class="panel">
@@ -596,7 +628,46 @@ function renderAll(){
   badgeDiv.innerHTML=selectedDays.map((gg,i)=>'<span style="font-size:.70rem;padding:2px 8px;border-radius:4px;background:'+SEL_COLORS[i]+';color:#fff;">'+giornoLabel(gg)+'</span>').join('');
   const results=selectedDays.map(gg=>({gg,data:simulaGiorno(gg,p)}));
   const primo=results[0],pctIn=Math.round(primo.data.tankInizio/capKwh*100);
-  document.getElementById('tank-prev-state').innerHTML='Inizio <b>'+giornoLabel(primo.gg)+'</b>: <b style="color:var(--teal)">'+pctIn+'%</b>';
+
+  // Calcola suggerimento volume per ogni giorno selezionato
+  // Per ogni giorno: volume minimo = freddo usato dal ghiaccio / (densita * fill 80%)
+  var suggerimenti=results.map(function(item){
+    var d=item.data;
+    // freddo totale usato dal ghiaccio nel giorno
+    var iceUsedTot=d.totIceDown;
+    // volume minimo fisico per contenere quel freddo (fill 80%)
+    var massaKg=iceUsedTot*1000/LATENTE_WH;
+    var volMin=Math.ceil(massaKg/RHO_ICE/0.80/10)*10;
+    // volume attuale
+    var volAtt=p.tankV;
+    return{gg:item.gg,iceUsed:Math.round(iceUsedTot),volMin:Math.max(10,volMin),volAtt:volAtt,ok:volAtt>=Math.max(10,volMin)};
+  });
+
+  var volMaxNecessario=Math.max.apply(null,suggerimenti.map(function(s){return s.volMin;}));
+  var tuttiOk=suggerimenti.every(function(s){return s.ok;});
+
+  var tankMsg='Inizio <b>'+giornoLabel(primo.gg)+'</b>: <b style="color:var(--teal)">'+pctIn+'%</b>';
+  if(results.length>1){
+    if(tuttiOk){
+      tankMsg+=' · <span style="color:var(--green);">✔ Serbatoio '+p.tankV+' m³ sufficiente per tutti i giorni selezionati</span>';
+    } else {
+      var carenti=suggerimenti.filter(function(s){return !s.ok;});
+      tankMsg+='<br><span style="color:var(--amber);">⚠ Suggerimento: per coprire tutti i giorni selezionati servirebbero almeno <b>'+volMaxNecessario+' m³</b></span>'
+        +' <button onclick="document.getElementById(\'r-tank\').value='+volMaxNecessario+';resetRun();" '
+        +'style="margin-left:6px;padding:2px 10px;border-radius:var(--r);border:1.5px solid var(--amber);background:var(--amber3);color:var(--amber);font-size:.68rem;font-weight:700;cursor:pointer;">'
+        +'⇧ Applica '+volMaxNecessario+' m³</button>';
+      tankMsg+='<div style="margin-top:3px;font-size:.66rem;color:var(--text3);">';
+      suggerimenti.forEach(function(s){
+        tankMsg+='<span style="margin-right:8px;">'
+          +(s.ok?'✔':'<b style="color:var(--amber);">⚠</b>')
+          +' '+giornoLabel(s.gg)+': ghiaccio usato '+s.iceUsed+' kWh_th → min '
+          +(s.ok?'<span style="color:var(--green);">':'<span style="color:var(--amber);">')
+          +s.volMin+' m³</span></span>';
+      });
+      tankMsg+='</div>';
+    }
+  }
+  document.getElementById('tank-prev-state').innerHTML=tankMsg;
   document.getElementById('kpi-top').innerHTML=results.map(function(item,i){
     var d=item.data,critAlert=d.tankMin<capKwh*0.20?'<span style="color:var(--red);font-size:.65rem;margin-left:6px;">\u26a0 tank sotto 20%</span>':'';
     return '<div style="border:1px solid '+SEL_COLORS[i]+';border-radius:var(--rl);padding:.7rem .6rem;background:var(--bg2);"><div style="font-size:.62rem;font-weight:600;color:'+SEL_COLORS[i]+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+giornoLabel(item.gg)+critAlert+'</div><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--red);font-size:1.3rem;">'+(d.totCooling/1000).toFixed(1)+'</div><div class="ku">MWh_th</div><div class="kl">Cooling</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--green);font-size:1.3rem;">'+Math.round(d.totPv)+'</div><div class="ku">kWh_el</div><div class="kl">FV</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--teal);font-size:1.3rem;">'+d.ghiaccioT.toFixed(1)+'</div><div class="ku">t</div><div class="kl">Ghiaccio</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.3rem;">'+(d.totGrid/1000).toFixed(1)+'</div><div class="ku">MWh_el</div><div class="kl">Rete</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.3rem;">'+Math.round(d.totCost)+'</div><div class="ku">\u20ac</div><div class="kl">Costo</div></div><div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--blue);font-size:1.3rem;">'+d.pueAvg.toFixed(2)+'</div><div class="ku"></div><div class="kl">PUE</div></div></div></div>';
@@ -996,6 +1067,208 @@ function autoDimTank(){
   },50);
 }
 
+
+function runOttimizzazione(){
+  var btn=document.getElementById('btn-ottimizza');
+  var prog=document.getElementById('opt-progress');
+  var res=document.getElementById('opt-results');
+  btn.disabled=true;
+  res.innerHTML='';
+
+  var p=getParams();
+  var itMin=parseInt(document.getElementById('r-opt-itmin').value);
+  var itMax=parseInt(document.getElementById('r-opt-itmax').value);
+  var nScen=parseInt(document.getElementById('r-opt-nscen').value);
+
+  // Genera scenari IT linearmente spaziati
+  var itScenari=[];
+  for(var i=0;i<nScen;i++){
+    itScenari.push(Math.round(itMin+(itMax-itMin)*i/(nScen-1)));
+  }
+
+  // Simula anno per dato itKw e vol, ritorna costo annuo
+  function simCosto(itKw,vol){
+    var coolKw=itKw*0.40;
+    // scala chillerMax proporzionalmente al carico (min 100, max 2000)
+    var chillerScalato=Math.min(2000,Math.max(100,Math.round(coolKw*1.5/50)*50));
+    // UA involucro e setP rimangono costanti (proprietà dell'edificio, non del carico)
+    var pT=Object.assign({},p,{tankV:vol,dcBase:itKw,heatKw:coolKw,itKw:itKw,chillerMax:chillerScalato});
+    var cap=vol*RHO_ICE*LATENTE_WH/1000;
+    var tank=cap*0.5;
+    for(var d=0;d<30;d++){
+      for(var h=0;h<24;h++){var r=simulaOra(h,11,pT,tank,0);tank=r.tankLevelRaw;}
+    }
+    var totCost=0;
+    for(var m=0;m<12;m++){
+      for(var dd=0;dd<GIORNI_MESE[m];dd++){
+        for(var h=0;h<24;h++){
+          var r=simulaOra(h,m,pT,tank,0);
+          tank=r.tankLevelRaw;
+          totCost+=r.gridCost-r.feedInRev;
+        }
+      }
+    }
+    return Math.round(totCost);
+  }
+
+  // Trova volume ottimale per un dato carico IT
+  function trovVolOttimo(itKw){
+    var cands=[10,20,30,50,75,100,150,200,300,500,800,1200];
+    var best=cands[0],bestC=Infinity;
+    var prev3=[Infinity,Infinity,Infinity];
+    for(var vi=0;vi<cands.length;vi++){
+      var c=simCosto(itKw,cands[vi]);
+      if(c<bestC){bestC=c;best=cands[vi];}
+      prev3=[prev3[1],prev3[2],c];
+      if(prev3[0]<prev3[1]&&prev3[1]<prev3[2])break;
+    }
+    // affina ±50 step 10
+    var lo=Math.max(10,best-50),hi=Math.min(1500,best+50);
+    for(var v=lo;v<=hi;v+=10){
+      var c=simCosto(itKw,v);
+      if(c<bestC){bestC=c;best=v;}
+    }
+    // costo senza serbatoio (vol=10)
+    var c0=simCosto(itKw,10);
+    return{vol:best,cost:bestC,costBase:c0,risparmio:c0-bestC};
+  }
+
+  // Esegui scenari con setTimeout per non bloccare il browser
+  var risultati=[];
+  var idx=0;
+
+  function stepScenario(){
+    if(idx>=itScenari.length){
+      renderRisultati();
+      btn.disabled=false;
+      prog.innerHTML='';
+      return;
+    }
+    var itKw=itScenari[idx];
+    prog.innerHTML='Scenario '+(idx+1)+'/'+nScen+': '+itKw+' kW IT …';
+    setTimeout(function(){
+      var r=trovVolOttimo(itKw);
+      risultati.push({itKw:itKw,vol:r.vol,cost:r.cost,costBase:r.costBase,risparmio:r.risparmio});
+      idx++;
+      stepScenario();
+    },10);
+  }
+
+  function renderRisultati(){
+    // Tabella scenari
+    var tbl='<div style="overflow-x:auto;margin-bottom:1.2rem;"><table><thead><tr>'
+      +'<th style="text-align:left;">Carico IT</th>'
+      +'<th>Calore 40%</th>'
+      +'<th>Vol. ottimale</th>'
+      +'<th>Capacità</th>'
+      +'<th>Costo/anno</th>'
+      +'<th>Senza ITES</th>'
+      +'<th>Risparmio/anno</th>'
+      +'<th>Risparmio 10a</th>'
+      +'</tr></thead><tbody>';
+    risultati.forEach(function(r,i){
+      var cap=Math.round(r.vol*RHO_ICE*LATENTE_WH/1000);
+      var r10=r.risparmio*10;
+      tbl+='<tr>'
+        +'<td style="font-family:IBM Plex Sans,monospace;color:var(--text);font-weight:600;">'+r.itKw+' kW</td>'
+        +'<td>'+Math.round(r.itKw*0.4)+' kW_th</td>'
+        +'<td style="color:var(--teal);font-weight:600;">'+r.vol+' m³</td>'
+        +'<td>'+cap+' kWh</td>'
+        +'<td style="color:var(--amber);">€'+fN(r.cost)+'</td>'
+        +'<td style="color:var(--text3);">€'+fN(r.costBase)+'</td>'
+        +'<td style="color:'+(r.risparmio>0?'var(--green)':'var(--red)')+'";font-weight:600;">'+(r.risparmio>0?'+':'')+'€'+fN(r.risparmio)+'</td>'
+        +'<td style="color:'+(r10>0?'var(--green)':'var(--red)')+'";>'+(r10>0?'+':'')+'€'+fN(r10)+'</td>'
+        +'</tr>';
+    });
+    tbl+='</tbody></table></div>';
+
+    // Grafico volume ottimale vs carico IT
+    res.innerHTML=tbl
+      +'<div class="g2">'
+      +'<div class="card"><div class="ct">Volume ottimale vs carico IT</div><div class="cw" style="height:220px;"><canvas id="cOptVol"></canvas></div></div>'
+      +'<div class="card"><div class="ct">Risparmio annuo vs carico IT</div><div class="cw" style="height:220px;"><canvas id="cOptRisp"></canvas></div></div>'
+      +'</div>'
+      +'<div class="ibar ibar-a" style="margin-top:.8rem;font-size:.73rem;">'
+      +'<b>Nota:</b> Il volume ottimale minimizza il costo della bolletta annua. '
+      +'Con carichi bassi (&lt;100 kW) il serbatoio ha rendimento decrescente per le perdite termiche. '
+      +'Definito il carico IT reale, usa il pulsante Ottimizza serbatoio nella tab Simulazione Giornaliera per l\'affinamento finale.'
+      +'</div>';
+
+    destroyC('cOptVol');
+    charts['cOptVol']=new Chart(document.getElementById('cOptVol'),{
+      type:'line',
+      data:{
+        labels:risultati.map(function(r){return r.itKw+' kW';}),
+        datasets:[{
+          label:'Volume ottimale (m³)',
+          data:risultati.map(function(r){return r.vol;}),
+          borderColor:'#0e7490',backgroundColor:'rgba(14,116,144,.10)',
+          fill:true,tension:.3,pointRadius:5,borderWidth:2.5,
+          pointBackgroundColor:'#0e7490'
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.y+' m³';}}}},
+        scales:{
+          x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},
+          y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},
+            title:{display:true,text:'m³',color:'#718096',font:{size:9}}}
+        }
+      }
+    });
+
+    destroyC('cOptRisp');
+    charts['cOptRisp']=new Chart(document.getElementById('cOptRisp'),{
+      type:'bar',
+      data:{
+        labels:risultati.map(function(r){return r.itKw+' kW';}),
+        datasets:[{
+          label:'Risparmio annuo (€)',
+          data:risultati.map(function(r){return r.risparmio;}),
+          backgroundColor:risultati.map(function(r){return r.risparmio>0?'rgba(57,211,83,.55)':'rgba(248,81,73,.5)';}),
+          borderColor:risultati.map(function(r){return r.risparmio>0?'#39d353':'#f85149';}),
+          borderWidth:1,borderRadius:4
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return '€'+Math.round(ctx.parsed.y)+'/anno';}}}},
+        scales:{
+          x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},
+          y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return '€'+Math.round(v/1000)+'k';}}}
+        }
+      }
+    });
+
+    // Applica scenario ottimale economicamente (max risparmio)
+    var best=risultati.reduce(function(a,b){return b.risparmio>a.risparmio?b:a;});
+    res.innerHTML+=
+      '<div class="ibar ibar-g" style="margin-top:.8rem;font-size:.78rem;">'
+      +'<b>Scenario migliore:</b> <b style="color:var(--teal);">'+best.itKw+' kW IT</b> '
+      +'con serbatoio <b style="color:var(--teal);">'+best.vol+' m³</b> '
+      +'→ risparmio <b style="color:var(--green);">€'+fN(best.risparmio)+'/anno</b> '
+      +'(€'+fN(best.risparmio*10)+' in 10 anni)'
+      +'<br><button onclick="applicaScenario('+best.itKw+','+best.vol+')" '
+      +'style="margin-top:6px;padding:5px 14px;border-radius:var(--r);border:1.5px solid var(--green);'
+      +'background:var(--green3);color:var(--green);font-size:.74rem;font-weight:700;cursor:pointer;'
+      +'font-family:sans-serif;">Applica questo scenario alla simulazione</button>'
+      +'</div>';
+  }
+
+  stepScenario();
+}
+
+function applicaScenario(itKw,vol){
+  // Calcola numero rack compatibile (arrotonda al tipo selezionato)
+  var p=getParams();
+  var kwPerRack=p.rack.kw;
+  var nRack=Math.max(1,Math.round(itKw/kwPerRack));
+  document.getElementById('r-nrack').value=nRack;
+  document.getElementById('r-tank').value=vol;
+  resetRun();
+  // Vai alla tab simulazione
+  sw('giornaliera');
+  document.getElementById('opt-results').innerHTML+='<div class="ibar ibar-g" style="margin-top:.5rem;font-size:.72rem;">Scenario applicato: '+nRack+' rack × '+kwPerRack+' kW = '+fN(nRack*kwPerRack)+' kW IT · serbatoio '+vol+' m³</div>';
+}
 
 function exportCSV(){
   if(selectedDays.length===0){alert('Seleziona almeno un giorno dal calendario.');return;}
