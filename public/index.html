@@ -900,9 +900,19 @@ function runCapex(){
   +'<div style="font-size:.68rem;color:var(--text3);margin-bottom:.5rem;">Curva cumulativa: punti verdi = utile, rossi = ancora in perdita. La linea tratteggiata indica lo zero.</div>'
   +'<div class="cw" style="height:200px;"><canvas id="cBreakeven"></canvas></div>'
   +'</div>';
-  destroyC('cCashflow');
-  const cfData20=Array.from({length:21},function(_,y){return{year:'A'+y,cf:cfArr[y],cum:cfArr.slice(0,y+1).reduce((a,b)=>a+b,0)};});
-  charts['cCashflow']=new Chart(document.getElementById('cCashflow'),{type:'bar',data:{labels:cfData20.map(d=>d.year),datasets:[{label:'Cash Flow',data:cfData20.map(d=>d.cf),backgroundColor:cfData20.map(d=>d.cf<0?'rgba(248,81,73,.5)':'rgba(57,211,83,.5)'),borderColor:cfData20.map(d=>d.cf<0?'#f85149':'#39d353'),borderWidth:1,borderRadius:3},{label:'Cumulativo',data:cfData20.map(d=>d.cum),type:'line',borderColor:'#58a6ff',backgroundColor:'rgba(88,166,255,.06)',fill:false,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return (v/1000000).toFixed(1)+'M';}}}}}});
+  var _cfArr2=cfArr,_bkAnno2=breakevenAnno;
+  setTimeout(function(){
+    destroyC('cCashflow');
+    var cfData20=Array.from({length:21},function(_,y){return{year:'A'+y,cf:_cfArr2[y],cum:_cfArr2.slice(0,y+1).reduce(function(a,b){return a+b;},0)};});
+    var cfEl=document.getElementById('cCashflow');
+    if(cfEl) charts['cCashflow']=new Chart(cfEl,{type:'bar',data:{labels:cfData20.map(function(d){return d.year;}),datasets:[{label:'Cash Flow',data:cfData20.map(function(d){return d.cf;}),backgroundColor:cfData20.map(function(d){return d.cf<0?'rgba(248,81,73,.5)':'rgba(57,211,83,.5)';}),borderColor:cfData20.map(function(d){return d.cf<0?'#f85149':'#39d353';}),borderWidth:1,borderRadius:3},{label:'Cumulativo',data:cfData20.map(function(d){return d.cum;}),type:'line',borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': €'+(ctx.parsed.y/1000000).toFixed(2)+'M';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return (v/1000000).toFixed(1)+'M€';}}}}}});
+    destroyC('cBreakeven');
+    var bkEl=document.getElementById('cBreakeven');
+    if(bkEl){
+      var cumVals=cfData20.map(function(d){return Math.round(d.cum/1000);});
+      charts['cBreakeven']=new Chart(bkEl,{type:'line',data:{labels:cfData20.map(function(d){return d.year;}),datasets:[{label:'Cumulativo (k€)',data:cumVals,borderColor:'#58a6ff',fill:false,tension:.3,borderWidth:2.5,segment:{borderColor:function(ctx){return cumVals[ctx.p1DataIndex]>=0?'#39d353':'#f85149';}},pointRadius:4,pointBackgroundColor:cumVals.map(function(v){return v>=0?'#39d353':'#f85149';})},{label:'Zero',data:cfData20.map(function(){return 0;}),borderColor:'rgba(0,0,0,0.25)',borderDash:[5,4],pointRadius:0,borderWidth:1.5,fill:false}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{callbacks:{label:function(ctx){return '€'+Math.round(ctx.parsed.y)+'k';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return v+'k€';}},title:{display:true,text:'k€',color:'#718096',font:{size:9}}}}}});
+    }
+  },80);
 }
 
 function runDim(){
@@ -1196,50 +1206,33 @@ function runOttimizzazione(){
       +'Definito il carico IT reale, usa il pulsante Ottimizza serbatoio nella tab Simulazione Giornaliera per l\'affinamento finale.'
       +'</div>';
 
-    destroyC('cOptVol');
-    charts['cOptVol']=new Chart(document.getElementById('cOptVol'),{
-      type:'line',
-      data:{
-        labels:risultati.map(function(r){return r.itKw+' kW';}),
-        datasets:[{
-          label:'Volume ottimale (m³)',
-          data:risultati.map(function(r){return r.vol;}),
-          borderColor:'#0e7490',backgroundColor:'rgba(14,116,144,.10)',
-          fill:true,tension:.3,pointRadius:5,borderWidth:2.5,
-          pointBackgroundColor:'#0e7490'
-        }]
-      },
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.y+' m³';}}}},
-        scales:{
-          x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},
-          y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},
-            title:{display:true,text:'m³',color:'#718096',font:{size:9}}}
-        }
-      }
-    });
-
-    destroyC('cOptRisp');
-    charts['cOptRisp']=new Chart(document.getElementById('cOptRisp'),{
-      type:'bar',
-      data:{
-        labels:risultati.map(function(r){return r.itKw+' kW';}),
-        datasets:[{
-          label:'Risparmio annuo (€)',
-          data:risultati.map(function(r){return r.risparmio;}),
-          backgroundColor:risultati.map(function(r){return r.risparmio>0?'rgba(57,211,83,.55)':'rgba(248,81,73,.5)';}),
-          borderColor:risultati.map(function(r){return r.risparmio>0?'#39d353':'#f85149';}),
-          borderWidth:1,borderRadius:4
-        }]
-      },
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return '€'+Math.round(ctx.parsed.y)+'/anno';}}}},
-        scales:{
-          x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},
-          y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return '€'+Math.round(v/1000)+'k';}}}
-        }
-      }
-    });
+    setTimeout(function(){
+      destroyC('cOptVol');
+      var volEl=document.getElementById('cOptVol');
+      if(volEl){charts['cOptVol']=new Chart(volEl,{type:'line',
+        data:{labels:risultati.map(function(r){return r.itKw+' kW';}),
+          datasets:[{label:'Volume ottimale (m³)',data:risultati.map(function(r){return r.vol;}),
+            borderColor:'#0e7490',backgroundColor:'rgba(14,116,144,.10)',
+            fill:true,tension:.3,pointRadius:5,borderWidth:2.5,pointBackgroundColor:'#0e7490'}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.y+' m³';}}}},
+          scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},
+            y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},
+              title:{display:true,text:'m³',color:'#718096',font:{size:9}}}}}});}
+      destroyC('cOptRisp');
+      var rispEl=document.getElementById('cOptRisp');
+      if(rispEl){charts['cOptRisp']=new Chart(rispEl,{type:'bar',
+        data:{labels:risultati.map(function(r){return r.itKw+' kW';}),
+          datasets:[{label:'Risparmio annuo (€)',data:risultati.map(function(r){return r.risparmio;}),
+            backgroundColor:risultati.map(function(r){return r.risparmio>0?'rgba(57,211,83,.55)':'rgba(248,81,73,.5)';}),
+            borderColor:risultati.map(function(r){return r.risparmio>0?'#39d353':'#f85149';}),
+            borderWidth:1,borderRadius:4}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return '€'+Math.round(ctx.parsed.y)+'/anno';}}}},
+          scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9}}},
+            y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},
+              callback:function(v){return '€'+Math.round(v/1000)+'k';}}}}}});}
+    },80);
 
     // Applica scenario ottimale economicamente (max risparmio)
     var best=risultati.reduce(function(a,b){return b.risparmio>a.risparmio?b:a;});
