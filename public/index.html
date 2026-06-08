@@ -197,9 +197,6 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <div><div class="ch"><span class="cn">EER/COP nominale (15&deg;C)</span><span class="cv" id="v-cop">3.5</span></div>
             <input type="range" min="2.0" max="6.0" step="0.1" value="3.5" id="r-cop" oninput="resetRun()">
           </div>
-          <div><div class="ch"><span class="cn">Potenza max chiller</span><span class="cv" id="v-chillermax">2000 kW_th</span></div>
-            <input type="range" min="100" max="5000" step="100" value="2000" id="r-chillermax" oninput="resetRun()">
-          </div>
           <!-- PANNELLO ESPLICITO kWh_el -> kWh_th -->
           <div class="cop-panel" id="cop-explain-panel">
             <div style="font-size:.62rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;">Catena di conversione energetica</div>
@@ -275,16 +272,20 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
         <!-- LEGENDA COMPLETA -->
         <div class="leg-box">
           <div class="leg-title">Legenda &mdash; tutte le linee del grafico</div>
+          <div style="font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;">Flussi termici (kWh_th)</div>
+          <div class="leg-grid" style="margin-bottom:.5rem;">
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#ff6b35" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#ff6b35">Cooling rack</b> &mdash; Calore da dissipare = IT + servizi + involucro.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#39c8c8" stroke-width="2"/></svg></div><div class="leg-text"><b style="color:#39c8c8">Ghiaccio prodotto</b> &mdash; Freddo accumulato con surplus FV (chiller illimitato).</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#a371f7" stroke-width="2" stroke-dasharray="4,3"/></svg></div><div class="leg-text"><b style="color:#a371f7">Ghiaccio usato</b> &mdash; Freddo prelevato per coprire deficit di cooling.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#58a6ff" stroke-width="2"/></svg></div><div class="leg-text"><b style="color:#58a6ff">Ghiaccio disponibile</b> &mdash; Riserva totale ora per ora (carry-over ieri + prodotto oggi).</div></div>
+          </div>
+          <div style="font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;">Flussi elettrici (kWh_el)</div>
           <div class="leg-grid">
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#f85149" stroke-width="2" stroke-dasharray="6,3"/></svg></div><div class="leg-text"><b style="color:#f85149">Rack IT (kWh_el)</b> &mdash; Consumo elettrico IT costante 24h. 100% si converte in calore da dissipare.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#ff6b35" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#ff6b35">Cooling rack (kWh_th)</b> &mdash; Calore termico da dissipare = IT + servizi + involucro. Il chiller lo rimuove consumando kWh_th/EER di elettricit&agrave;.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#39d353" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#39d353">FV lordo (kWh_el)</b> &mdash; Potenza fotovoltaica totale prodotta. Priorit&agrave;: 1) IT &rarr; 2) Cooling &rarr; 3) Ghiaccio &rarr; 4) Rete.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#22c55e" stroke-width="2" stroke-dasharray="4,2"/></svg></div><div class="leg-text"><b style="color:#22c55e">FV netto (kWh_el)</b> &mdash; FV residuo dopo aver coperto IT e cooling. Tutto il surplus va a produrre ghiaccio o rete.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#e3b341" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#e3b341">Prelievo rete (kWh_el)</b> &mdash; Acquistato dalla rete quando FV non basta. Di notte copre tutto IT + cooling.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="1,0"/></svg></div><div class="leg-text"><b style="color:#8b5cf6">Somma consumi el. (kWh_el)</b> &mdash; IT + chiller cooling + chiller ghiaccio. Totale elettrico consumato ogni ora.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#39c8c8" stroke-width="2"/></svg></div><div class="leg-text"><b style="color:#39c8c8">Ghiaccio+ prodotto (kWh_th)</b> &mdash; Freddo accumulato con surplus FV. Serbatoio illimitato, limitato solo dalla potenza chiller.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#a371f7" stroke-width="2" stroke-dasharray="4,3"/></svg></div><div class="leg-text"><b style="color:#a371f7">Ghiaccio&minus; usato (kWh_th)</b> &mdash; Freddo prelevato per coprire deficit di cooling (notte, picchi estivi).</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="2,4"/></svg></div><div class="leg-text"><b style="color:#58a6ff">FV venduto rete (kWh_el)</b> &mdash; Surplus FV immesso in rete al prezzo feed-in dopo aver saturato il chiller ghiaccio.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#f85149" stroke-width="2" stroke-dasharray="6,3"/></svg></div><div class="leg-text"><b style="color:#f85149">Rack IT</b> &mdash; Consumo elettrico IT costante 24h.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#39d353" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#39d353">FV lordo</b> &mdash; Potenza FV totale. Priorit&agrave;: IT &rarr; Cooling &rarr; Ghiaccio &rarr; Rete.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#22c55e" stroke-width="2" stroke-dasharray="4,2"/></svg></div><div class="leg-text"><b style="color:#22c55e">FV netto surplus</b> &mdash; FV residuo dopo IT e cooling.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#e3b341" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#e3b341">Prelievo rete</b> &mdash; Acquistato dalla rete quando FV non basta.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="2,4"/></svg></div><div class="leg-text"><b style="color:#58a6ff">FV venduto rete</b> &mdash; Surplus FV immesso in rete dopo aver saturato il chiller.</div></div>
           </div>
         </div>
 
@@ -490,7 +491,6 @@ function getParams(){
     setP:parseFloat(document.getElementById('r-setp').value),
     ua:parseFloat(document.getElementById('r-ua').value),
     cop:parseFloat(document.getElementById('r-cop').value),
-    chillerMax:parseFloat(document.getElementById('r-chillermax').value),
     gridPrice,
     feedIn:parseFloat(document.getElementById('r-feedin').value),
     tariffMode
@@ -518,7 +518,6 @@ function updateLabels(p){
   document.getElementById('v-setp').textContent=p.setP+' \u00b0C';
   document.getElementById('v-ua').textContent=p.ua+' W/K';
   document.getElementById('v-cop').textContent=p.cop.toFixed(1);
-  document.getElementById('v-chillermax').textContent=p.chillerMax+' kW_th';
   document.getElementById('v-price').textContent=p.gridPrice.toFixed(2)+' \u20ac/kWh';
   document.getElementById('v-feedin').textContent=p.feedIn.toFixed(2)+' \u20ac/kWh';
   var nFile=Math.ceil(p.nRack/p.rack.perRow),rpf=Math.min(p.nRack,p.rack.perRow);
@@ -615,15 +614,14 @@ function simulaOra(h,mese,p,tankKwhToday,iceYesterdayKwh){
   var gridForChiller=coolResidualAfterFV>0 ? coolResidualAfterFV/eer : 0;
 
   // 6) Tutto il surplus FV residuo va a produrre ghiaccio (serbatoio ILLIMITATO)
-  //    Limite: potenza max chiller
+  //    Chiller illimitato: nessun cap di potenza
   var iceCharged=0;
   var pvElUsedForIce=0;
   if(pvAfterCooling>0){
     // Il chiller ha gia' usato coolingNeed kWh_th per il cooling.
     // Capacita' termica residua del chiller disponibile per ghiaccio:
-    var chillerResiduo=Math.max(0, p.chillerMax - coolingNeed);
-    // kWh_th ghiaccio producibili dal surplus FV, nei limiti del residuo chiller
-    var iceFromPv=Math.min(pvAfterCooling*copIce, chillerResiduo);
+    // Chiller illimitato: produce tutto il ghiaccio possibile col surplus FV
+    var iceFromPv=pvAfterCooling*copIce;
     iceCharged=iceFromPv;
     pvElUsedForIce=iceCharged/copIce;
     tankKwhToday+=iceCharged;
@@ -658,6 +656,7 @@ function simulaOra(h,mese,p,tankKwhToday,iceYesterdayKwh){
     iceYestUsed:Math.round(iceYestUsed*10)/10,
     iceTodayUsed:Math.round(iceTodayUsed*10)/10,
     tankKwhToday:Math.round(tankKwhToday*10)/10,
+    iceAvailable:Math.round((tankKwhToday+iceYesterdayKwh)*10)/10,
     gridForChiller:Math.round(gridForChiller*10)/10,
     totalGrid:Math.round(totalGrid*10)/10,
     pvToGrid:Math.round(pvToGrid*10)/10,
@@ -1007,31 +1006,48 @@ function renderAll(){
     var lbl=document.createElement('div');
     lbl.style.cssText='font-size:.70rem;color:'+SEL_COLORS[i]+';font-weight:600;margin-bottom:3px;';
     lbl.textContent=giornoLabel(gg);
-    var cw=document.createElement('div');
-    cw.style.cssText='position:relative;width:100%;height:'+(results.length===1?'300':'220')+'px;';
-    var cv=document.createElement('canvas');cv.id='cOrario'+i;
-    cw.appendChild(cv);wrap.appendChild(lbl);wrap.appendChild(cw);
-    if(i<results.length-1){var sep=document.createElement('hr');sep.style.cssText='border:none;border-top:0.5px solid var(--border);margin:5px 0;';wrap.appendChild(sep);}
+    // --- GRAFICO kW_th ---
+    var cwTh=document.createElement('div');
+    cwTh.style.cssText='position:relative;width:100%;height:'+(results.length===1?'240':'200')+'px;margin-bottom:4px;';
+    var lblTh=document.createElement('div');
+    lblTh.style.cssText='font-size:.62rem;color:var(--text3);font-weight:600;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;';
+    lblTh.textContent='Flussi termici (kWh_th)';
+    var cvTh=document.createElement('canvas');cvTh.id='cOrarioTh'+i;
+    cwTh.appendChild(cvTh);wrap.appendChild(lblTh);wrap.appendChild(cwTh);
+
+    // --- GRAFICO kW_el ---
+    var cwEl=document.createElement('div');
+    cwEl.style.cssText='position:relative;width:100%;height:'+(results.length===1?'240':'200')+'px;';
+    var lblEl=document.createElement('div');
+    lblEl.style.cssText='font-size:.62rem;color:var(--text3);font-weight:600;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;';
+    lblEl.textContent='Flussi elettrici (kWh_el)';
+    var cvEl=document.createElement('canvas');cvEl.id='cOrarioEl'+i;
+    cwEl.appendChild(cvEl);wrap.appendChild(lblEl);wrap.appendChild(cwEl);
+
+    if(i<results.length-1){var sep=document.createElement('hr');sep.style.cssText='border:none;border-top:0.5px solid var(--border);margin:8px 0;';wrap.appendChild(sep);}
     chartsDiv.appendChild(wrap);
 
-    charts['cOrario'+i]=new Chart(cv,{type:'line',data:{labels,datasets:[
-      // 1. Rack IT (linea tratteggiata rossa)
-      {label:'Rack IT (kWh_el)',data:data.hours.map(function(r){return p.dcBase;}),borderColor:'#f85149',fill:false,tension:0,pointRadius:0,borderWidth:2,borderDash:[6,3]},
-      // 2. Cooling rack (area arancione) - kWh_th
+    charts['cOrarioTh'+i]=new Chart(cvTh,{type:'line',data:{labels,datasets:[
+      // Cooling rack (area arancione)
       {label:'Cooling rack (kWh_th)',data:data.hours.map(function(r){return r.coolingNeed;}),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,.07)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
-      // 3. FV lordo (area verde) - kWh_el
+      // Ghiaccio prodotto (linea teal)
+      {label:'Ghiaccio prodotto (kWh_th)',data:data.hours.map(function(r){return r.iceCharged;}),borderColor:'#39c8c8',fill:false,tension:.3,pointRadius:0,borderWidth:2},
+      // Ghiaccio usato (tratteggiata viola)
+      {label:'Ghiaccio usato (kWh_th)',data:data.hours.map(function(r){return r.iceUsed;}),borderColor:'#a371f7',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[4,3]},
+      // Ghiaccio disponibile (linea azzurra solida)
+      {label:'Ghiaccio disponibile (kWh_th)',data:data.hours.map(function(r){return r.iceAvailable;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:2}
+    ]},options:coOpts});
+
+    charts['cOrarioEl'+i]=new Chart(cvEl,{type:'line',data:{labels,datasets:[
+      // Rack IT (tratteggiata rossa)
+      {label:'Rack IT (kWh_el)',data:data.hours.map(function(r){return p.dcBase;}),borderColor:'#f85149',fill:false,tension:0,pointRadius:0,borderWidth:2,borderDash:[6,3]},
+      // FV lordo (area verde)
       {label:'FV lordo (kWh_el)',data:data.hours.map(function(r){return r.pvKw;}),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.08)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5},
-      // 4. FV netto dopo IT+cooling (tratteggiata verde scuro)
+      // FV netto surplus (tratteggiata verde scuro)
       {label:'FV netto surplus (kWh_el)',data:data.hours.map(function(r){return r.pvNetto;}),borderColor:'#22c55e',fill:false,tension:.4,pointRadius:0,borderWidth:1.5,borderDash:[4,2]},
-      // 5. Prelievo rete (area gialla)
+      // Prelievo rete (area gialla)
       {label:'Prelievo rete (kWh_el)',data:data.hours.map(function(r){return r.totalGrid;}),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
-      // 6. SOMMA consumi elettrici (linea viola solida)
-      {label:'Somma consumi el. (kWh_el)',data:data.hours.map(function(r){return r.totalElecConsumed;}),borderColor:'#8b5cf6',fill:false,tension:.3,pointRadius:0,borderWidth:2},
-      // 7. Ghiaccio prodotto (linea teal)
-      {label:'Ghiaccio+ prodotto (kWh_th)',data:data.hours.map(function(r){return r.iceCharged;}),borderColor:'#39c8c8',fill:false,tension:.3,pointRadius:0,borderWidth:2},
-      // 8. Ghiaccio usato (tratteggiata viola)
-      {label:'Ghiaccio- usato (kWh_th)',data:data.hours.map(function(r){return r.iceUsed;}),borderColor:'#a371f7',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[4,3]},
-      // 9. FV venduto rete (tratteggiata blu)
+      // FV venduto rete (tratteggiata blu)
       {label:'FV venduto rete (kWh_el)',data:data.hours.map(function(r){return r.pvToGrid;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[2,4]}
     ]},options:coOpts});
   });
