@@ -89,10 +89,10 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 /* LEGENDA GRAFICO */
 .leg-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:.7rem 1rem;margin-top:.8rem;}
 .leg-title{font-size:.60rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:.5rem;}
-.leg-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 1.5rem;}
+.leg-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px 1.5rem;}
 .leg-item{display:flex;align-items:flex-start;gap:7px;}
 .leg-line{flex-shrink:0;margin-top:7px;}
-.leg-text{font-size:.64rem;color:var(--text2);line-height:1.4;}
+.leg-text{font-size:.75rem;color:var(--text2);line-height:1.5;}
 /* SPIEGATORE CONTESTUALE */
 .explainer-box{background:linear-gradient(135deg,#f0f9ff,#e8f0fe);border:1px solid #bfdbfe;border-radius:var(--rl);padding:.9rem 1.1rem;margin-top:.8rem;}
 .explainer-title{font-size:.68rem;font-weight:700;color:#1e40af;margin-bottom:.6rem;display:flex;align-items:center;gap:6px;}
@@ -987,69 +987,94 @@ function renderAll(){
   Object.keys(charts).filter(function(k){return k.startsWith('cOrario');}).forEach(function(k){destroyC(k);});
   chartsDiv.innerHTML='';
   var labels=Array.from({length:24},function(_,h){return h+':00';});
-  var coOpts={
-    responsive:true,maintainAspectRatio:false,
-    interaction:{mode:'index',intersect:false},
-    plugins:{
-      legend:{display:true,position:'top',labels:{color:'#4a5568',font:{size:7.5},boxWidth:8,usePointStyle:true}},
-      tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.dataset.label+': '+Math.round(ctx.parsed.y).toLocaleString('it-IT')+' kW';}}}
-    },
-    scales:{
-      x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:12}},
-      y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'kW',color:'#718096',font:{size:9}}}
-    }
-  };
+  // Opzioni grafici condivise - font leggibili
+  function makeOpts(yLabel){
+    return {
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:true,position:'top',labels:{color:'#2d3748',font:{size:11},boxWidth:12,usePointStyle:true,padding:8}},
+        tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.dataset.label+': '+Math.round(ctx.parsed.y).toLocaleString('it-IT')+' kW';}}}
+      },
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#4a5568',font:{size:11},autoSkip:true,maxTicksLimit:12}},
+        y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#4a5568',font:{size:11}},title:{display:true,text:yLabel,color:'#4a5568',font:{size:11}}}
+      }
+    };
+  }
+
+  // Layout: riga th sopra, riga el sotto — ogni riga affianca tutti i giorni
+  var n=results.length;
+  var colW=n===1?'100%':(n===2?'calc(50% - 6px)':'calc(33.33% - 8px)');
+
+  // Intestazione sezione TERMICA
+  var secTh=document.createElement('div');
+  secTh.style.cssText='font-size:.85rem;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--orange);';
+  secTh.textContent='Flussi termici (kWh_th)';
+  chartsDiv.appendChild(secTh);
+
+  // Riga grafici termici
+  var rowTh=document.createElement('div');
+  rowTh.style.cssText='display:flex;gap:12px;margin-bottom:18px;';
+  chartsDiv.appendChild(rowTh);
+
+  // Separatore visivo
+  var divider=document.createElement('div');
+  divider.style.cssText='border-top:3px solid var(--border);margin-bottom:18px;';
+  chartsDiv.appendChild(divider);
+
+  // Intestazione sezione ELETTRICA
+  var secEl=document.createElement('div');
+  secEl.style.cssText='font-size:.85rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green);';
+  secEl.textContent='Flussi elettrici (kWh_el)';
+  chartsDiv.appendChild(secEl);
+
+  // Riga grafici elettrici
+  var rowEl=document.createElement('div');
+  rowEl.style.cssText='display:flex;gap:12px;';
+  chartsDiv.appendChild(rowEl);
 
   results.forEach(function(item,i){
     var gg=item.gg,data=item.data;
-    var wrap=document.createElement('div');
-    var lbl=document.createElement('div');
-    lbl.style.cssText='font-size:.70rem;color:'+SEL_COLORS[i]+';font-weight:600;margin-bottom:3px;';
-    lbl.textContent=giornoLabel(gg);
-    // --- GRAFICO kW_th ---
-    var cwTh=document.createElement('div');
-    cwTh.style.cssText='position:relative;width:100%;height:'+(results.length===1?'240':'200')+'px;margin-bottom:4px;';
+
+    // Cella termica
+    var cellTh=document.createElement('div');
+    cellTh.style.cssText='flex:0 0 '+colW+';min-width:0;';
     var lblTh=document.createElement('div');
-    lblTh.style.cssText='font-size:.62rem;color:var(--text3);font-weight:600;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;';
-    lblTh.textContent='Flussi termici (kWh_th)';
+    lblTh.style.cssText='font-size:.80rem;color:'+SEL_COLORS[i]+';font-weight:700;margin-bottom:4px;';
+    lblTh.textContent=giornoLabel(gg);
+    var cwTh=document.createElement('div');
+    cwTh.style.cssText='position:relative;width:100%;height:260px;';
     var cvTh=document.createElement('canvas');cvTh.id='cOrarioTh'+i;
-    cwTh.appendChild(cvTh);wrap.appendChild(lblTh);wrap.appendChild(cwTh);
+    cwTh.appendChild(cvTh);cellTh.appendChild(lblTh);cellTh.appendChild(cwTh);
+    rowTh.appendChild(cellTh);
 
-    // --- GRAFICO kW_el ---
-    var cwEl=document.createElement('div');
-    cwEl.style.cssText='position:relative;width:100%;height:'+(results.length===1?'240':'200')+'px;';
+    // Cella elettrica
+    var cellEl=document.createElement('div');
+    cellEl.style.cssText='flex:0 0 '+colW+';min-width:0;';
     var lblEl=document.createElement('div');
-    lblEl.style.cssText='font-size:.62rem;color:var(--text3);font-weight:600;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;';
-    lblEl.textContent='Flussi elettrici (kWh_el)';
+    lblEl.style.cssText='font-size:.80rem;color:'+SEL_COLORS[i]+';font-weight:700;margin-bottom:4px;';
+    lblEl.textContent=giornoLabel(gg);
+    var cwEl=document.createElement('div');
+    cwEl.style.cssText='position:relative;width:100%;height:260px;';
     var cvEl=document.createElement('canvas');cvEl.id='cOrarioEl'+i;
-    cwEl.appendChild(cvEl);wrap.appendChild(lblEl);wrap.appendChild(cwEl);
-
-    if(i<results.length-1){var sep=document.createElement('hr');sep.style.cssText='border:none;border-top:0.5px solid var(--border);margin:8px 0;';wrap.appendChild(sep);}
-    chartsDiv.appendChild(wrap);
+    cwEl.appendChild(cvEl);cellEl.appendChild(lblEl);cellEl.appendChild(cwEl);
+    rowEl.appendChild(cellEl);
 
     charts['cOrarioTh'+i]=new Chart(cvTh,{type:'line',data:{labels,datasets:[
-      // Cooling rack (area arancione)
       {label:'Cooling rack (kWh_th)',data:data.hours.map(function(r){return r.coolingNeed;}),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,.07)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
-      // Ghiaccio prodotto (linea teal)
       {label:'Ghiaccio prodotto (kWh_th)',data:data.hours.map(function(r){return r.iceCharged;}),borderColor:'#39c8c8',fill:false,tension:.3,pointRadius:0,borderWidth:2},
-      // Ghiaccio usato (tratteggiata viola)
       {label:'Ghiaccio usato (kWh_th)',data:data.hours.map(function(r){return r.iceUsed;}),borderColor:'#a371f7',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[4,3]},
-      // Ghiaccio disponibile (linea azzurra solida)
       {label:'Ghiaccio disponibile (kWh_th)',data:data.hours.map(function(r){return r.iceAvailable;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:2}
-    ]},options:coOpts});
+    ]},options:makeOpts('kWh_th')});
 
     charts['cOrarioEl'+i]=new Chart(cvEl,{type:'line',data:{labels,datasets:[
-      // Rack IT (tratteggiata rossa)
       {label:'Rack IT (kWh_el)',data:data.hours.map(function(r){return p.dcBase;}),borderColor:'#f85149',fill:false,tension:0,pointRadius:0,borderWidth:2,borderDash:[6,3]},
-      // FV lordo (area verde)
       {label:'FV lordo (kWh_el)',data:data.hours.map(function(r){return r.pvKw;}),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.08)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5},
-      // FV netto surplus (tratteggiata verde scuro)
       {label:'FV netto surplus (kWh_el)',data:data.hours.map(function(r){return r.pvNetto;}),borderColor:'#22c55e',fill:false,tension:.4,pointRadius:0,borderWidth:1.5,borderDash:[4,2]},
-      // Prelievo rete (area gialla)
       {label:'Prelievo rete (kWh_el)',data:data.hours.map(function(r){return r.totalGrid;}),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
-      // FV venduto rete (tratteggiata blu)
       {label:'FV venduto rete (kWh_el)',data:data.hours.map(function(r){return r.pvToGrid;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[2,4]}
-    ]},options:coOpts});
+    ]},options:makeOpts('kWh_el')});
   });
 
   // SPIEGATORE CONTESTUALE
