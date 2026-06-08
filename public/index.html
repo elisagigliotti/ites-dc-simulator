@@ -165,7 +165,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
       <div class="card">
         <div class="ct">Impianto FV &mdash; Bellocchi</div>
         <div class="cg">
-          <div><div class="ch"><span class="cn">Potenza installata</span><span class="cv" id="v-kwp">1040 kWp</span></div><input type="range" min="200" max="3000" step="20" value="1040" id="r-kwp" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Potenza installata</span><span class="cv" id="v-kwp">2000 kWp</span></div><input type="range" min="200" max="3000" step="20" value="2000" id="r-kwp" oninput="resetRun()"></div>
           <div><div class="ch"><span class="cn">Perdite sistema</span><span class="cv" id="v-loss">14 %</span></div><input type="range" min="10" max="22" step="1" value="14" id="r-loss" oninput="resetRun()"></div>
           <div><div class="ct" style="margin-bottom:6px;">Seleziona giorno</div><div id="cal-container"></div></div>
         </div>
@@ -987,95 +987,140 @@ function renderAll(){
   Object.keys(charts).filter(function(k){return k.startsWith('cOrario');}).forEach(function(k){destroyC(k);});
   chartsDiv.innerHTML='';
   var labels=Array.from({length:24},function(_,h){return h+':00';});
-  // Opzioni grafici condivise - font leggibili
+  var n=results.length;
+
+  // Layout: 1 giorno = full; 2 giorni = 2 col; 3-4 giorni = griglia 2x2
+  // Ogni sezione (th, el) usa la stessa griglia
+  var gridCols=n<=2?n:2;
+  var gridStyle='display:grid;grid-template-columns:repeat('+gridCols+',1fr);gap:16px;margin-bottom:20px;';
+
+  // Opzioni grafici — leggibilità massima, nessuna legenda nativa
   function makeOpts(yLabel){
     return {
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
-        legend:{display:true,position:'top',labels:{color:'#2d3748',font:{size:11},boxWidth:12,usePointStyle:true,padding:8}},
-        tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.dataset.label+': '+Math.round(ctx.parsed.y).toLocaleString('it-IT')+' kW';}}}
+        legend:{display:false},
+        tooltip:{
+          mode:'index',intersect:false,
+          bodyFont:{size:13},titleFont:{size:13},padding:10,
+          callbacks:{label:function(ctx){return '  '+ctx.dataset.label+':  '+Math.round(ctx.parsed.y).toLocaleString('it-IT')+' kW';}}
+        }
       },
       scales:{
-        x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#4a5568',font:{size:11},autoSkip:true,maxTicksLimit:12}},
-        y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#4a5568',font:{size:11}},title:{display:true,text:yLabel,color:'#4a5568',font:{size:11}}}
+        x:{
+          grid:{color:'rgba(0,0,0,0.06)'},
+          ticks:{color:'#1a202c',font:{size:13},autoSkip:true,maxTicksLimit:8}
+        },
+        y:{
+          grid:{color:'rgba(0,0,0,0.08)'},
+          ticks:{color:'#1a202c',font:{size:13}},
+          title:{display:true,text:yLabel,color:'#1a202c',font:{size:13,weight:'bold'}}
+        }
       }
     };
   }
 
-  // Layout: riga th sopra, riga el sotto — ogni riga affianca tutti i giorni
-  var n=results.length;
-  var colW=n===1?'100%':(n===2?'calc(50% - 6px)':'calc(33.33% - 8px)');
+  // Dataset definitions
+  var datasetsTh=function(data){return [
+    {label:'Cooling rack (kWh_th)',data:data.hours.map(function(r){return r.coolingNeed;}),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,.09)',fill:true,tension:.3,pointRadius:0,borderWidth:2.5},
+    {label:'Ghiaccio prodotto (kWh_th)',data:data.hours.map(function(r){return r.iceCharged;}),borderColor:'#39c8c8',fill:false,tension:.3,pointRadius:0,borderWidth:2.5},
+    {label:'Ghiaccio usato (kWh_th)',data:data.hours.map(function(r){return r.iceUsed;}),borderColor:'#a371f7',fill:false,tension:.3,pointRadius:0,borderWidth:2.5,borderDash:[6,3]},
+    {label:'Ghiaccio disponibile (kWh_th)',data:data.hours.map(function(r){return r.iceAvailable;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:2.5}
+  ];};
+  var datasetsEl=function(data){return [
+    {label:'Rack IT (kWh_el)',data:data.hours.map(function(r){return p.dcBase;}),borderColor:'#f85149',fill:false,tension:0,pointRadius:0,borderWidth:2.5,borderDash:[8,4]},
+    {label:'FV lordo (kWh_el)',data:data.hours.map(function(r){return r.pvKw;}),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.09)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5},
+    {label:'FV netto surplus (kWh_el)',data:data.hours.map(function(r){return r.pvNetto;}),borderColor:'#22c55e',fill:false,tension:.4,pointRadius:0,borderWidth:2,borderDash:[5,3]},
+    {label:'Prelievo rete (kWh_el)',data:data.hours.map(function(r){return r.totalGrid;}),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.09)',fill:true,tension:.3,pointRadius:0,borderWidth:2.5},
+    {label:'FV venduto rete (kWh_el)',data:data.hours.map(function(r){return r.pvToGrid;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[3,5]}
+  ];};
 
-  // Intestazione sezione TERMICA
-  var secTh=document.createElement('div');
-  secTh.style.cssText='font-size:.85rem;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--orange);';
-  secTh.textContent='Flussi termici (kWh_th)';
-  chartsDiv.appendChild(secTh);
+  // Legenda custom HTML — un click nasconde/mostra la serie su tutti i grafici della riga
+  function buildCustomLegend(container, dsDefinitions, chartIds){
+    var leg=document.createElement('div');
+    leg.style.cssText='display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:12px;padding:10px 12px;background:rgba(0,0,0,0.03);border-radius:8px;';
+    dsDefinitions.forEach(function(ds,dsIdx){
+      var item=document.createElement('span');
+      item.style.cssText='display:inline-flex;align-items:center;gap:7px;font-size:.90rem;font-weight:600;color:#1a202c;cursor:pointer;user-select:none;padding:3px 6px;border-radius:4px;transition:opacity .15s;';
+      var swatch=document.createElement('span');
+      swatch.style.cssText='display:inline-block;width:22px;height:4px;background:'+ds.borderColor+';border-radius:2px;flex-shrink:0;';
+      var txt=document.createElement('span');
+      txt.textContent=ds.label;
+      item.appendChild(swatch);item.appendChild(txt);
+      var hidden=false;
+      item.addEventListener('click',function(){
+        hidden=!hidden;
+        item.style.opacity=hidden?'0.30':'1';
+        item.style.textDecoration=hidden?'line-through':'none';
+        chartIds.forEach(function(cid){
+          var ch=charts[cid];
+          if(!ch)return;
+          ch.data.datasets[dsIdx].hidden=hidden;
+          ch.update();
+        });
+      });
+      leg.appendChild(item);
+    });
+    container.appendChild(leg);
+  }
 
-  // Riga grafici termici
-  var rowTh=document.createElement('div');
-  rowTh.style.cssText='display:flex;gap:12px;margin-bottom:18px;';
-  chartsDiv.appendChild(rowTh);
+  // Costruisce una sezione (th o el) con titolo, legenda condivisa, griglia di grafici
+  function buildSection(color, title, yLabel, dsFactory, prefix){
+    var sec=document.createElement('div');
+    sec.style.cssText='margin-bottom:28px;';
 
-  // Separatore visivo
+    // Titolo sezione
+    var hdr=document.createElement('div');
+    hdr.style.cssText='font-size:1rem;font-weight:800;color:'+color+';text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;padding-bottom:6px;border-bottom:3px solid '+color+';';
+    hdr.textContent=title;
+    sec.appendChild(hdr);
+
+    // Legenda condivisa
+    var legCont=document.createElement('div');
+    sec.appendChild(legCont);
+
+    // Griglia grafici
+    var grid=document.createElement('div');
+    grid.style.cssText=gridStyle;
+    sec.appendChild(grid);
+
+    chartsDiv.appendChild(sec);
+
+    // Costruisce celle
+    results.forEach(function(item,i){
+      var gg=item.gg,data=item.data;
+      var cell=document.createElement('div');
+      cell.style.cssText='min-width:0;';
+
+      // Etichetta giorno
+      var lbl=document.createElement('div');
+      lbl.style.cssText='font-size:.95rem;color:'+SEL_COLORS[i]+';font-weight:800;margin-bottom:6px;letter-spacing:.02em;';
+      lbl.textContent=giornoLabel(gg);
+
+      // Canvas
+      var cw=document.createElement('div');
+      cw.style.cssText='position:relative;width:100%;height:280px;';
+      var cv=document.createElement('canvas');cv.id=prefix+i;
+      cw.appendChild(cv);cell.appendChild(lbl);cell.appendChild(cw);
+      grid.appendChild(cell);
+
+      charts[prefix+i]=new Chart(cv,{type:'line',data:{labels,datasets:dsFactory(data)},options:makeOpts(yLabel)});
+    });
+
+    // Legenda dopo i grafici (gli id esistono già)
+    var ids=results.map(function(_,i){return prefix+i;});
+    buildCustomLegend(legCont, dsFactory({hours:Array(24).fill({})}), ids);
+  }
+
+  buildSection('#c05621','Flussi termici (kWh_th)','kWh_th',datasetsTh,'cOrarioTh');
+
+  // Separatore
   var divider=document.createElement('div');
-  divider.style.cssText='border-top:3px solid var(--border);margin-bottom:18px;';
+  divider.style.cssText='border-top:3px solid var(--border);margin-bottom:28px;';
   chartsDiv.appendChild(divider);
 
-  // Intestazione sezione ELETTRICA
-  var secEl=document.createElement('div');
-  secEl.style.cssText='font-size:.85rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green);';
-  secEl.textContent='Flussi elettrici (kWh_el)';
-  chartsDiv.appendChild(secEl);
-
-  // Riga grafici elettrici
-  var rowEl=document.createElement('div');
-  rowEl.style.cssText='display:flex;gap:12px;';
-  chartsDiv.appendChild(rowEl);
-
-  results.forEach(function(item,i){
-    var gg=item.gg,data=item.data;
-
-    // Cella termica
-    var cellTh=document.createElement('div');
-    cellTh.style.cssText='flex:0 0 '+colW+';min-width:0;';
-    var lblTh=document.createElement('div');
-    lblTh.style.cssText='font-size:.80rem;color:'+SEL_COLORS[i]+';font-weight:700;margin-bottom:4px;';
-    lblTh.textContent=giornoLabel(gg);
-    var cwTh=document.createElement('div');
-    cwTh.style.cssText='position:relative;width:100%;height:260px;';
-    var cvTh=document.createElement('canvas');cvTh.id='cOrarioTh'+i;
-    cwTh.appendChild(cvTh);cellTh.appendChild(lblTh);cellTh.appendChild(cwTh);
-    rowTh.appendChild(cellTh);
-
-    // Cella elettrica
-    var cellEl=document.createElement('div');
-    cellEl.style.cssText='flex:0 0 '+colW+';min-width:0;';
-    var lblEl=document.createElement('div');
-    lblEl.style.cssText='font-size:.80rem;color:'+SEL_COLORS[i]+';font-weight:700;margin-bottom:4px;';
-    lblEl.textContent=giornoLabel(gg);
-    var cwEl=document.createElement('div');
-    cwEl.style.cssText='position:relative;width:100%;height:260px;';
-    var cvEl=document.createElement('canvas');cvEl.id='cOrarioEl'+i;
-    cwEl.appendChild(cvEl);cellEl.appendChild(lblEl);cellEl.appendChild(cwEl);
-    rowEl.appendChild(cellEl);
-
-    charts['cOrarioTh'+i]=new Chart(cvTh,{type:'line',data:{labels,datasets:[
-      {label:'Cooling rack (kWh_th)',data:data.hours.map(function(r){return r.coolingNeed;}),borderColor:'#ff6b35',backgroundColor:'rgba(255,107,53,.07)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
-      {label:'Ghiaccio prodotto (kWh_th)',data:data.hours.map(function(r){return r.iceCharged;}),borderColor:'#39c8c8',fill:false,tension:.3,pointRadius:0,borderWidth:2},
-      {label:'Ghiaccio usato (kWh_th)',data:data.hours.map(function(r){return r.iceUsed;}),borderColor:'#a371f7',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[4,3]},
-      {label:'Ghiaccio disponibile (kWh_th)',data:data.hours.map(function(r){return r.iceAvailable;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:2}
-    ]},options:makeOpts('kWh_th')});
-
-    charts['cOrarioEl'+i]=new Chart(cvEl,{type:'line',data:{labels,datasets:[
-      {label:'Rack IT (kWh_el)',data:data.hours.map(function(r){return p.dcBase;}),borderColor:'#f85149',fill:false,tension:0,pointRadius:0,borderWidth:2,borderDash:[6,3]},
-      {label:'FV lordo (kWh_el)',data:data.hours.map(function(r){return r.pvKw;}),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.08)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5},
-      {label:'FV netto surplus (kWh_el)',data:data.hours.map(function(r){return r.pvNetto;}),borderColor:'#22c55e',fill:false,tension:.4,pointRadius:0,borderWidth:1.5,borderDash:[4,2]},
-      {label:'Prelievo rete (kWh_el)',data:data.hours.map(function(r){return r.totalGrid;}),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
-      {label:'FV venduto rete (kWh_el)',data:data.hours.map(function(r){return r.pvToGrid;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:1.5,borderDash:[2,4]}
-    ]},options:makeOpts('kWh_el')});
-  });
+  buildSection('#276749','Flussi elettrici (kWh_el)','kWh_el',datasetsEl,'cOrarioEl');
 
   // SPIEGATORE CONTESTUALE
   buildExplainer(results,p);
