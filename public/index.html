@@ -526,9 +526,9 @@ function updateLabels(p){
   document.getElementById('v-nrack').textContent=p.nRack;
   document.getElementById('v-setp').textContent=p.setP+' \u00b0C';
   document.getElementById('v-ua').textContent=p.ua+' W/K';
-  document.getElementById('v-cop').textContent=p.itNum(cop,1);
-  document.getElementById('v-price').textContent=p.itNum(gridPrice,2)+' \u20ac/kWh';
-  document.getElementById('v-feedin').textContent=p.itNum(feedIn,2)+' \u20ac/kWh';
+  document.getElementById('v-cop').textContent=itNum(p.cop,1);
+  document.getElementById('v-price').textContent=itNum(p.gridPrice,2)+' \u20ac/kWh';
+  document.getElementById('v-feedin').textContent=itNum(p.feedIn,2)+' \u20ac/kWh';
   var nFile=Math.ceil(p.nRack/p.rack.perRow),rpf=Math.min(p.nRack,p.rack.perRow);
   document.getElementById('rack-summary').innerHTML=
     'IT: <b style="color:var(--text);">'+fN(p.itKw)+' kW_el</b>'
@@ -891,7 +891,7 @@ function buildExplainerForDay(item,p,colore){
   d.hours.forEach(function(r){if(r.pvKw>maxPv){maxPv=r.pvKw;maxPvH=r.h;}});
   if(maxPv>10){
     var surplusH=d.hours[maxPvH].pvNetto;
-    events.push({time:maxPvH+':00',color:'#16a34a',text:'Picco FV: '+Math.round(maxPv)+' kWh_el. Surplus netto: ~'+Math.round(surplusH)+' kWh_el \u00d7 COP_ice '+d.hours[maxPvH].itNum(copIce,1)+' = '+Math.round(surplusH*d.hours[maxPvH].copIce)+' kWh_th ghiaccio.'});
+    events.push({time:maxPvH+':00',color:'#16a34a',text:'Picco FV: '+Math.round(maxPv)+' kWh_el. Surplus netto: ~'+Math.round(surplusH)+' kWh_el \u00d7 COP_ice '+itNum(d.hours[maxPvH].copIce,1)+' = '+Math.round(surplusH*d.hours[maxPvH].copIce)+' kWh_th ghiaccio.'});
   }
 
   // Prima ora produzione ghiaccio
@@ -982,12 +982,12 @@ function renderAll(){
       +'<div style="font-size:1.0rem;font-weight:600;color:'+SEL_COLORS[i]+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+giornoLabel(item.gg)+'</div>'
       +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--red);font-size:1.2rem;">'+(d.totCooling/itNum(1000),1)+'</div><div class="ku" style="font-size:1.0rem;">MWh_th</div><div class="kl" style="font-size:1.0rem;">Cooling</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--green);font-size:1.2rem;">'+Math.round(d.itNum(totPv))+'</div><div class="ku" style="font-size:1.0rem;">kWh_el</div><div class="kl" style="font-size:1.0rem;">FV prodotto</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--green);font-size:1.2rem;">'+itNum(Math.round(d.totPv))+'</div><div class="ku" style="font-size:1.0rem;">kWh_el</div><div class="kl" style="font-size:1.0rem;">FV prodotto</div></div>'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--teal);font-size:1.2rem;">'+itNum(kgGhiaccio)+'</div><div class="ku" style="font-size:1.0rem;">kg</div><div class="kl" style="font-size:1.0rem;">Ghiaccio prod.</div></div>'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:#0e7490;font-size:1.2rem;">'+itNum(kgCarry)+'</div><div class="ku" style="font-size:1.0rem;">kg</div><div class="kl" style="font-size:1.0rem;">Carry domani</div></div>'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+(d.totGrid/itNum(1000),1)+'</div><div class="ku" style="font-size:1.0rem;">MWh_el</div><div class="kl" style="font-size:1.0rem;">Rete</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+Math.round(d.itNum(totCost))+'</div><div class="ku" style="font-size:1.0rem;">\u20ac</div><div class="kl" style="font-size:1.0rem;">Costo</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--blue);font-size:1.2rem;">'+d.itNum(pueAvg,2)+'</div><div class="ku" style="font-size:1.0rem;"></div><div class="kl" style="font-size:1.0rem;">PUE</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+itNum(Math.round(d.totCost))+'</div><div class="ku" style="font-size:1.0rem;">\u20ac</div><div class="kl" style="font-size:1.0rem;">Costo</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--blue);font-size:1.2rem;">'+itNum(d.pueAvg,2)+'</div><div class="ku" style="font-size:1.0rem;"></div><div class="kl" style="font-size:1.0rem;">PUE</div></div>'
       +'</div></div>';
   }).join('');
 
@@ -1013,7 +1013,7 @@ function renderAll(){
         tooltip:{
           mode:'index',intersect:false,
           bodyFont:{size:13},titleFont:{size:13},padding:10,
-          callbacks:{label:function(ctx){return '  '+ctx.dataset.label+':  '+Math.round(ctx.parsed.itNum(y))+' kW';}}
+          callbacks:{label:function(ctx){return '  '+ctx.dataset.label+':  '+itNum(ctx.parsed.y)+' kW';}}
         }
       },
       scales:{
@@ -1143,7 +1143,7 @@ function renderAll(){
       {label:'Cool da FV (kWh_th)',data:results.map(function(r){return Math.round(r.data.totCoolPv);}),backgroundColor:'rgba(57,211,83,.5)',borderColor:'#39d353',borderWidth:1,borderRadius:4},
       {label:'Ghiaccio prod. (kWh_th)',data:results.map(function(r){return Math.round(r.data.totIceUp);}),backgroundColor:'rgba(57,200,200,.5)',borderColor:'#39c8c8',borderWidth:1,borderRadius:4},
       {label:'Ghiaccio usato (kWh_th)',data:results.map(function(r){return Math.round(r.data.totIceDown);}),backgroundColor:'rgba(163,113,247,.5)',borderColor:'#a371f7',borderWidth:1,borderRadius:4}
-    ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.dataset.label+': '+Math.round(ctx.parsed.itNum(y));}}}}
+    ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.dataset.label+': '+itNum(ctx.parsed.y);}}}}
     ,scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9},callback:function(v){return itNum(v);}}}}}});
 
   // KG GHIACCIO ACCUMULATI - profilo orario cumulativo
@@ -1174,7 +1174,7 @@ function renderAll(){
 
   // PUE
   destroyC('cPUE');
-  charts['cPUE']=new Chart(document.getElementById('cPUE'),{type:'line',data:{labels,datasets:results.map(function(item,i){return{label:giornoLabel(item.gg),data:item.data.hours.map(function(r){return r.pue;}),borderColor:SEL_COLORS[i],fill:false,tension:.3,pointRadius:0,borderWidth:2};})},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:results.length>1,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return 'PUE: '+ctx.parsed.itNum(y,2);}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:8}},y:{min:1,grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'PUE',color:'#718096',font:{size:9}}}}}});
+  charts['cPUE']=new Chart(document.getElementById('cPUE'),{type:'line',data:{labels,datasets:results.map(function(item,i){return{label:giornoLabel(item.gg),data:item.data.hours.map(function(r){return r.pue;}),borderColor:SEL_COLORS[i],fill:false,tension:.3,pointRadius:0,borderWidth:2};})},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:results.length>1,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return 'PUE: '+itNum(ctx.parsed.y,2);}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:8}},y:{min:1,grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'PUE',color:'#718096',font:{size:9}}}}}});
 
   // COSTO ORARIO
   destroyC('cCostoOrario');
@@ -1229,7 +1229,7 @@ function renderAll(){
       ['Costo senza FV+ITES',fE(cSF),'','#718096'],
       ['Risparmio',fE(risp),'',risp>0?'#39d353':'#f85149'],
       ['','','',''],
-      ['PUE medio',d.itNum(pueAvg,2),'','#58a6ff'],
+      ['PUE medio',itNum(d.pueAvg,2),'','#58a6ff'],
       ['CO\u2082 evitata',co2s,'kg','#39d353'],
       ['FV autoconsumato',pvPct,'%','#39d353']
     ];
@@ -1273,8 +1273,8 @@ function runRete(){
     +'Costo rete: <b style="color:var(--amber)">'+fE(ann.cost)+'</b><br>'
     +'Ricavo feed-in: <b style="color:var(--green)">'+fE(ann.feedIn)+'</b><br>'
     +'Netto annuo: <b>'+fE(ann.cost-ann.feedIn)+'</b><br>'
-    +'CO\u2082 evitata FV: <b style="color:var(--green)">'+Math.round(ann.itNum(co2Saved))+' t/anno</b><br>'
-    +'CO\u2082 da rete: <b style="color:var(--red)">'+Math.round(ann.itNum(co2Grid))+' t/anno</b>'
+    +'CO\u2082 evitata FV: <b style="color:var(--green)">'+itNum(Math.round(ann.co2Saved))+' t/anno</b><br>'
+    +'CO\u2082 da rete: <b style="color:var(--red)">'+itNum(Math.round(ann.co2Grid))+' t/anno</b>'
     +'</div>'
     +'</div>'
     +'<div class="card">'
@@ -1319,7 +1319,7 @@ function runRete(){
       responsive:true,maintainAspectRatio:false,
       plugins:{
         legend:{display:false},
-        tooltip:{callbacks:{label:function(ctx){return (ctx.raw>0?'Import: ':'Export: ')+Math.abs(ctx.itNum(raw),1)+' MWh';}}}
+        tooltip:{callbacks:{label:function(ctx){return (ctx.raw>0?'Import: ':'Export: ')+Math.abs(itNum(ctx.raw),1)+' MWh';}}}
       },
       scales:{
         x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},
@@ -1389,16 +1389,16 @@ function runCOP(){
     +'<div class="card">'
     +'<div class="ct">Catena energetica IT &rarr; Calore &rarr; Chiller</div>'
     +'<div style="font-size:.92rem;color:var(--text2);line-height:1.9;">'
-    +'Con COP='+p.itNum(cop,1)+', ogni kWh_el surplus FV produce <b style="color:var(--green);">'+p.itNum(cop,1)+' kWh_th</b> di freddo per il cooling.<br>'
+    +'Con COP='+itNum(p.cop,1)+', ogni kWh_el surplus FV produce <b style="color:var(--green);">'+itNum(p.cop,1)+' kWh_th</b> di freddo per il cooling.<br>'
     +'Per il ghiaccio (COP_ice = COP&times;0.85 = '+itNum(p.cop*0.85,2)+'):<br>'
     +'ogni kWh_el FV surplus &rarr; <b style="color:var(--teal);">'+itNum(p.cop*0.85,2)+' kWh_th ghiaccio</b>'
     +'</div>'
     +'<div class="formula">P_el_chiller = Q_cooling_th / EER = IT / EER</div>'
-    +'<div class="formula">Es: 200 kW_IT \u00f7 EER '+p.itNum(cop,1)+' = '+Math.round(200/p.cop)+' kW_el chiller</div>'
+    +'<div class="formula">Es: 200 kW_IT \u00f7 EER '+itNum(p.cop,1)+' = '+Math.round(200/p.cop)+' kW_el chiller</div>'
     +'<div style="margin:10px 0;padding:10px;background:var(--amber3);border:1px solid rgba(180,83,9,.2);border-radius:var(--r);font-size:.92rem;color:var(--text2);">'
     +'<b style="color:var(--amber);">Risposta alla domanda del capo:</b><br>'
     +'200 kW_el IT &rarr; 200 kW_th calore (100%, non 40%).<br>'
-    +'Per dissipare 200 kW_th con EER='+p.itNum(cop,1)+', il chiller usa '+Math.round(200/p.cop)+' kW_el aggiuntivi.<br>'
+    +'Per dissipare 200 kW_th con EER='+itNum(p.cop,1)+', il chiller usa '+Math.round(200/p.cop)+' kW_el aggiuntivi.<br>'
     +'Il 40% citato era probabilmente il rapporto chiller/IT (PUE overhead):<br>'
     +''+Math.round(200/p.cop)+'/200 = '+Math.round(100/p.cop)+'% \u2248 non 40%, ma dipende dall\'EER.'
     +'</div>'
@@ -1445,7 +1445,7 @@ function runProfili(){
     +'<div class="ct">Tabella mensile completa</div>'
     +'<div style="overflow-x:auto;"><table><thead><tr><th>Mese</th><th>T\u00b0 med</th><th>FV (MWh)</th><th>Cooling (th)</th><th>Cool da FV</th><th>Ghiaccio \u2191</th><th>Ghiaccio \u2193</th><th>Rete (el)</th><th>Costo (k\u20ac)</th><th>CO\u2082 ev.</th></tr></thead><tbody>'
     +mesi.map(function(m,i){return '<tr><td>'+NOMI_MESE[i]+'</td><td>'+TEMP_MEDIE[i]+'\u00b0C</td><td>'+fN1(m.pv/1000)+'</td><td style="color:var(--red)">'+fN1(m.cooling/1000)+'</td><td style="color:var(--green)">'+fN1(m.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN1(m.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN1(m.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN1(m.grid/1000)+'</td><td>'+fN1(m.cost/1000)+'</td><td style="color:var(--green)">'+fN1(m.pv/1000*CO2_FACTOR)+'</td></tr>';}).join('')
-    +'<tr style="border-top:2px solid var(--border2);font-weight:600;"><td>TOTALE</td><td>\u2014</td><td>'+fN(ann.pv/1000)+'</td><td style="color:var(--red)">'+fN(ann.cooling/1000)+'</td><td style="color:var(--green)">'+fN(ann.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN(ann.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN(ann.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN(ann.grid/1000)+'</td><td>'+fN(ann.cost/1000)+'</td><td style="color:var(--green)">'+ann.itNum(co2Saved,1)+'</td></tr>'
+    +'<tr style="border-top:2px solid var(--border2);font-weight:600;"><td>TOTALE</td><td>\u2014</td><td>'+fN(ann.pv/1000)+'</td><td style="color:var(--red)">'+fN(ann.cooling/1000)+'</td><td style="color:var(--green)">'+fN(ann.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN(ann.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN(ann.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN(ann.grid/1000)+'</td><td>'+fN(ann.cost/1000)+'</td><td style="color:var(--green)">'+itNum(ann.co2Saved,1)+'</td></tr>'
     +'</tbody></table></div></div>';
 
   destroyC('cMensile');
