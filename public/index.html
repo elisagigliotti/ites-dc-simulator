@@ -1203,58 +1203,70 @@ function renderAll(){
   // TABELLA ORA PER ORA — giorno 1 (il primo selezionato)
   var tblDiv=document.getElementById('tabella-oraria');
   if(tblDiv){
-    var item0=results[0];
-    var d0=item0.data;
     var LATENTE_WH_local=333550;
-    var runKgT=Math.round(d0.iceYesterday*1000/LATENTE_WH_local);
-    var tblRows=d0.hours.map(function(r,h){
-      var ice_prod_kg=Math.round(r.iceChargedKg);
-      var ice_cons_kg=Math.round(r.iceUsedKg);
-      runKgT+=ice_prod_kg-ice_cons_kg;
-      if(runKgT<0)runKgT=0;
-      var rete_kw=Math.round(r.totalGrid);
-      var fv_kw=Math.round(r.pvKw);
-      var cool_kw=Math.round(r.coolingNeed/(p.cop||3.5));
-      var surplus=Math.max(0,Math.round(r.pvNetto));
-      var deltaIce=(ice_prod_kg>0?'+'+ice_prod_kg:(ice_cons_kg>0?'\u2212'+ice_cons_kg:'0'));
-      var fonteBg=fv_kw===0?'background:#1a2535;color:#7aa2c8;':surplus>100?'background:#1a3520;color:#7ec87e;':'';
-      var reteColor=rete_kw>0?'color:#e3b341;':'color:#718096;';
-      return '<tr style="'+fonteBg+'">'
-        +'<td style="text-align:center;font-weight:600;">'+String(h).padStart(2,'0')+':00</td>'
-        +'<td>'+fv_kw+'</td>'
-        +'<td>'+Math.round(p.dcBase)+'</td>'
-        +'<td>'+cool_kw+'</td>'
-        +'<td>'+(surplus>0?'<b style="color:#39d353;">'+surplus+'</b>':'<span style="color:#718096;">0</span>')+'</td>'
-        +'<td style="'+(ice_prod_kg>0?'color:#39c8c8;':ice_cons_kg>0?'color:#a371f7;':'color:#718096;')+'">'+deltaIce+'</td>'
-        +'<td><b>'+itNum(runKgT)+'</b></td>'
-        +'<td style="'+reteColor+'">'+rete_kw+'</td>'
-        +'</tr>';
-    }).join('');
-    var dayNum=item0.gg;
-    tblDiv.innerHTML='<div class="card" style="margin-top:1rem;">'
-      +'<div class="ct" style="margin-bottom:8px;">Tabella ora per ora \u2014 <span style="color:'+SEL_COLORS[0]+';">'+giornoLabel(dayNum)+'</span>'
-      +' <span style="font-size:.85rem;color:var(--text3);font-weight:400;">(giorno '+dayNum+' dell\'anno \u2014 tank inizio giornata: '+itNum(Math.round(d0.iceYesterday*1000/LATENTE_WH_local))+' kg)</span></div>'
-      +'<div style="overflow-x:auto;">'
-      +'<table style="width:100%;border-collapse:collapse;font-size:.9rem;font-family:\'IBM Plex Mono\',monospace;">'
-      +'<thead><tr style="border-bottom:2px solid var(--border);color:var(--text3);font-size:.82rem;">'
+    var thead='<thead><tr style="border-bottom:2px solid var(--border);color:var(--text3);font-size:.82rem;">'
       +'<th style="padding:5px 8px;text-align:center;">Ora</th>'
       +'<th style="padding:5px 8px;text-align:right;">FV (kW)</th>'
       +'<th style="padding:5px 8px;text-align:right;">Rack (kW)</th>'
       +'<th style="padding:5px 8px;text-align:right;">Chiller (kW)</th>'
       +'<th style="padding:5px 8px;text-align:right;">Surplus (kW)</th>'
-      +'<th style="padding:5px 8px;text-align:right;">Ghiaccio &Delta; (kg)</th>'
+      +'<th style="padding:5px 8px;text-align:right;">Ghiaccio \u0394 (kg)</th>'
       +'<th style="padding:5px 8px;text-align:right;">Tank (kg)</th>'
       +'<th style="padding:5px 8px;text-align:right;">Da rete (kW)</th>'
-      +'</tr></thead>'
-      +'<tbody>'+tblRows+'</tbody>'
-      +'</table>'
-      +'</div>'
-      +'<div style="font-size:.82rem;color:var(--text3);margin-top:6px;line-height:1.6;">'
-      +'<span style="display:inline-block;width:12px;height:10px;background:#1a3520;border-radius:2px;"></span> ore surplus FV \u2192 produzione ghiaccio &nbsp;'
-      +'<span style="display:inline-block;width:12px;height:10px;background:#1a2535;border-radius:2px;"></span> ore notturne / rete &nbsp;'
-      +'<span style="color:#39c8c8;">+kg</span> ghiaccio prodotto &nbsp; <span style="color:#a371f7;">\u2212kg</span> ghiaccio consumato'
-      +'</div>'
+      +'</tr></thead>';
+    var legenda='<div style="font-size:.82rem;color:var(--text3);margin-top:8px;line-height:2;">'
+      +'<span style="display:inline-block;width:3px;height:14px;background:#39d353;border-radius:2px;vertical-align:middle;margin-right:4px;"></span> surplus FV \u2192 ghiaccio &nbsp;&nbsp;'
+      +'<span style="display:inline-block;width:3px;height:14px;background:#3a5070;border-radius:2px;vertical-align:middle;margin-right:4px;"></span> ore notturne (solo rete) &nbsp;&nbsp;'
+      +'<span style="color:#39c8c8;font-weight:600;">+kg</span> ghiaccio prodotto &nbsp;&nbsp;'
+      +'<span style="color:#a371f7;font-weight:600;">\u2212kg</span> ghiaccio consumato &nbsp;&nbsp;'
+      +'<span style="color:#e3b341;font-weight:600;">kW</span> prelievo da rete'
       +'</div>';
+    var tablesHtml=results.map(function(item,idx){
+      var d=item.data;
+      var dayNum=item.gg;
+      var runKgT=Math.round(d.iceYesterday*1000/LATENTE_WH_local);
+      var accentColor=SEL_COLORS[idx];
+      var tblRows=d.hours.map(function(r,h){
+        var ice_prod_kg=Math.round(r.iceChargedKg);
+        var ice_cons_kg=Math.round(r.iceUsedKg);
+        runKgT+=ice_prod_kg-ice_cons_kg;
+        if(runKgT<0)runKgT=0;
+        var rete_kw=Math.round(r.totalGrid);
+        var fv_kw=Math.round(r.pvKw);
+        var cool_kw=Math.round(r.coolingNeed/(p.cop||3.5));
+        var surplus=Math.max(0,Math.round(r.pvNetto));
+        var deltaIce=(ice_prod_kg>0?'<b style="color:#39c8c8;">+'+ice_prod_kg+'</b>':(ice_cons_kg>0?'<span style="color:#a371f7;">\u2212'+ice_cons_kg+'</span>':'<span style="color:var(--text3);">0</span>'));
+        var isNight=fv_kw===0;
+        var isPeak=surplus>100;
+        var borderLeft=isNight?'border-left:3px solid #3a5070;':isPeak?'border-left:3px solid #39d353;':'border-left:3px solid transparent;';
+        var oraColor=isNight?'color:var(--text3);':'color:var(--text);';
+        var trStyle='border-bottom:1px solid var(--border);'+borderLeft;
+        var td='padding:5px 10px;text-align:right;color:var(--text);';
+        var td1='padding:5px 10px;text-align:center;font-weight:600;font-family:\'IBM Plex Mono\',monospace;'+oraColor;
+        return '<tr style="'+trStyle+'">'
+          +'<td style="'+td1+'">'+String(h).padStart(2,'0')+':00</td>'
+          +'<td style="'+td+'">'+(fv_kw>0?fv_kw:'<span style="color:var(--text3);">—</span>')+'</td>'
+          +'<td style="'+td+'">'+Math.round(p.dcBase)+'</td>'
+          +'<td style="'+td+'">'+(fv_kw>0?cool_kw:'<span style="color:var(--text3);">'+cool_kw+'</span>')+'</td>'
+          +'<td style="'+td+'">'+(surplus>0?'<b style="color:#39d353;">'+surplus+'</b>':'<span style="color:var(--text3);">0</span>')+'</td>'
+          +'<td style="'+td+'">'+deltaIce+'</td>'
+          +'<td style="'+td+';font-weight:600;">'+(runKgT>0?itNum(runKgT):'<span style="color:var(--text3);">0</span>')+'</td>'
+          +'<td style="'+td+';'+(rete_kw>0?'color:#e3b341;':'color:var(--text3);')+'">'+rete_kw+'</td>'
+          +'</tr>';
+      }).join('');
+      return '<div class="card" style="margin-top:1rem;border-top:3px solid '+accentColor+';">'
+        +'<div class="ct" style="margin-bottom:8px;">Tabella ora per ora \u2014 <span style="color:'+accentColor+';">'+giornoLabel(dayNum)+'</span>'
+        +' <span style="font-size:.85rem;color:var(--text3);font-weight:400;">(giorno '+dayNum+' dell\'anno \u2014 tank inizio giornata: '+itNum(Math.round(d.iceYesterday*1000/LATENTE_WH_local))+' kg)</span></div>'
+        +'<div style="overflow-x:auto;">'
+        +'<table style="width:100%;border-collapse:collapse;font-size:.9rem;font-family:\'IBM Plex Mono\',monospace;">'
+        +thead
+        +'<tbody>'+tblRows+'</tbody>'
+        +'</table>'
+        +'</div>'
+        +(idx===results.length-1?legenda:'')
+        +'</div>';
+    }).join('');
+    tblDiv.innerHTML=tablesHtml;
   }
 
   // KPI SIDE
