@@ -517,9 +517,9 @@ function updateLabels(p){
   document.getElementById('v-nrack').textContent=p.nRack;
   document.getElementById('v-setp').textContent=p.setP+' \u00b0C';
   document.getElementById('v-ua').textContent=p.ua+' W/K';
-  document.getElementById('v-cop').textContent=p.cop.toFixed(1);
-  document.getElementById('v-price').textContent=p.gridPrice.toFixed(2)+' \u20ac/kWh';
-  document.getElementById('v-feedin').textContent=p.feedIn.toFixed(2)+' \u20ac/kWh';
+  document.getElementById('v-cop').textContent=p.cop.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1});
+  document.getElementById('v-price').textContent=p.gridPrice.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac/kWh';
+  document.getElementById('v-feedin').textContent=p.feedIn.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac/kWh';
   var nFile=Math.ceil(p.nRack/p.rack.perRow),rpf=Math.min(p.nRack,p.rack.perRow);
   document.getElementById('rack-summary').innerHTML=
     'IT: <b style="color:var(--text);">'+fN(p.itKw)+' kW_el</b>'
@@ -534,11 +534,11 @@ function updateLabels(p){
   // Aggiorna pannello COP esplicito
   var eerNom=p.cop,copIceNom=p.cop*0.85;
   document.getElementById('cop-el-box').textContent='1 kWh_el FV';
-  document.getElementById('cop-th-box').textContent='EER '+eerNom.toFixed(1);
-  document.getElementById('cop-result-box').textContent=eerNom.toFixed(1)+' kWh_th freddo';
+  document.getElementById('cop-th-box').textContent='EER '+eerNom.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1});
+  document.getElementById('cop-result-box').textContent=eerNom.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})+' kWh_th freddo';
   document.getElementById('cop-ice-el-box').textContent='1 kWh_el surplus';
-  document.getElementById('cop-ice-th-box').textContent='COP_ice '+copIceNom.toFixed(2);
-  document.getElementById('cop-ice-result-box').textContent=copIceNom.toFixed(2)+' kWh_th ghiaccio';
+  document.getElementById('cop-ice-th-box').textContent='COP_ice '+copIceNom.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('cop-ice-result-box').textContent=copIceNom.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' kWh_th ghiaccio';
   // EER mensile rapido
   var eerMesi=TEMP_MEDIE.map(function(t){return getEER(p.cop,t).toFixed(1);});
   document.getElementById('cop-mensile-quick').innerHTML=
@@ -882,7 +882,7 @@ function buildExplainerForDay(item,p,colore){
   d.hours.forEach(function(r){if(r.pvKw>maxPv){maxPv=r.pvKw;maxPvH=r.h;}});
   if(maxPv>10){
     var surplusH=d.hours[maxPvH].pvNetto;
-    events.push({time:maxPvH+':00',color:'#16a34a',text:'Picco FV: '+Math.round(maxPv)+' kWh_el. Surplus netto: ~'+Math.round(surplusH)+' kWh_el \u00d7 COP_ice '+d.hours[maxPvH].copIce.toFixed(1)+' = '+Math.round(surplusH*d.hours[maxPvH].copIce)+' kWh_th ghiaccio.'});
+    events.push({time:maxPvH+':00',color:'#16a34a',text:'Picco FV: '+Math.round(maxPv)+' kWh_el. Surplus netto: ~'+Math.round(surplusH)+' kWh_el \u00d7 COP_ice '+d.hours[maxPvH].copIce.toLocaleString('it-IT',{maximumFractionDigits:1})+' = '+Math.round(surplusH*d.hours[maxPvH].copIce)+' kWh_th ghiaccio.'});
   }
 
   // Prima ora produzione ghiaccio
@@ -972,13 +972,13 @@ function renderAll(){
     return '<div style="border:1px solid '+SEL_COLORS[i]+';border-radius:var(--rl);padding:.7rem .6rem;background:var(--bg2);">'
       +'<div style="font-size:1.0rem;font-weight:600;color:'+SEL_COLORS[i]+';text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+giornoLabel(item.gg)+'</div>'
       +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--red);font-size:1.2rem;">'+(d.totCooling/1000).toFixed(1)+'</div><div class="ku" style="font-size:1.0rem;">MWh_th</div><div class="kl" style="font-size:1.0rem;">Cooling</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--green);font-size:1.2rem;">'+Math.round(d.totPv)+'</div><div class="ku" style="font-size:1.0rem;">kWh_el</div><div class="kl" style="font-size:1.0rem;">FV prodotto</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--red);font-size:1.2rem;">'+(d.totCooling/1000).toLocaleString('it-IT',{maximumFractionDigits:1,minimumFractionDigits:1})+'</div><div class="ku" style="font-size:1.0rem;">MWh_th</div><div class="kl" style="font-size:1.0rem;">Cooling</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--green);font-size:1.2rem;">'+Math.round(d.totPv).toLocaleString('it-IT')+'</div><div class="ku" style="font-size:1.0rem;">kWh_el</div><div class="kl" style="font-size:1.0rem;">FV prodotto</div></div>'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--teal);font-size:1.2rem;">'+kgGhiaccio.toLocaleString('it-IT')+'</div><div class="ku" style="font-size:1.0rem;">kg</div><div class="kl" style="font-size:1.0rem;">Ghiaccio prod.</div></div>'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:#0e7490;font-size:1.2rem;">'+kgCarry.toLocaleString('it-IT')+'</div><div class="ku" style="font-size:1.0rem;">kg</div><div class="kl" style="font-size:1.0rem;">Carry domani</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+(d.totGrid/1000).toFixed(1)+'</div><div class="ku" style="font-size:1.0rem;">MWh_el</div><div class="kl" style="font-size:1.0rem;">Rete</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+Math.round(d.totCost)+'</div><div class="ku" style="font-size:1.0rem;">\u20ac</div><div class="kl" style="font-size:1.0rem;">Costo</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--blue);font-size:1.2rem;">'+d.pueAvg.toFixed(2)+'</div><div class="ku" style="font-size:1.0rem;"></div><div class="kl" style="font-size:1.0rem;">PUE</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+(d.totGrid/1000).toLocaleString('it-IT',{maximumFractionDigits:1,minimumFractionDigits:1})+'</div><div class="ku" style="font-size:1.0rem;">MWh_el</div><div class="kl" style="font-size:1.0rem;">Rete</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+Math.round(d.totCost).toLocaleString('it-IT')+'</div><div class="ku" style="font-size:1.0rem;">\u20ac</div><div class="kl" style="font-size:1.0rem;">Costo</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--blue);font-size:1.2rem;">'+d.pueAvg.toLocaleString('it-IT',{maximumFractionDigits:2,minimumFractionDigits:2})+'</div><div class="ku" style="font-size:1.0rem;"></div><div class="kl" style="font-size:1.0rem;">PUE</div></div>'
       +'</div></div>';
   }).join('');
 
@@ -1165,7 +1165,7 @@ function renderAll(){
 
   // PUE
   destroyC('cPUE');
-  charts['cPUE']=new Chart(document.getElementById('cPUE'),{type:'line',data:{labels,datasets:results.map(function(item,i){return{label:giornoLabel(item.gg),data:item.data.hours.map(function(r){return r.pue;}),borderColor:SEL_COLORS[i],fill:false,tension:.3,pointRadius:0,borderWidth:2};})},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:results.length>1,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return 'PUE: '+ctx.parsed.y.toFixed(2);}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:8}},y:{min:1,grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'PUE',color:'#718096',font:{size:9}}}}}});
+  charts['cPUE']=new Chart(document.getElementById('cPUE'),{type:'line',data:{labels,datasets:results.map(function(item,i){return{label:giornoLabel(item.gg),data:item.data.hours.map(function(r){return r.pue;}),borderColor:SEL_COLORS[i],fill:false,tension:.3,pointRadius:0,borderWidth:2};})},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:results.length>1,labels:{color:'#4a5568',font:{size:9},boxWidth:10}},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return 'PUE: '+ctx.parsed.y.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:8}},y:{min:1,grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'PUE',color:'#718096',font:{size:9}}}}}});
 
   // COSTO ORARIO
   destroyC('cCostoOrario');
@@ -1220,7 +1220,7 @@ function renderAll(){
       ['Costo senza FV+ITES',fE(cSF),'','#718096'],
       ['Risparmio',fE(risp),'',risp>0?'#39d353':'#f85149'],
       ['','','',''],
-      ['PUE medio',d.pueAvg.toFixed(2),'','#58a6ff'],
+      ['PUE medio',d.pueAvg.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}),'','#58a6ff'],
       ['CO\u2082 evitata',co2s,'kg','#39d353'],
       ['FV autoconsumato',pvPct,'%','#39d353']
     ];
@@ -1264,8 +1264,8 @@ function runRete(){
     +'Costo rete: <b style="color:var(--amber)">'+fE(ann.cost)+'</b><br>'
     +'Ricavo feed-in: <b style="color:var(--green)">'+fE(ann.feedIn)+'</b><br>'
     +'Netto annuo: <b>'+fE(ann.cost-ann.feedIn)+'</b><br>'
-    +'CO\u2082 evitata FV: <b style="color:var(--green)">'+ann.co2Saved.toFixed(0)+' t/anno</b><br>'
-    +'CO\u2082 da rete: <b style="color:var(--red)">'+ann.co2Grid.toFixed(0)+' t/anno</b>'
+    +'CO\u2082 evitata FV: <b style="color:var(--green)">'+Math.round(ann.co2Saved).toLocaleString('it-IT')+' t/anno</b><br>'
+    +'CO\u2082 da rete: <b style="color:var(--red)">'+Math.round(ann.co2Grid).toLocaleString('it-IT')+' t/anno</b>'
     +'</div>'
     +'</div>'
     +'<div class="card">'
@@ -1310,7 +1310,7 @@ function runRete(){
       responsive:true,maintainAspectRatio:false,
       plugins:{
         legend:{display:false},
-        tooltip:{callbacks:{label:function(ctx){return (ctx.raw>0?'Import: ':'Export: ')+Math.abs(ctx.raw).toFixed(1)+' MWh';}}}
+        tooltip:{callbacks:{label:function(ctx){return (ctx.raw>0?'Import: ':'Export: ')+Math.abs(ctx.raw).toLocaleString('it-IT',{maximumFractionDigits:1})+' MWh';}}}
       },
       scales:{
         x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},
@@ -1380,22 +1380,22 @@ function runCOP(){
     +'<div class="card">'
     +'<div class="ct">Catena energetica IT &rarr; Calore &rarr; Chiller</div>'
     +'<div style="font-size:.92rem;color:var(--text2);line-height:1.9;">'
-    +'Con COP='+p.cop.toFixed(1)+', ogni kWh_el surplus FV produce <b style="color:var(--green);">'+p.cop.toFixed(1)+' kWh_th</b> di freddo per il cooling.<br>'
-    +'Per il ghiaccio (COP_ice = COP&times;0.85 = '+(p.cop*0.85).toFixed(2)+'):<br>'
-    +'ogni kWh_el FV surplus &rarr; <b style="color:var(--teal);">'+(p.cop*0.85).toFixed(2)+' kWh_th ghiaccio</b>'
+    +'Con COP='+p.cop.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})+', ogni kWh_el surplus FV produce <b style="color:var(--green);">'+p.cop.toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})+' kWh_th</b> di freddo per il cooling.<br>'
+    +'Per il ghiaccio (COP_ice = COP&times;0.85 = '+(p.cop*0.85).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+'):<br>'
+    +'ogni kWh_el FV surplus &rarr; <b style="color:var(--teal);">'+(p.cop*0.85).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' kWh_th ghiaccio</b>'
     +'</div>'
     +'<div class="formula">P_el_chiller = Q_cooling_th / EER = IT / EER</div>'
-    +'<div class="formula">Es: 200 kW_IT \u00f7 EER '+p.cop.toFixed(1)+' = '+Math.round(200/p.cop)+' kW_el chiller</div>'
+    +'<div class="formula">Es: 200 kW_IT \u00f7 EER '+p.cop.toLocaleString('it-IT',{maximumFractionDigits:1})+' = '+Math.round(200/p.cop)+' kW_el chiller</div>'
     +'<div style="margin:10px 0;padding:10px;background:var(--amber3);border:1px solid rgba(180,83,9,.2);border-radius:var(--r);font-size:.92rem;color:var(--text2);">'
     +'<b style="color:var(--amber);">Risposta alla domanda del capo:</b><br>'
     +'200 kW_el IT &rarr; 200 kW_th calore (100%, non 40%).<br>'
-    +'Per dissipare 200 kW_th con EER='+p.cop.toFixed(1)+', il chiller usa '+Math.round(200/p.cop)+' kW_el aggiuntivi.<br>'
+    +'Per dissipare 200 kW_th con EER='+p.cop.toLocaleString('it-IT',{maximumFractionDigits:1})+', il chiller usa '+Math.round(200/p.cop)+' kW_el aggiuntivi.<br>'
     +'Il 40% citato era probabilmente il rapporto chiller/IT (PUE overhead):<br>'
     +''+Math.round(200/p.cop)+'/200 = '+Math.round(100/p.cop)+'% \u2248 non 40%, ma dipende dall\'EER.'
     +'</div>'
     +'<div style="margin-top:10px;font-size:.92rem;color:var(--text2);">'
     +'<b style="color:var(--amber);">Degradazione con temperatura:</b><br>'
-    +'Estate 30\u00b0C: EER = '+getEER(p.cop,30).toFixed(2)+' \u00b7 Primavera 15\u00b0C: EER = '+getEER(p.cop,15).toFixed(2)+' \u00b7 Inverno 5\u00b0C: EER = '+getEER(p.cop,5).toFixed(2)
+    +'Estate 30\u00b0C: EER = '+getEER(p.cop,30).toLocaleString('it-IT',{maximumFractionDigits:2})+' \u00b7 Primavera 15\u00b0C: EER = '+getEER(p.cop,15).toLocaleString('it-IT',{maximumFractionDigits:2})+' \u00b7 Inverno 5\u00b0C: EER = '+getEER(p.cop,5).toLocaleString('it-IT',{maximumFractionDigits:2})
     +'</div>'
     +'</div>'
     +'<div class="card"><div class="ct">EER/COP medio mensile</div><div class="cw" style="height:200px;"><canvas id="cCOPmese"></canvas></div></div>'
@@ -1405,7 +1405,7 @@ function runCOP(){
     +TEMP_MEDIE.map(function(t,m){
       var eer=getEER(p.cop,t),ci=getCOPice(p.cop,t);
       var kgPerKwh=ci*1000/LATENTE_WH;
-      return '<tr><td>'+NOMI_MESE[m]+'</td><td>'+t+'\u00b0C</td><td style="color:var(--green)">'+eer.toFixed(2)+'</td><td style="color:var(--teal)">'+eer.toFixed(2)+' kWh_th</td><td style="color:var(--blue)">'+ci.toFixed(2)+'</td><td style="color:var(--teal)">'+kgPerKwh.toFixed(1)+' kg</td></tr>';
+      return '<tr><td>'+NOMI_MESE[m]+'</td><td>'+t+'\u00b0C</td><td style="color:var(--green)">'+eer.toLocaleString('it-IT',{maximumFractionDigits:2})+'</td><td style="color:var(--teal)">'+eer.toLocaleString('it-IT',{maximumFractionDigits:2})+' kWh_th</td><td style="color:var(--blue)">'+ci.toLocaleString('it-IT',{maximumFractionDigits:2})+'</td><td style="color:var(--teal)">'+kgPerKwh.toLocaleString('it-IT',{maximumFractionDigits:1})+' kg</td></tr>';
     }).join('')
     +'</tbody></table>'
     +'</div>'
@@ -1436,7 +1436,7 @@ function runProfili(){
     +'<div class="ct">Tabella mensile completa</div>'
     +'<div style="overflow-x:auto;"><table><thead><tr><th>Mese</th><th>T\u00b0 med</th><th>FV (MWh)</th><th>Cooling (th)</th><th>Cool da FV</th><th>Ghiaccio \u2191</th><th>Ghiaccio \u2193</th><th>Rete (el)</th><th>Costo (k\u20ac)</th><th>CO\u2082 ev.</th></tr></thead><tbody>'
     +mesi.map(function(m,i){return '<tr><td>'+NOMI_MESE[i]+'</td><td>'+TEMP_MEDIE[i]+'\u00b0C</td><td>'+fN1(m.pv/1000)+'</td><td style="color:var(--red)">'+fN1(m.cooling/1000)+'</td><td style="color:var(--green)">'+fN1(m.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN1(m.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN1(m.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN1(m.grid/1000)+'</td><td>'+fN1(m.cost/1000)+'</td><td style="color:var(--green)">'+fN1(m.pv/1000*CO2_FACTOR)+'</td></tr>';}).join('')
-    +'<tr style="border-top:2px solid var(--border2);font-weight:600;"><td>TOTALE</td><td>\u2014</td><td>'+fN(ann.pv/1000)+'</td><td style="color:var(--red)">'+fN(ann.cooling/1000)+'</td><td style="color:var(--green)">'+fN(ann.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN(ann.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN(ann.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN(ann.grid/1000)+'</td><td>'+fN(ann.cost/1000)+'</td><td style="color:var(--green)">'+ann.co2Saved.toFixed(1)+'</td></tr>'
+    +'<tr style="border-top:2px solid var(--border2);font-weight:600;"><td>TOTALE</td><td>\u2014</td><td>'+fN(ann.pv/1000)+'</td><td style="color:var(--red)">'+fN(ann.cooling/1000)+'</td><td style="color:var(--green)">'+fN(ann.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN(ann.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN(ann.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN(ann.grid/1000)+'</td><td>'+fN(ann.cost/1000)+'</td><td style="color:var(--green)">'+ann.co2Saved.toLocaleString('it-IT',{maximumFractionDigits:1})+'</td></tr>'
     +'</tbody></table></div></div>';
 
   destroyC('cMensile');
@@ -1485,7 +1485,7 @@ function runCapex(){
   document.getElementById('v-fvcost').textContent=(fvcostPct>0?'+':'')+fvcostPct+' %';
   document.getElementById('v-gridvar').textContent=(gridvarPct>0?'+':'')+gridvarPct+' %';
   var hostingFee=parseFloat(document.getElementById('r-hosting').value)||0.12;
-  document.getElementById('v-hosting').textContent=hostingFee.toFixed(2)+' \u20ac/kWh';
+  document.getElementById('v-hosting').textContent=hostingFee.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' \u20ac/kWh';
   var fvCost=850*(1+fvcostPct/100);
   var capex={};
   capex['Impianto FV ('+fN(p.kwp)+' kWp)']=p.kwp*fvCost;
@@ -1533,8 +1533,8 @@ function runCapex(){
     +'<div class="g4" style="margin-bottom:1rem;">'
     +'<div class="card kpi"><div class="kv" style="color:var(--green)">'+fE(Math.round(revTot/1000))+'k</div><div class="ku">/anno</div><div class="kl">Revenue</div></div>'
     +'<div class="card kpi"><div class="kv" style="color:'+(cashflow>0?'var(--green)':'var(--red)')+'">'+fE(Math.round(cashflow/1000))+'k</div><div class="ku">/anno</div><div class="kl">Cash Flow</div></div>'
-    +'<div class="card kpi"><div class="kv" style="color:var(--blue)">'+(payback<50?payback.toFixed(1):'\u221e')+'</div><div class="ku">anni</div><div class="kl">Payback</div></div>'
-    +'<div class="card kpi"><div class="kv" style="color:var(--purple)">'+(isFinite(irr)&&irr>-0.5?(irr*100).toFixed(1)+'\u2009%':'\u2014')+'</div><div class="ku"></div><div class="kl">IRR 20a</div></div>'
+    +'<div class="card kpi"><div class="kv" style="color:var(--blue)">'+(payback<50?payback.toLocaleString('it-IT',{maximumFractionDigits:1}):'\u221e')+'</div><div class="ku">anni</div><div class="kl">Payback</div></div>'
+    +'<div class="card kpi"><div class="kv" style="color:var(--purple)">'+(isFinite(irr)&&irr>-0.5?(irr*100).toLocaleString('it-IT',{minimumFractionDigits:1,maximumFractionDigits:1})+'\u2009%':'\u2014')+'</div><div class="ku"></div><div class="kl">IRR 20a</div></div>'
     +'</div>'
     +'<div class="card"><div class="ct">Cash Flow cumulativo 20 anni</div><div class="cw" style="height:250px;"><canvas id="cCashflow"></canvas></div></div>';
 
