@@ -1619,19 +1619,66 @@ function runProfili(){
 // ============================================================
 function runHeatmap(){
   var p=getParams(),res=simula365completa(p),g=res.giorni365;
+
   function buildHM(data,title,colorFn,unitLabel,subtitle){
     var maxV=Math.max.apply(null,data),minV=Math.min.apply(null,data);
-    var cells=data.map(function(v){return '<div class="hm-cell" style="background:'+colorFn(v,minV,maxV)+'" title="'+unitLabel+': '+Math.round(v*10)/10+'"></div>';}).join('');
-    return '<div class="card" style="margin-bottom:1rem;"><div class="ct">'+title+'</div><div style="font-size:1.0rem;color:var(--text3);margin-bottom:6px;">'+subtitle+'</div><div class="heatmap-wrap"><div class="heatmap-grid">'+cells+'</div></div><div style="display:flex;gap:4px;align-items:center;margin-top:6px;"><div style="width:60px;height:6px;background:linear-gradient(90deg,'+colorFn(minV,minV,maxV)+','+colorFn(maxV,minV,maxV)+');border-radius:3px;"></div><span style="font-size:1.0rem;color:var(--text3);">'+Math.round(minV)+' \u2014 '+Math.round(maxV)+' '+unitLabel+'</span></div></div>';
+
+    // Una riga per mese — etichetta a sinistra, celle a destra
+    var rows='';
+    var gg=0;
+    for(var m=0;m<12;m++){
+      var nDays=GIORNI_MESE[m];
+      var cells='';
+      for(var d=0;d<nDays;d++){
+        var v=data[gg+d];
+        cells+='<div style="flex:0 0 auto;width:calc((100% - 48px) / 31);max-width:28px;min-width:10px;aspect-ratio:1;border-radius:2px;background:'+colorFn(v,minV,maxV)+'" title="'+NOMI_MESE_FULL[m]+' '+(d+1)+' — '+unitLabel+': '+itNum(Math.round(v))+'"></div>';
+      }
+      // Pad with empty cells to align all rows to 31 days
+      for(var d2=nDays;d2<31;d2++){
+        cells+='<div style="flex:0 0 auto;width:calc((100% - 48px) / 31);max-width:28px;min-width:10px;aspect-ratio:1;"></div>';
+      }
+      rows+='<div style="display:flex;align-items:center;gap:3px;margin-bottom:3px;">'
+        +'<div style="width:28px;flex-shrink:0;font-size:.78rem;font-weight:700;color:var(--text2);text-align:right;padding-right:4px;">'+NOMI_MESE[m]+'</div>'
+        +'<div style="display:flex;gap:2px;flex:1;">'+cells+'</div>'
+        +'</div>';
+      gg+=nDays;
+    }
+
+    // Numbering header 1..31
+    var numHeader='<div style="display:flex;align-items:center;gap:3px;margin-bottom:4px;">'
+      +'<div style="width:28px;flex-shrink:0;"></div>'
+      +'<div style="display:flex;gap:2px;flex:1;">';
+    for(var d3=1;d3<=31;d3++){
+      numHeader+='<div style="flex:0 0 auto;width:calc((100% - 0px) / 31);max-width:28px;min-width:10px;text-align:center;font-size:.68rem;color:var(--text3);">'+(d3%5===1||d3===31?d3:'')+'</div>';
+    }
+    numHeader+='</div></div>';
+
+    return '<div class="card" style="margin-bottom:1rem;">'
+      +'<div class="ct">'+title+'</div>'
+      +'<div style="font-size:1.0rem;color:var(--text3);margin-bottom:8px;">'+subtitle+'</div>'
+      +'<div style="overflow-x:auto;">'
+        +numHeader
+        +rows
+      +'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-top:8px;">'
+        +'<div style="width:80px;height:7px;background:linear-gradient(90deg,'+colorFn(minV,minV,maxV)+','+colorFn(maxV,minV,maxV)+');border-radius:3px;"></div>'
+        +'<span style="font-size:.9rem;color:var(--text3);">'+itNum(Math.round(minV))+' — '+itNum(Math.round(maxV))+' '+unitLabel+'</span>'
+      +'</div>'
+      +'</div>';
   }
+
   function costColor(v,mn,mx){var t=Math.max(0,Math.min(1,(v-mn)/(mx-mn+0.001)));return 'rgba('+(Math.round(57+t*191))+','+(Math.round(211-t*162))+','+(Math.round(83-t*34))+',0.8)';}
   function pvColor(v,mn,mx){var t=Math.max(0,Math.min(1,(v-mn)/(mx-mn+0.001)));return 'rgba('+(Math.round(57+t*180))+','+(Math.round(100+t*111))+','+Math.round(57*t)+',0.8)';}
   function kgColor(v,mn,mx){var t=Math.max(0,Math.min(1,(v-mn)/(mx-mn+0.001)));return 'rgba('+Math.round(14+t*43)+','+(Math.round(116+t*84))+','+(Math.round(144-t*44))+',0.9)';}
+
   document.getElementById('heatmap-content').innerHTML=
-    '<div class="ibar ibar-g" style="margin-bottom:1rem;"><b>Ogni cella = 1 giorno.</b> 365 giorni. Con ghiaccio smart, l\'accumulo si azzerera\u2019 naturalmente ogni giorno.</div>'
-    +buildHM(g.tankKg,'Kg ghiaccio carry-over (fine giornata)',kgColor,'kg','Blu scuro = pi\u00f9 ghiaccio residuo. Con ghiaccio smart tende a essere basso.')
-    +buildHM(g.cost,'Costo Giornaliero Rete (\u20ac)',costColor,'\u20ac','Verde = basso, Rosso = alto')
-    +buildHM(g.pv,'Produzione FV Giornaliera (kWh_el)',pvColor,'kWh','Pi\u00f9 chiaro = pi\u00f9 produzione');
+    '<div class="ibar ibar-g" style="margin-bottom:1rem;"><b>Ogni cella = 1 giorno.</b> 12 righe = 12 mesi, 31 colonne = giorni del mese. Passa il cursore per il valore esatto.</div>'
+    +buildHM(g.tankKg,'Kg ghiaccio carry-over (fine giornata)',kgColor,'kg',
+      'Blu scuro = più ghiaccio residuo. In estate il surplus FV è abbondante; in inverno il carry-over è minimo.')
+    +buildHM(g.cost,'Costo Giornaliero Rete (€)',costColor,'€',
+      'Verde = costo basso (FV abbondante) · Rosso = costo alto (poca produzione solare)')
+    +buildHM(g.pv,'Produzione FV Giornaliera (kWh_el)',pvColor,'kWh',
+      'Più chiaro/giallo = più produzione · Verde scuro = produzione bassa (inverno)');
 }
 
 // ============================================================
