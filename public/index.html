@@ -1381,37 +1381,91 @@ function runRete(){
 function runCOP(){
   var p=getParams();
   var tempData=[];for(var t=-5;t<=40;t++)tempData.push({t,eer:getEER(p.cop,t),copIce:getCOPice(p.cop,t)});
+  // Calcola valori stagionali per il sito
+  var eerEstate=getEER(p.cop,TEMP_MEDIE[6]), eerInverno=getEER(p.cop,TEMP_MEDIE[0]);
+  var chillerEstate=Math.round(p.dcBase/eerEstate), chillerInverno=Math.round(p.dcBase/eerInverno);
+  var kgPerKwhEstate=getCOPice(p.cop,TEMP_MEDIE[6])*1000/LATENTE_WH;
+  var kgPerKwhInverno=getCOPice(p.cop,TEMP_MEDIE[0])*1000/LATENTE_WH;
+
   document.getElementById('cop-content').innerHTML=
     '<div class="ibar ibar-g" style="margin-bottom:1rem;font-size:.92rem;">'
     +'<b>Principio fondamentale:</b> 1 kWh_el in un server = 1 kWh_th di calore (100%). '
-    +'Il chiller consuma kWh_el per <em>spostare</em> il calore. Con EER=3.5, ogni kWh_el del chiller sposta 3.5 kWh_th di calore.'
+    +'Il chiller consuma kWh_el per <em>spostare</em> il calore. Con EER='+itNum(p.cop,1)+', ogni kWh_el del chiller sposta '+itNum(p.cop,1)+' kWh_th di calore. '
+    +'<b>Soglia di degradazione: 15°C</b> — sopra questa temperatura l\'EER cala del 2%/°C.'
     +'</div>'
     +'<div class="g2" style="margin-bottom:1rem;">'
-    +'<div class="card"><div class="ct">EER/COP vs Temperatura Esterna</div><div class="cw" style="height:280px;"><canvas id="cCOP"></canvas></div></div>'
+    +'<div class="card">'
+    +'<div class="ct">EER/COP vs Temperatura Esterna &mdash; soglia degradazione 15°C</div>'
+    +'<div class="cw" style="height:260px;"><canvas id="cCOP"></canvas></div>'
+    +'<div style="font-size:.85rem;color:var(--text3);margin-top:6px;line-height:1.7;">'
+    +'<span style="color:var(--blue);font-weight:700;">▏ 15°C</span> = soglia di progetto &nbsp;·&nbsp; '
+    +'Inverno Gen ('+TEMP_MEDIE[0]+'°C): EER <b style="color:var(--green);">'+itNum(eerInverno,2)+'</b> &nbsp;·&nbsp; '
+    +'Estate Lug ('+TEMP_MEDIE[6]+'°C): EER <b style="color:var(--amber);">'+itNum(eerEstate,2)+'</b>'
+    +'</div>'
+    +'</div>'
     +'<div class="card">'
     +'<div class="ct">Catena energetica IT &rarr; Calore &rarr; Chiller</div>'
-    +'<div style="font-size:.92rem;color:var(--text2);line-height:1.9;">'
-    +'Con COP='+itNum(p.cop,1)+', ogni kWh_el surplus FV produce <b style="color:var(--green);">'+itNum(p.cop,1)+' kWh_th</b> di freddo.<br>'
-    +'Per il ghiaccio (COP_ice = COP&times;0.85 = '+itNum(p.cop*0.85,2)+'):<br>'
-    +'ogni kWh_el FV surplus &rarr; <b style="color:var(--teal);">'+itNum(p.cop*0.85,2)+' kWh_th ghiaccio</b>'
+    +'<div style="font-size:.88rem;color:var(--text2);line-height:1.7;margin-bottom:.7rem;">'
+    +'Tutta l\'energia elettrica dei server diventa calore (100%). Il chiller la sposta fuori con un moltiplicatore EER che varia con la temperatura esterna.'
     +'</div>'
-    +'<div class="formula">P_el_chiller = Q_cooling_th / EER = IT / EER</div>'
-    +'<div class="formula">Es: 200 kW_IT &divide; EER '+itNum(p.cop,1)+' = '+Math.round(200/p.cop)+' kW_el chiller</div>'
+    +'<div class="formula">Q_calore = P_IT &times; 1h &nbsp;&nbsp;(100%, fisicamente esatto)</div>'
+    +'<div class="formula">P_chiller_el = Q_calore / EER(T_ext)</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.8rem 0;">'
+    +'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--r);padding:.6rem .8rem;font-size:.88rem;">'
+    +'<div style="font-weight:700;color:var(--green);margin-bottom:4px;">⛄ Inverno — Gen ('+TEMP_MEDIE[0]+'°C)</div>'
+    +'EER = <b>'+itNum(eerInverno,2)+'</b><br>'
+    +itNum(p.dcBase)+' kW_IT &rarr; <b>'+chillerInverno+' kW_el</b> chiller<br>'
+    +'1 kWh_el surplus &rarr; <b>'+itNum(kgPerKwhInverno,1)+' kg</b> ghiaccio/h'
+    +'</div>'
+    +'<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--r);padding:.6rem .8rem;font-size:.88rem;">'
+    +'<div style="font-weight:700;color:var(--amber);margin-bottom:4px;">☀️ Estate — Lug ('+TEMP_MEDIE[6]+'°C)</div>'
+    +'EER = <b>'+itNum(eerEstate,2)+'</b><br>'
+    +itNum(p.dcBase)+' kW_IT &rarr; <b>'+chillerEstate+' kW_el</b> chiller<br>'
+    +'1 kWh_el surplus &rarr; <b>'+itNum(kgPerKwhEstate,1)+' kg</b> ghiaccio/h'
+    +'</div>'
+    +'</div>'
+    +'<div style="font-size:.82rem;color:var(--text3);line-height:1.6;">'
+    +'COP_ice = EER &times; 0,85 &nbsp;·&nbsp; Degrado: &minus;2%/°C sopra 15°C &nbsp;·&nbsp; Sito Bellocchi: T media annua ≈ 14°C'
+    +'</div>'
     +'</div>'
     +'<div class="card"><div class="ct">EER/COP medio mensile</div><div class="cw" style="height:200px;"><canvas id="cCOPmese"></canvas></div></div>'
     +'<div class="card">'
     +'<div class="ct">Conversione kWh_el &harr; kWh_th per mese</div>'
-    +'<table><thead><tr><th>Mese</th><th>T\u00b0 med</th><th>EER</th><th>1 kWh_el &rarr; kWh_th</th><th>COP_ice</th><th>1 kWh_el &rarr; kg ghiaccio</th></tr></thead><tbody>'
+    +'<table><thead><tr><th>Mese</th><th>T° med</th><th>EER</th><th>1 kWh_el &rarr; kWh_th</th><th>COP_ice</th><th>1 kWh_el &rarr; kg ghiaccio</th></tr></thead><tbody>'
     +TEMP_MEDIE.map(function(t,m){
       var eer=getEER(p.cop,t),ci=getCOPice(p.cop,t);
       var kgPerKwh=ci*1000/LATENTE_WH;
-      return '<tr><td>'+NOMI_MESE[m]+'</td><td>'+t+'\u00b0C</td><td style="color:var(--green)">'+itNum(eer,2)+'</td><td style="color:var(--teal)">'+itNum(eer,2)+' kWh_th</td><td style="color:var(--blue)">'+itNum(ci,2)+'</td><td style="color:var(--teal)">'+itNum(kgPerKwh,1)+' kg</td></tr>';
+      var deg=t>15;
+      return '<tr style="'+(deg?'background:#fff7ed;':'')+'">'
+        +'<td>'+NOMI_MESE[m]+'</td>'
+        +'<td>'+(deg?'<b style="color:var(--amber)">':'')+t+'°C'+(deg?'</b>':'')+'</td>'
+        +'<td style="color:'+(deg?'var(--amber)':'var(--green)')+'"><b>'+itNum(eer,2)+'</b></td>'
+        +'<td style="color:var(--teal)">'+itNum(eer,2)+' kWh_th</td>'
+        +'<td style="color:var(--blue)">'+itNum(ci,2)+'</td>'
+        +'<td style="color:var(--teal)">'+itNum(kgPerKwh,1)+' kg</td>'
+        +'</tr>';
     }).join('')
     +'</tbody></table>'
+    +'<div style="font-size:.82rem;color:var(--text3);margin-top:5px;">'
+    +'<span style="background:#fff7ed;padding:1px 6px;border-radius:3px;border:1px solid #fed7aa;">arancio</span> = mesi con T &gt; 15°C, EER degradato rispetto al nominale'
+    +'</div>'
     +'</div>'
     +'</div>';
   destroyC('cCOP');
-  charts['cCOP']=new Chart(document.getElementById('cCOP'),{type:'line',data:{labels:tempData.map(function(d){return d.t+'\u00b0C';}),datasets:[{label:'EER Cooling',data:tempData.map(function(d){return d.eer;}),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2},{label:'COP Ice (x0.85)',data:tempData.map(function(d){return d.copIce;}),borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:9},autoSkip:true,maxTicksLimit:10}},y:{min:0,max:7,grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}}}}}});
+  var idx15=tempData.findIndex(function(d){return d.t===15;});
+  charts['cCOP']=new Chart(document.getElementById('cCOP'),{type:'line',data:{labels:tempData.map(function(d){return d.t+'\u00b0C';}),datasets:[
+    {label:'EER Cooling',data:tempData.map(function(d){return d.eer;}),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2},
+    {label:'COP Ice (x0.85)',data:tempData.map(function(d){return d.copIce;}),borderColor:'#39c8c8',backgroundColor:'rgba(57,200,200,.08)',fill:true,tension:.3,pointRadius:0,borderWidth:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}}},
+    scales:{
+      x:{
+        grid:{color:function(ctx){return ctx.tick&&ctx.tick.label==='15\u00b0C'?'rgba(29,111,184,0.7)':'rgba(0,0,0,0.04)';},lineWidth:function(ctx){return ctx.tick&&ctx.tick.label==='15\u00b0C'?2:1;}},
+        ticks:{color:function(ctx){return ctx.tick&&ctx.tick.label==='15\u00b0C'?'#1d6fb8':'#718096';},font:{size:9},autoSkip:true,maxTicksLimit:10}
+      },
+      y:{min:0,max:7,grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}}}
+    }
+  }});
   destroyC('cCOPmese');
   charts['cCOPmese']=new Chart(document.getElementById('cCOPmese'),{type:'bar',data:{labels:NOMI_MESE,datasets:[{label:'EER medio',data:TEMP_MEDIE.map(function(t){return +getEER(p.cop,t).toFixed(2);}),backgroundColor:'rgba(57,211,83,.5)',borderColor:'#39d353',borderWidth:1,borderRadius:3},{label:'COP ice medio',data:TEMP_MEDIE.map(function(t){return +getCOPice(p.cop,t).toFixed(2);}),backgroundColor:'rgba(57,200,200,.5)',borderColor:'#39c8c8',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},y:{min:0,grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}}}}}});
 }
