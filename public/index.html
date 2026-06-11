@@ -288,9 +288,8 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
             <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#39c8c8" stroke-width="2" stroke-dasharray="5,3"/></svg></div><div class="leg-text"><b style="color:#39c8c8">Chiller ghiaccio</b> &mdash; kW_el usati per produrre ghiaccio.</div></div>
             <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#1a202c" stroke-width="2.5"/></svg></div><div class="leg-text"><b style="color:#1a202c">Totale consumi</b> &mdash; Somma IT + chiller cooling + chiller ghiaccio.</div></div>
             <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#39d353" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#39d353">FV lordo</b> &mdash; Potenza FV totale prodotta.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#22c55e" stroke-width="2" stroke-dasharray="4,2"/></svg></div><div class="leg-text"><b style="color:#22c55e">FV netto surplus</b> &mdash; FV residuo dopo IT, cooling e ghiaccio.</div></div>
+            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#22c55e" stroke-width="2" stroke-dasharray="4,2"/></svg></div><div class="leg-text"><b style="color:#22c55e">FV netto surplus</b> &mdash; FV residuo dopo IT, cooling e ghiaccio = energia immessa in rete.</div></div>
             <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><rect x="0" y="2" width="20" height="6" fill="#e3b341" opacity=".75" rx="2"/></svg></div><div class="leg-text"><b style="color:#e3b341">Prelievo rete</b> &mdash; Acquistato dalla rete quando FV non basta.</div></div>
-            <div class="leg-item"><div class="leg-line"><svg width="20" height="10"><line x1="0" y1="5" x2="20" y2="5" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="2,4"/></svg></div><div class="leg-text"><b style="color:#58a6ff">FV venduto rete</b> &mdash; Surplus FV dopo aver saturato il chiller.</div></div>
           </div>
         </div>
 
@@ -1034,7 +1033,6 @@ function renderAll(){
     {label:'FV lordo (kW_el)',data:data.hours.map(function(r){return r.pvKw;}),borderColor:'#39d353',backgroundColor:'rgba(57,211,83,.09)',fill:true,tension:.4,pointRadius:0,borderWidth:2.5},
     {label:'FV netto surplus (kW_el)',data:data.hours.map(function(r){return r.pvNetto;}),borderColor:'#22c55e',fill:false,tension:.4,pointRadius:0,borderWidth:2,borderDash:[5,3]},
     {label:'Prelievo rete (kW_el)',data:data.hours.map(function(r){return r.totalGrid;}),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.09)',fill:true,tension:.3,pointRadius:0,borderWidth:2.5},
-    {label:'FV venduto rete (kW_el)',data:data.hours.map(function(r){return r.pvToGrid;}),borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:0,borderWidth:2,borderDash:[3,5]}
   ];};
 
   function buildCustomLegend(container, dsDefinitions, chartIds){
