@@ -1217,6 +1217,7 @@ function renderAll(){
       }).join('');
 
       // Riga totali
+      var tariffaMedia=totRete>0?(totCosto/totRete):0;
       var tfoot='<tfoot><tr style="border-top:2px solid var(--border2);background:#f8fafc;font-weight:700;">'
         +'<td style="padding:5px 8px;font-family:\'IBM Plex Sans\',sans-serif;color:var(--text2);">TOTALE</td>'
         +'<td style="padding:5px 8px;text-align:right;color:#39d353;">'+fN1(totFV)+'</td>'
@@ -1227,10 +1228,10 @@ function renderAll(){
         +'<td style="padding:5px 8px;text-align:right;color:#39c8c8;">'+fN1(totThProd)+'</td>'
         +'<td style="padding:5px 8px;text-align:right;color:#39c8c8;">'+fN(totKgProd)+'</td>'
         +'<td style="padding:5px 8px;text-align:right;color:#a371f7;">'+fN(totKgUsed)+'</td>'
-        +'<td style="padding:5px 8px;text-align:right;">—</td>'
+        +'<td style="padding:5px 8px;text-align:right;color:var(--text3);font-size:.82rem;font-weight:400;">fine: '+itNum(runKgT)+' kg</td>'
         +'<td style="padding:5px 8px;text-align:right;color:#e3b341;">'+fN1(totRete)+'</td>'
         +'<td style="padding:5px 8px;text-align:right;color:var(--text);">'+fN2(totCosto)+'</td>'
-        +'<td style="padding:5px 8px;text-align:right;">—</td>'
+        +'<td style="padding:5px 8px;text-align:right;color:var(--text3);font-size:.82rem;font-weight:400;">media: '+itNum(tariffaMedia,3)+'</td>'
         +'</tr></tfoot>';
 
       return '<div class="card" style="margin-top:1rem;border-top:3px solid '+accentColor+';">'
