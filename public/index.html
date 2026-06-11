@@ -1341,34 +1341,40 @@ function runRete(){
   var annNet=ann.grid-ann.pvToGrid;
   var isExporter=annNet<=0;
   var isRegulator=annNet>0&&annNet<ann.grid*0.7;
-  var role=isExporter?'Net Exporter':isRegulator?'Grid Regulator':'Net Consumer';
+  var role=isExporter?'Esportatore netto':isRegulator?'Regolatore di rete':'Consumatore netto';
   var roleColor=isExporter?'var(--teal)':isRegulator?'var(--green)':'var(--amber)';
   var roleEmoji=isExporter?'\ud83d\udce4':isRegulator?'\u2696\ufe0f':'\ud83d\udce5';
+  var costNoFV=(p.itKw*(1+p.servPct)+p.itKw/getEER(p.cop,15))*8760*p.gridPrice;
+  var risparmio=costNoFV-(ann.cost-ann.feedIn);
   document.getElementById('rete-content').innerHTML=
     '<div class="g3" style="margin-bottom:1rem;">'
     +'<div class="card" style="text-align:center;padding:24px;">'
     +'<div style="font-size:3rem;">'+roleEmoji+'</div>'
     +'<div style="font-size:1.3rem;font-weight:700;color:'+roleColor+';margin:6px 0;">'+role+'</div>'
-    +'<div style="font-size:1.0rem;color:var(--text2);">'+exportMesi+' mesi export / '+(12-exportMesi)+' mesi import</div>'
-    +'<div style="margin-top:6px;">Netto: <b style="color:'+(annNet>0?'var(--amber)':'var(--green)')+';">'+fN(Math.abs(annNet/1000))+' MWh '+(annNet>0?'import':'export')+'</b>/anno</div>'
+    +'<div style="font-size:1.0rem;color:var(--text2);">'+exportMesi+' mesi in export / '+(12-exportMesi)+' mesi in import</div>'
+    +'<div style="margin-top:6px;">Bilancio netto: <b style="color:'+(annNet>0?'var(--amber)':'var(--green)')+';">'+fN(Math.abs(annNet/1000))+' MWh '+(annNet>0?'importati':'esportati')+'</b>/anno</div>'
     +'</div>'
     +'<div class="card">'
     +'<div class="ct">Bilancio economico annuo</div>'
     +'<div style="font-size:.92rem;color:var(--text2);line-height:2.1;">'
     +'Costo rete: <b style="color:var(--amber)">'+fE(ann.cost)+'</b><br>'
     +'Ricavo feed-in: <b style="color:var(--green)">'+fE(ann.feedIn)+'</b><br>'
-    +'Netto annuo: <b>'+fE(ann.cost-ann.feedIn)+'</b><br>'
-    +'CO\u2082 evitata FV: <b style="color:var(--green)">'+itNum(Math.round(ann.co2Saved))+' t/anno</b><br>'
-    +'CO\u2082 da rete: <b style="color:var(--red)">'+itNum(Math.round(ann.co2Grid))+' t/anno</b>'
+    +'Costo netto: <b style="color:var(--red)">'+fE(ann.cost-ann.feedIn)+'</b><br>'
+    +'<hr style="margin:.4rem 0;">'
+    +'Senza FV+ITES: <span style="color:var(--text3);text-decoration:line-through;">'+fE(costNoFV)+'</span><br>'
+    +'<b>Risparmio annuo: <span style="color:var(--green);font-size:1.05rem;">'+fE(risparmio)+'</span></b><br>'
+    +'<hr style="margin:.4rem 0;">'
+    +'CO₂ evitata: <b style="color:var(--green)">'+itNum(Math.round(ann.co2Saved))+' t/anno</b><br>'
+    +'CO₂ da rete: <b style="color:var(--red)">'+itNum(Math.round(ann.co2Grid))+' t/anno</b>'
     +'</div>'
     +'</div>'
     +'<div class="card">'
     +'<div class="ct">Effetto ITES sulla curva di carico</div>'
-    +'<div style="font-size:1.0rem;color:var(--text2);line-height:1.9;">'
-    +'\u2022 Ore centrali: surplus FV \u2192 ghiaccio (fino al fabbisogno), poi vendita<br>'
-    +'\u2022 Ore serali/notturne: ghiaccio \u2192 cooling, riduce prelievo da rete<br>'
-    +'\u2022 Ghiaccio smart: il chiller si ferma quando il tank basta<br>'
-    +'\u2022 Effetto netto: appiattimento della curva di carico'
+    +'<div style="font-size:.92rem;color:var(--text2);line-height:2.0;">'
+    +'<span style="color:#39d353;font-weight:700;">&#9654;</span> <b>Ore centrali</b> (FV attivo): surplus → ghiaccio fino al fabbisogno, poi vendita in rete<br>'
+    +'<span style="color:#a371f7;font-weight:700;">&#9654;</span> <b>Ore serali/notturne</b>: ghiaccio → cooling, evita prelievo da rete<br>'
+    +'<span style="color:#39c8c8;font-weight:700;">&#9654;</span> <b>Ghiaccio smart</b>: il chiller si ferma quando il tank copre il fabbisogno residuo<br>'
+    +'<span style="color:var(--blue);font-weight:700;">&#9654;</span> <b>Effetto netto</b>: appiattimento della curva di carico, riduzione picchi'
     +'</div>'
     +'</div>'
     +'</div>'
@@ -1378,10 +1384,10 @@ function runRete(){
     +'</div>'
     +'<div class="g2" style="margin-bottom:1rem;">'
     +'<div class="card"><div class="ct">FV prodotto vs prelievo rete (MWh/mese)</div><div class="cw" style="height:220px;"><canvas id="cFVvsRete"></canvas></div></div>'
-    +'<div class="card"><div class="ct">CO\u2082 evitata vs emessa mensile (t)</div><div class="cw" style="height:220px;"><canvas id="cCO2"></canvas></div></div>'
+    +'<div class="card"><div class="ct">CO₂ evitata vs emessa mensile (t)</div><div class="cw" style="height:220px;"><canvas id="cCO2"></canvas></div></div>'
     +'</div>';
-  destroyC('cNetGrid');
-  charts['cNetGrid']=new Chart(document.getElementById('cNetGrid'),{type:'bar',data:{labels:NOMI_MESE,datasets:[{label:'Bilancio netto (MWh)',data:netMese.map(function(n){return +(n/1000).toFixed(1);}),backgroundColor:netMese.map(function(n){return n>0?'rgba(227,179,65,.55)':'rgba(57,211,83,.55)';}),borderColor:netMese.map(function(n){return n>0?'#e3b341':'#39d353';}),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return (ctx.raw>0?'Import: ':'Export: ')+Math.abs(ctx.raw).toFixed(1)+' MWh';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'MWh (+import / -export)',color:'#718096',font:{size:9}}}}}});
+    destroyC('cNetGrid');
+  charts['cNetGrid']=new Chart(document.getElementById('cNetGrid'),{type:'bar',data:{labels:NOMI_MESE,datasets:[{label:'Bilancio netto (MWh)',data:netMese.map(function(n){return +(n/1000).toFixed(1);}),backgroundColor:netMese.map(function(n){return n>0?'rgba(227,179,65,.55)':'rgba(57,211,83,.55)';}),borderColor:netMese.map(function(n){return n>0?'#e3b341':'#39d353';}),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return (ctx.raw>0?'Import: ':'Export: ')+itNum(Math.abs(ctx.raw),1)+' MWh';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'MWh (+import / -export)',color:'#718096',font:{size:9}}}}}});
   destroyC('cFVvsRete');
   charts['cFVvsRete']=new Chart(document.getElementById('cFVvsRete'),{type:'bar',data:{labels:NOMI_MESE,datasets:[{label:'FV prodotto',data:res.mesi.map(function(m){return +(m.pv/1000).toFixed(1);}),backgroundColor:'rgba(57,211,83,.5)',borderColor:'#39d353',borderWidth:1,borderRadius:3},{label:'Prelievo rete',data:res.mesi.map(function(m){return +(m.grid/1000).toFixed(1);}),backgroundColor:'rgba(227,179,65,.4)',borderColor:'#e3b341',borderWidth:1,borderRadius:3},{label:'Venduto rete',data:res.mesi.map(function(m){return +(m.pvToGrid/1000).toFixed(1);}),backgroundColor:'rgba(88,166,255,.4)',borderColor:'#58a6ff',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:9},boxWidth:10}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:10}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:9}},title:{display:true,text:'MWh',color:'#718096',font:{size:9}}}}}});
   destroyC('cCO2');
