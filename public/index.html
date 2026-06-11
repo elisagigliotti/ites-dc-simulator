@@ -471,6 +471,19 @@ function fN(n){return itNum(Math.round(n));}
 function fN1(n){return itNum(n,1);}
 function fN2(n){return itNum(n,2);}
 function fE(n){return '\u20ac'+fN(Math.round(n));}
+function fK(n){
+  // Formats as compact k notation: 4800 -> "4,8k", 985373 -> "985k", 228600 -> "229k"
+  if(n===null||n===undefined||isNaN(n))return '—';
+  var k=n/1000;
+  if(Math.abs(k)>=100) return itNum(Math.round(k))+'k';
+  if(Math.abs(k)>=10)  return itNum(k,1)+'k';
+  return itNum(k,2)+'k';
+}
+function fKEuro(n){
+  // Cost in euros: keep full if <1000, else k
+  if(Math.abs(n)<1000) return itNum(n,2);
+  return itNum(n/1000,1)+'k';
+}
 
 // ============================================================
 // PARAMETRI
@@ -1489,8 +1502,8 @@ function runProfili(){
     +'<div class="card" style="margin-bottom:1rem;">'
     +'<div class="ct">Tabella mensile riepilogativa</div>'
     +'<div style="overflow-x:auto;"><table><thead><tr>'
-    +'<th>Mese</th><th>T\u00b0 med</th><th>FV (MWh)</th><th>Cooling (th)</th><th>Cool da FV</th>'
-    +'<th>Ghiaccio \u2191</th><th>Ghiaccio \u2193</th><th>Rete (el)</th><th>Costo (k\u20ac)</th><th>CO\u2082 ev.</th>'
+    +'<th>Mese</th><th>T\u00b0 med</th><th>FV (MWh_el)</th><th>Cooling (MWh_th)</th><th>Cool da FV (MWh_th)</th>'
+    +'<th>Ghiaccio \u2191 (MWh_th)</th><th>Ghiaccio \u2193 (MWh_th)</th><th>Rete (MWh_el)</th><th>Costo (k\u20ac)</th><th>CO\u2082 ev. (t)</th>'
     +'</tr></thead><tbody>'
     +mesi.map(function(m,i){return '<tr><td>'+NOMI_MESE[i]+'</td><td>'+TEMP_MEDIE[i]+'\u00b0C</td><td>'+fN1(m.pv/1000)+'</td><td style="color:var(--red)">'+fN1(m.cooling/1000)+'</td><td style="color:var(--green)">'+fN1(m.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN1(m.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN1(m.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN1(m.grid/1000)+'</td><td>'+fN1(m.cost/1000)+'</td><td style="color:var(--green)">'+fN1(m.pv/1000*CO2_FACTOR)+'</td></tr>';}).join('')
     +'<tr style="border-top:2px solid var(--border2);font-weight:600;"><td>TOTALE</td><td>\u2014</td><td>'+fN(ann.pv/1000)+'</td><td style="color:var(--red)">'+fN(ann.cooling/1000)+'</td><td style="color:var(--green)">'+fN(ann.coolPv/1000)+'</td><td style="color:var(--teal)">'+fN(ann.iceUp/1000)+'</td><td style="color:var(--purple)">'+fN(ann.iceDown/1000)+'</td><td style="color:var(--amber)">'+fN(ann.grid/1000)+'</td><td>'+fN(ann.cost/1000)+'</td><td style="color:var(--green)">'+itNum(ann.co2Saved,1)+'</td></tr>'
@@ -1505,7 +1518,7 @@ function runProfili(){
     +'<span style="color:#e3b341;">Rete</span> = prelievo dalla rete &middot; '
     +'<span style="color:#58a6ff;">Feed-in</span> = energia venduta &middot; '
     +'<span style="color:#39c8c8;">Ghiaccio</span> = energia termica accumulata &middot; '
-    +'<span style="color:var(--amber);">Costo</span> = costo netto rete &middot; Tutti i valori in kWh/giorno salvo indicato.'
+    +'<span style="color:var(--amber);">Costo</span> = costo netto rete. '
     +'</div>'
     +'<div class="tbl365-wrap" id="tbl365-container">'
     +'<div style="text-align:center;padding:2rem;color:var(--text3);">Calcolo in corso\u2026</div>'
@@ -1522,16 +1535,15 @@ function runProfili(){
     var g=res.giorni365;
     var thead365='<table class="tbl365"><thead><tr>'
       +'<th style="text-align:left;">Giorno</th>'
-      +'<th>Mese</th>'
-      +'<th style="color:#f85149;">IT (kWh_el)</th>'
-      +'<th style="color:#39d353;">FV (kWh_el)</th>'
-      +'<th style="color:#ff6b35;">Cooling (kWh_th)</th>'
-      +'<th style="color:#39c8c8;">Ghiaccio prod. (kWh_th)</th>'
-      +'<th style="color:#a371f7;">Ghiaccio usato (kWh_th)</th>'
-      +'<th style="color:#e3b341;">Rete (kWh_el)</th>'
-      +'<th style="color:#58a6ff;">Feed-in (kWh_el)</th>'
-      +'<th style="color:#1a202c;">Totale consumi (kWh_el)</th>'
-      +'<th style="color:var(--amber);">Costo (&euro;)</th>'
+      +'<th style="color:#f85149;">IT<br><span style="font-weight:400;font-size:.80rem;">(kWh_el)</span></th>'
+      +'<th style="color:#39d353;">FV<br><span style="font-weight:400;font-size:.80rem;">(kWh_el)</span></th>'
+      +'<th style="color:#ff6b35;">Cooling<br><span style="font-weight:400;font-size:.80rem;">(kWh_th)</span></th>'
+      +'<th style="color:#39c8c8;">Ghiaccio↑<br><span style="font-weight:400;font-size:.80rem;">(kWh_th)</span></th>'
+      +'<th style="color:#a371f7;">Ghiaccio↓<br><span style="font-weight:400;font-size:.80rem;">(kWh_th)</span></th>'
+      +'<th style="color:#e3b341;">Rete<br><span style="font-weight:400;font-size:.80rem;">(kWh_el)</span></th>'
+      +'<th style="color:#58a6ff;">Feed-in<br><span style="font-weight:400;font-size:.80rem;">(kWh_el)</span></th>'
+      +'<th style="color:#1a202c;">Tot. consumi<br><span style="font-weight:400;font-size:.80rem;">(kWh_el)</span></th>'
+      +'<th style="color:var(--amber);">Costo<br><span style="font-weight:400;font-size:.80rem;">(&euro;/gg)</span></th>'
       +'<th>PUE</th>'
       +'</tr></thead><tbody>';
 
@@ -1555,7 +1567,7 @@ function runProfili(){
         prevMese=m;
         rows365+='<tr'+trClass+'>'
           +'<td>'+giornoLabel(gg+1)+'</td>'
-          +'<td style="color:var(--text3);font-family:\'IBM Plex Sans\',sans-serif;">'+NOMI_MESE[m]+'</td>'
+          
           +'<td style="color:#f85149;">'+itNum(itKwh)+'</td>'
           +'<td style="color:#39d353;">'+(pv>0?itNum(pv):'<span style="color:var(--text3);">0</span>')+'</td>'
           +'<td style="color:#ff6b35;">'+itNum(cool)+'</td>'
@@ -1584,8 +1596,8 @@ function runProfili(){
     var avgPue=g.pue.reduce(function(a,b){return a+b;},0)/g.pue.length;
 
     rows365+='<tr style="border-top:3px solid var(--border2);background:#f0f4f8;font-weight:700;">'
-      +'<td style="font-family:\'IBM Plex Sans\',sans-serif;font-weight:700;">ANNO</td>'
-      +'<td style="font-family:\'IBM Plex Sans\',sans-serif;color:var(--text3);">12 mesi</td>'
+      +'<td style="font-family:\'IBM Plex Sans\',sans-serif;font-weight:700;">ANNO (12 mesi)</td>'
+      
       +'<td style="color:#f85149;">'+itNum(totIT)+'</td>'
       +'<td style="color:#39d353;">'+itNum(totPV)+'</td>'
       +'<td style="color:#ff6b35;">'+itNum(totCool)+'</td>'
@@ -1594,7 +1606,7 @@ function runProfili(){
       +'<td style="color:#e3b341;">'+itNum(totGrid)+'</td>'
       +'<td style="color:#58a6ff;">'+itNum(totPvToGrid)+'</td>'
       +'<td style="color:#1a202c;">'+itNum(totElec)+'</td>'
-      +'<td style="color:var(--amber);">'+itNum(totCost,2)+'</td>'
+      +'<td style="color:var(--amber);">'+fN2(totCost)+'</td>'
       +'<td>'+itNum(avgPue,2)+'</td>'
       +'</tr>';
 
