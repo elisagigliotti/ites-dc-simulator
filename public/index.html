@@ -341,29 +341,58 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
   <div class="g2">
     <div>
       <div class="card" style="margin-bottom:.8rem;">
-        <div class="ct">Modello fisico v7 &mdash; ghiaccio smart</div>
+        <div class="ct">Logica di accumulo ghiaccio</div>
         <div class="ibar ibar-g" style="margin-bottom:.8rem;font-size:.92rem;">
-          <b>Novit&agrave; v7:</b> Il chiller smette di produrre ghiaccio quando il tank copre gi&agrave; il fabbisogno di cooling residuo del giorno. Il surplus FV in eccesso viene venduto in rete.
+          <b>Principio:</b> il chiller smette di produrre ghiaccio quando il tank copre gi&agrave; il fabbisogno di cooling residuo del giorno. Il surplus FV in eccesso viene venduto in rete. Nessun accumulo indefinito tra i giorni.
         </div>
         <div class="formula">cooling_residuo(h) = &sum;<sub>h+1..23</sub> coolingNeed(h')</div>
         <div class="formula">ice_cap(h) = max(0, cooling_residuo(h) &minus; tank_attuale)</div>
         <div class="formula">ice_charged(h) = min(surplus_FV &times; COP_ice, ice_cap(h))</div>
-        <div style="font-size:1.0rem;color:var(--text3);line-height:1.9;margin:.6rem 0 0 .5rem;">
-          <b>Effetto pratico:</b> il tank si riempie quanto serve, poi si ferma. Il carry-over verso il giorno dopo &egrave; minimo (solo il residuo non consumato la sera). Nessun accumulo infinito.
+        <div style="font-size:.92rem;color:var(--text3);line-height:1.8;margin:.7rem 0 .6rem .2rem;">
+          <b style="color:var(--text2);">Effetto pratico:</b> il tank si riempie quanto serve, poi si ferma. Il carry-over al giorno successivo &egrave; solo il residuo non consumato la sera, che decade al ritmo dello 0,5%/h per dispersione termica.
         </div>
+        <hr>
+        <div class="ct" style="margin-top:.7rem;">Esempio numerico &mdash; ora di picco estiva</div>
+        <table style="margin-top:.4rem;">
+          <thead><tr><th>Grandezza</th><th>Formula</th><th>Valore</th></tr></thead>
+          <tbody>
+            <tr><td>Cooling residuo ore 12-23</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">12h &times; ~207 kWh_th</td><td style="color:var(--red);">~2.484 kWh_th</td></tr>
+            <tr><td>Tank attuale (ore 11)</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">accumulato finora</td><td style="color:var(--teal);">es. 1.200 kWh_th</td></tr>
+            <tr><td>ice_cap (gap da coprire)</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">2.484 &minus; 1.200</td><td style="color:var(--blue);">1.284 kWh_th</td></tr>
+            <tr><td>Surplus FV ora 11</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">FV &minus; IT &minus; chiller</td><td style="color:var(--green);">es. 200 kW_el</td></tr>
+            <tr><td>Ghiaccio producibile</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">200 &times; COP_ice 2,97</td><td style="color:var(--teal);">594 kWh_th</td></tr>
+            <tr><td>Ghiaccio caricato</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">min(594, 1.284)</td><td style="color:var(--teal);font-weight:700;">594 kWh_th ✓</td></tr>
+            <tr><td style="color:var(--green);">FV venduto rete</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">surplus non usato per ghiaccio</td><td style="color:var(--green);">0 kW_el (tutto usato)</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
     <div>
       <div class="card" style="margin-bottom:.8rem;">
-        <div class="ct">Modello fisico v7 &mdash; catena termica</div>
+        <div class="ct">Catena termica &mdash; formule</div>
         <div class="formula">Q_calore_IT = P_IT &times; 1h = kWh_el = kWh_th (100%)</div>
         <div class="formula">Q_cooling_totale = Q_IT + Q_servizi(1.5%) + Q_involucro(UA &times; &Delta;T)</div>
         <div class="formula">P_chiller_el = Q_cooling_th / EER(T_ext)</div>
-        <div class="formula">P_ghiaccio_el = min(surplus, ice_cap/COP_ice)</div>
-        <div style="font-size:1.0rem;color:var(--text2);line-height:1.9;margin:.6rem 0 0 .5rem;">
+        <div class="formula">P_ghiaccio_el = min(surplus, ice_cap / COP_ice)</div>
+        <div style="font-size:.92rem;color:var(--text2);line-height:1.8;margin:.7rem 0 .6rem .2rem;">
           <b>Priorit&agrave; FV:</b> 1&deg; IT + servizi &rarr; 2&deg; Cooling diretto &rarr; 3&deg; Ghiaccio (fino al cap) &rarr; 4&deg; Vendita rete<br>
-          <b>CO&#8322;:</b> fattore emissione rete italiana 0.233 kg/kWh (GSE 2023)
+          <b>CO&#8322;:</b> fattore emissione rete italiana 0,233 kg/kWh (GSE 2023)<br>
+          <b>Decadimento ghiaccio:</b> &minus;0,5%/h sul carry-over (dispersione termica del serbatoio)
         </div>
+        <hr>
+        <div class="ct" style="margin-top:.7rem;">Esempio numerico &mdash; configurazione default (200 kW IT, EER 3,5)</div>
+        <table style="margin-top:.4rem;">
+          <thead><tr><th>Grandezza</th><th>Calcolo</th><th>Risultato</th></tr></thead>
+          <tbody>
+            <tr><td>Calore generato da IT</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">200 kW_el &times; 100%</td><td style="color:var(--red);">200 kW_th</td></tr>
+            <tr><td>+ Servizi ausiliari</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">200 &times; 1,5%</td><td style="color:var(--orange);">3 kW_th</td></tr>
+            <tr><td>+ Involucro (estate, T=25°C)</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">500 W/K &times; (25&minus;27)K / 1000</td><td style="color:var(--text3);">&minus;1 kW_th (aiuta)</td></tr>
+            <tr><td><b>Fabbisogno cooling</b></td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">200 + 3 &minus; 1</td><td style="color:var(--red);font-weight:700;">202 kW_th</td></tr>
+            <tr><td>Consumo chiller (EER 3,5)</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">202 / 3,5</td><td style="color:var(--blue);">57,7 kW_el</td></tr>
+            <tr><td>1 kWh_el surplus &rarr; ghiaccio</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">COP_ice = 3,5 &times; 0,85</td><td style="color:var(--teal);">2,975 kWh_th</td></tr>
+            <tr><td>1 kWh_th ghiaccio &rarr; kg</td><td style="font-family:'IBM Plex Sans',sans-serif;color:var(--text3);">1000 / 92,78 Wh/kg</td><td style="color:var(--teal);">10,8 kg/kWh_th</td></tr>
+          </tbody>
+        </table>
       </div>
       <div class="card">
         <div class="ct">Tariffe F1/F2/F3 &mdash; Fonte GSE</div>
@@ -372,6 +401,10 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
           <tr><td>F2 (mezza)</td><td style="font-family:'IBM Plex Sans',sans-serif">Lun-Sab 7-8, 19-23</td><td style="color:var(--amber)">base</td></tr>
           <tr><td>F3 (fuori picco)</td><td style="font-family:'IBM Plex Sans',sans-serif">Notti + Dom</td><td style="color:var(--green)">-25%</td></tr>
         </table>
+        <div style="font-size:.85rem;color:var(--text3);margin-top:.6rem;line-height:1.7;">
+          Fonte: ARERA/GSE. I moltiplicatori si applicano al prezzo base impostato nel pannello controlli.<br>
+          F3 notturno (0-7h e 23-24h) favorisce la ricarica economica del tank da rete quando necessario.
+        </div>
       </div>
     </div>
   </div>
