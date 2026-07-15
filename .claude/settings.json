@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node --check _combined_check.js)",
+      "Bash(node _verify.js)",
+      "Bash(node --check public/js/simulation.js)",
+      "Bash(node --check public/js/ui-daily.js)",
+      "Bash(node --check public/js/tabs.js)"
+    ]
+  }
+}
