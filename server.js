@@ -14,8 +14,8 @@ const PORT = 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ---- Proxy endpoint PVGIS monthly (PVcalc) ----
-app.get('/api/pvgis/monthly', async (req, res) => {
+// ---- Proxy endpoint PVGIS monthly (PVcalc) — stesso path usato dal frontend e da Vercel ----
+app.get('/api/pvgis-monthly', async (req, res) => {
   const { lat, lon, kwp, losses, tilt, azimuth } = req.query;
 
   // PVGIS converte azimut: 0=sud, positivo=ovest, negativo=est

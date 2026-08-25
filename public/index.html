@@ -16,7 +16,7 @@
       <h1>Studio Pre-Fattibilit&agrave; <span>ITES</span> &mdash; Data Center <span style="font-size:1.0rem;color:rgba(255,255,255,0.6)">v7</span></h1>
       <p>Ice Thermal Energy Storage + FV 1 MWp &middot; Ghiaccio prima della rete, vendita solo d'estate a tank saturo &middot; kWh_el &harr; kWh_th &middot; CO&#8322;</p>
     </div>
-    <div class="hdr-meta">Sito: Bellocchi (PU) &middot; 43.85&deg;N 12.98&deg;E<br>Capannone ex-frigo: 5.500 m&sup2; &middot; H 6m<br>FV: 4.000 m&sup2; &times; 260 Wp/m&sup2; = 1.040 kWp<br>Azimut 145&deg; (SSE) &middot; Inclinazione 5&deg;</div>
+    <div class="hdr-meta">Sito: Bellocchi (PU) &middot; 43.85&deg;N 12.98&deg;E<br>Capannone ex-frigo: 5.500 m&sup2; &middot; H 6m (riuso)<br>Lotto Petra Srl: 23.659 m&sup2; (Comparto A)<br>Terreno libero: ~18.000 m&sup2; tutto a FV<br>Azimut tetto 145&deg; (SSE) &middot; Inclinazione 5&deg;</div>
   </div>
   <div class="badges">
     <span class="badge">FV &asymp; 1 MWp</span><span class="badge">PVGIS v5.2</span><span class="badge">ITES &lambda;=334 kJ/kg</span>
@@ -55,6 +55,23 @@
         </div>
       </div>
 
+      <div class="card" style="border:1.5px solid var(--green);">
+        <div class="ct" style="color:var(--green);">FV: tetto + terreno &mdash; Lotto Petra Srl</div>
+        <div class="cg">
+          <div><div class="ch"><span class="cn">Superficie lotto Petra netta (m&sup2;)</span></div><input type="number" value="23659" id="r-suplotto" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Footprint edificio ex-frigo (m&sup2;)</span></div><input type="number" value="5500" id="r-footprint" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Densit&agrave; FV in copertura (kWp/m&sup2; utile)</span></div><input type="number" step="0.01" value="0.19" id="r-fvroof" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Tipo montaggio FV a terra</span></div>
+            <select id="r-fvground-type" onchange="resetRun()">
+              <option value="bancali" selected>Bancali a terra (0,10 kWp/m&sup2;)</option>
+              <option value="piazzali">Piazzali complanari (0,13 kWp/m&sup2;)</option>
+              <option value="pensiline">Pensiline (0,15 kWp/m&sup2;)</option>
+            </select>
+          </div>
+          <div id="superfici-info" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="ct">Data Center &mdash; Rack IT</div>
         <div class="cg">
@@ -67,7 +84,7 @@
               <option value="colo">Colocation (7 kW/rack)</option>
             </select>
           </div>
-          <div><div class="ch"><span class="cn">Numero rack</span><span class="cv" id="v-nrack">20</span></div><input type="range" min="5" max="120" step="1" value="20" id="r-nrack" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Numero rack</span><span class="cv" id="v-nrack">50</span></div><input type="range" min="5" max="120" step="1" value="50" id="r-nrack" oninput="resetRun()"></div>
           <div id="rack-summary" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
           <div><div class="ch"><span class="cn">Set-point interno</span><span class="cv" id="v-setp">27 &deg;C</span></div><input type="range" min="18" max="30" step="1" value="27" id="r-setp" oninput="resetRun()"></div>
           <div><div class="ch"><span class="cn">Involucro UA</span><span class="cv" id="v-ua">500 W/K</span></div><input type="range" min="100" max="5000" step="100" value="500" id="r-ua" oninput="resetRun()"></div>
@@ -212,10 +229,11 @@
 <div id="panel-capex" class="panel">
   <div class="card" style="margin-bottom:1rem;">
     <div class="ct">Parametri analisi finanziaria</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1.2rem;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:1.2rem;">
       <div><div class="ch"><span class="cn">Variazione costo FV</span><span class="cv" id="v-fvcost">0 %</span></div><input type="range" min="-30" max="30" step="5" value="0" id="r-fvcost" oninput="runCapex()"></div>
       <div><div class="ch"><span class="cn">Variazione tariffa energia</span><span class="cv" id="v-gridvar">0 %</span></div><input type="range" min="-30" max="50" step="5" value="0" id="r-gridvar" oninput="runCapex()"></div>
       <div><div class="ch"><span class="cn">Tariffa hosting IT</span><span class="cv" id="v-hosting">0.12 &euro;/kWh</span></div><input type="range" min="0.05" max="0.30" step="0.01" value="0.12" id="r-hosting" oninput="runCapex()"></div>
+      <div><div class="ch"><span class="cn">Oneri urbanizzazione</span><span class="cv" id="v-urbcost">50 &euro;/m&sup2;</span></div><input type="range" min="0" max="150" step="5" value="50" id="r-urbcost" oninput="runCapex()"></div>
       <div><div class="ch"><span class="cn">N&deg; macchine ghiaccio</span></div>
         <select id="r-nmacchine" onchange="runCapex()">
           <option value="1" selected>1 macchina (nessuna ridondanza)</option>
@@ -232,6 +250,18 @@
 <div id="panel-note" class="panel">
   <div class="g2">
     <div>
+      <div class="card" style="margin-bottom:.8rem;border:1.5px solid var(--green);">
+        <div class="ct" style="color:var(--green);">Superfici e FV (lotto Petra)</div>
+        <div style="font-size:.92rem;color:var(--text2);line-height:1.9;">
+          <b>Lotto Petra Srl (Comparto A):</b> 23.659 m&sup2; netti, propriet&agrave; diretta.<br>
+          <b>Edificio ex-frigo (riuso):</b> ~5.500 m&sup2;, gi&agrave; esistente, nessuna nuova costruzione.<br>
+          <b>Terreno libero:</b> ~18.000 m&sup2;, interamente destinato a fotovoltaico (bancali, piazzali o pensiline a scelta).<br>
+          <b>Tetto:</b> orientamento fisso 145&deg;/5&deg; (vincolato dall'edificio esistente) &middot; <b>Terra:</b> orientabile a Sud, resa specifica maggiore.
+        </div>
+        <div class="ibar ibar-a" style="margin-top:.7rem;font-size:.92rem;">
+          <b>Attenzione:</b> la taglia FV massima installabile &egrave; vincolata dalla somma di tetto + terreno del lotto, non solo dal tetto. Il n.32% di PMI Srl (Comparto B, 158.979 m&sup2;) &egrave; escluso da questo studio.
+        </div>
+      </div>
       <div class="card" style="margin-bottom:.8rem;">
         <div class="ct">Logica di accumulo ghiaccio</div>
         <div class="ibar ibar-g" style="margin-bottom:.8rem;font-size:.92rem;">
