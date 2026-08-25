@@ -163,12 +163,25 @@ function runCOP(){
 // ============================================================
 function runProfili(){
   var p=getParams();var res=simula365completa(p);var mesi=res.mesi,ann=res.ann;
+  var dimAnno=calcolaDimensionamento(p);
+  var machineKwElAnno=Math.max.apply(null, dimAnno.map(function(s){return s.potenzaDiluitaKwEl;}));
+  var tankM3Anno=Math.max.apply(null, dimAnno.map(function(s){return s.tankPiccoM3;}));
+  var tankKgAnno=Math.max.apply(null, dimAnno.map(function(s){return s.tankPiccoKg;}));
+  var stagionePeggiore=dimAnno.reduce(function(best,s){return s.tankPiccoKg>best.tankPiccoKg?s:best;},dimAnno[0]);
   document.getElementById('profili-content').innerHTML=
     '<div class="g4" style="margin-bottom:1rem;">'
     +'<div class="card kpi"><div class="kv" style="color:var(--red)">'+fN(ann.cooling/1000)+'</div><div class="ku">MWh_th/a</div><div class="kl">Cooling</div></div>'
     +'<div class="card kpi"><div class="kv" style="color:var(--green)">'+fN(ann.pv/1000)+'</div><div class="ku">MWh_el/a</div><div class="kl">FV</div></div>'
     +'<div class="card kpi"><div class="kv" style="color:var(--amber)">'+fN(ann.grid/1000)+'</div><div class="ku">MWh_el/a</div><div class="kl">Rete</div></div>'
     +'<div class="card kpi"><div class="kv" style="color:var(--teal)">'+fN(ann.iceUp/1000)+'</div><div class="ku">MWh_th/a</div><div class="kl">Ghiaccio prod.</div></div>'
+    +'</div>'
+    +'<div class="card" style="margin-bottom:1rem;border:1.5px solid var(--teal);">'
+    +'<div class="ct" style="color:var(--teal);">Dimensionamento consigliato — macchina ghiaccio e serbatoio</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">'
+    +'<div class="kpi" style="padding:.4rem;"><div class="kv" style="color:var(--teal);">'+itNum(machineKwElAnno,1)+'</div><div class="ku">kW_el</div><div class="kl">Potenza macchina ghiaccio</div></div>'
+    +'<div class="kpi" style="padding:.4rem;"><div class="kv" style="color:var(--teal);">'+itNum(tankM3Anno,1)+'</div><div class="ku">m&sup3; ('+itNum(tankKgAnno)+' kg)</div><div class="kl">Volume serbatoio</div></div>'
+    +'</div>'
+    +'<div style="font-size:1.0rem;color:var(--text3);margin-top:.6rem;">Basato sul giorno con il picco di ghiaccio più alto trovato scansionando i 365 giorni simulati &mdash; caso peggiore: <b>'+stagionePeggiore.nome+', '+stagionePeggiore.label+'</b>. Dettaglio per stagione e ipotesi di calcolo nel tab CAPEX / OPEX.</div>'
     +'</div>'
     +'<div class="g2" style="margin-bottom:1rem;">'
     +'<div class="card"><div class="ct">Cooling &amp; Fonti mensili (MWh)</div><div class="cw" style="height:250px;"><canvas id="cMensile"></canvas></div></div>'
@@ -391,6 +404,8 @@ function runCapex(){
   // Dimensionamento macchina ghiaccio (giorno peggiore per stagione) + multi-macchina
   var dimensionamento=calcolaDimensionamento(p);
   var machineKwElRichiesta=Math.max.apply(null, dimensionamento.map(function(s){return s.potenzaDiluitaKwEl;}));
+  var tankM3Consigliato=Math.max.apply(null, dimensionamento.map(function(s){return s.tankPiccoM3;}));
+  var tankKgConsigliato=Math.max.apply(null, dimensionamento.map(function(s){return s.tankPiccoKg;}));
   var machineKwElTotale=nMacchine>1 ? machineKwElRichiesta*nMacchine/(nMacchine-1) : machineKwElRichiesta;
   var machineKwElPerUnita=machineKwElTotale/nMacchine;
   var overheadMultiUnita=1+0.04*(nMacchine-1); // +4% per unit\u00e0 oltre la prima (tubazioni, valvole, BMS extra)
@@ -507,7 +522,8 @@ function runCapex(){
     +'</tbody></table></div>'
     +'<div style="font-size:.85rem;color:var(--text3);margin-top:.6rem;line-height:1.7;">'
     +'Taglia macchina scelta (max fra le stagioni, potenza diluita): <b style="color:var(--teal);">'+itNum(machineKwElRichiesta,1)+' kW_el</b> &middot; '
-    +'con '+nMacchine+' unità'+(nMacchine>1?' (ridondanza N+1, ogni unità '+itNum(machineKwElPerUnita,1)+' kW_el)':'')+': totale installato <b style="color:var(--blue);">'+itNum(machineKwElTotale,1)+' kW_el</b>'
+    +'con '+nMacchine+' unità'+(nMacchine>1?' (ridondanza N+1, ogni unità '+itNum(machineKwElPerUnita,1)+' kW_el)':'')+': totale installato <b style="color:var(--blue);">'+itNum(machineKwElTotale,1)+' kW_el</b><br>'
+    +'Volume serbatoio consigliato (max fra le stagioni, picco reale nei 365 giorni): <b style="color:var(--teal);">'+itNum(tankM3Consigliato,1)+' m&sup3;</b> ('+itNum(tankKgConsigliato)+' kg di ghiaccio)'
     +'</div>'
     +'</div>'
     +'<div class="card"><div class="ct">Cash Flow cumulativo 20 anni</div><div class="cw" style="height:250px;"><canvas id="cCashflow"></canvas></div></div>';
