@@ -39,8 +39,29 @@ function clearAll(){
   Object.keys(charts).filter(function(k){return k.startsWith('cOrario');}).forEach(function(k){destroyC(k);});
   renderLabels();
 }
-function resetRun(){tankStates365=null;cache365=null;renderCalendar();if(selectedDays.length>0)renderAll();else renderLabels();}
+function resetRun(){updateSuperficiUI();tankStates365=null;cache365=null;renderCalendar();if(selectedDays.length>0)renderAll();else renderLabels();}
 function renderLabels(){var p=getParams();updateLabels(p);}
+
+// ============================================================
+// SUPERFICI — lotto Petra: aggiorna il tetto dello slider FV e la card riepilogo
+// ============================================================
+function updateSuperficiUI(){
+  var sp=getSuperficiParams(),sf=calcSuperfici(sp);
+  var slider=document.getElementById('r-kwp');
+  var newMax=Math.max(1,Math.round(sf.fvPotenzialeMax));
+  slider.max=newMax;
+  if(parseFloat(slider.value)>newMax)slider.value=newMax;
+  var kwp=parseFloat(slider.value);
+  var kwpRoof=Math.min(kwp,sf.fvRoofMax),kwpGround=Math.max(0,kwp-kwpRoof);
+  var info=document.getElementById('superfici-info');
+  if(!info)return;
+  info.innerHTML=
+    'Terreno libero: <b>'+itNum(Math.round(sf.terrenoLibero))+' m²</b> tutto a FV ('+sp.groundType+')<br>'
+    +'FV tetto max: <b>'+itNum(Math.round(sf.fvRoofMax))+' kWp</b> &middot; FV terra max: <b>'+itNum(Math.round(sf.fvGroundMax))+' kWp</b><br>'
+    +'<b style="color:var(--teal);">FV potenziale totale: '+itNum(newMax)+' kWp</b><br>'
+    +'Installato ora: '+itNum(Math.round(kwp))+' kWp — tetto '+itNum(Math.round(kwpRoof))+' / terra '+itNum(Math.round(kwpGround))+' kWp'
+    +(kwp>=newMax-0.5?'<div style="color:var(--red);margin-top:4px;">&#9888; Hai raggiunto il potenziale massimo del layout scelto.</div>':'');
+}
 
 function updateLabels(p){
   document.getElementById('v-kwp').textContent=p.kwp+' kWp';
@@ -353,7 +374,6 @@ function renderAll(){
   // TABELLA ORA PER ORA — AGGIORNATA con nuove colonne
   var tblDiv=document.getElementById('tabella-oraria');
   if(tblDiv){
-    var LATENTE_WH_local=333550;
     var thead='<thead><tr style="border-bottom:2px solid var(--border);color:var(--text3);font-size:.88rem;">'
       +'<th style="padding:5px 8px;text-align:center;background:#f1f5f9;position:sticky;top:0;">Ora</th>'
       +'<th style="padding:5px 8px;text-align:right;background:#f1f5f9;position:sticky;top:0;">FV<br><span style="color:#39d353;font-weight:400;">(kW)</span></th>'
@@ -373,7 +393,7 @@ function renderAll(){
     var tablesHtml=results.map(function(item,idx){
       var d=item.data;
       var dayNum=item.gg;
-      var runKgT=Math.round(d.iceYesterday*1000/LATENTE_WH_local);
+      var runKgT=Math.round(d.iceYesterday*1000/LATENTE_WH);
       var accentColor=SEL_COLORS[idx];
 
       // Totali colonna per il footer
@@ -433,7 +453,7 @@ function renderAll(){
 
       return '<div class="card" style="margin-top:1rem;border-top:3px solid '+accentColor+';">'
         +'<div class="ct" style="margin-bottom:8px;">Tabella ora per ora \u2014 <span style="color:'+accentColor+';">'+giornoLabel(dayNum)+'</span>'
-        +' <span style="font-size:.85rem;color:var(--text3);font-weight:400;">(Tank inizio giornata: '+itNum(Math.round(d.iceYesterday*1000/LATENTE_WH_local))+' kg)</span></div>'
+        +' <span style="font-size:.85rem;color:var(--text3);font-weight:400;">(Tank inizio giornata: '+itNum(Math.round(d.iceYesterday*1000/LATENTE_WH))+' kg)</span></div>'
         +'<div style="overflow-x:auto;">'
         +'<table style="width:100%;border-collapse:collapse;font-size:.92rem;font-family:\'IBM Plex Mono\',monospace;">'
         +thead+tfoot

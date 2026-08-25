@@ -406,6 +406,9 @@ function runCapex(){
   capex['Rack + cablaggio']=p.nRack*4500;
   capex['BMS / Monitoring']=85000;
   capex['Ingegneria e permessi']=120000;
+  var urbCostM2=parseFloat(document.getElementById('r-urbcost').value)||0;
+  document.getElementById('v-urbcost').textContent=urbCostM2+' €/m²';
+  capex['Oneri di urbanizzazione a scomputo ('+fN(p.supLotto)+' m² × '+urbCostM2+')']=p.supLotto*urbCostM2;
   var capexTot=Object.values(capex).reduce(function(a,b){return a+b;},0);
   var annCostAdj=ann.cost*(1+gridvarPct/100);
   var opex={};

@@ -1,4 +1,22 @@
 // ============================================================
+// SUPERFICI — lotto Petra Srl: tetto (riuso ex-frigo) + terreno libero a FV
+// ============================================================
+function getSuperficiParams(){
+  return{
+    supLotto:parseFloat(document.getElementById('r-suplotto').value),
+    footprint:parseFloat(document.getElementById('r-footprint').value),
+    densRoof:parseFloat(document.getElementById('r-fvroof').value),
+    groundType:document.getElementById('r-fvground-type').value
+  };
+}
+function calcSuperfici(sp){
+  var terrenoLibero=Math.max(0,sp.supLotto-sp.footprint);
+  var fvRoofMax=sp.footprint*0.60*sp.densRoof;
+  var fvGroundMax=terrenoLibero*DENSITA_GROUND[sp.groundType];
+  return{terrenoLibero,fvRoofMax,fvGroundMax,fvPotenzialeMax:fvRoofMax+fvGroundMax};
+}
+
+// ============================================================
 // PARAMETRI
 // ============================================================
 function getParams(){
@@ -8,8 +26,14 @@ function getParams(){
   var itKw=nRack*rack.kw;
   var gridPrice=parseFloat(document.getElementById('r-price').value);
   var tariffMode=document.getElementById('r-tariffmode').value;
+  var kwp=parseFloat(document.getElementById('r-kwp').value);
+  var sp=getSuperficiParams(),sf=calcSuperfici(sp);
+  var kwpRoof=Math.min(kwp,sf.fvRoofMax),kwpGround=Math.max(0,kwp-kwpRoof);
+  // Miscela pesata dei due profili PVGIS (tetto/terra) sui kWp installati in ciascuno.
+  // Puro ricalcolo locale: le chiamate di rete avvengono solo al click "Carica da PVGIS".
+  if(pvgisRoofData) pvgisData=pvgisGroundData?blendMensili(pvgisRoofData,pvgisGroundData,kwpRoof,kwpGround):pvgisRoofData;
   return{
-    kwp:parseFloat(document.getElementById('r-kwp').value),
+    kwp,
     loss:parseFloat(document.getElementById('r-loss').value)/100,
     rackType:rt,rack,nRack,itKw,
     dcBase:itKw,
@@ -20,7 +44,8 @@ function getParams(){
     cop:parseFloat(document.getElementById('r-cop').value),
     gridPrice,
     feedIn:parseFloat(document.getElementById('r-feedin').value),
-    tariffMode
+    tariffMode,
+    supLotto:sp.supLotto,superfici:sf,kwpRoof,kwpGround
   };
 }
 

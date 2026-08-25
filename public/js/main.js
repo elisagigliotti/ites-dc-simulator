@@ -1,27 +1,44 @@
 // ============================================================
 // PVGIS
 // ============================================================
+async function fetchPvgisMonthly(loss,tilt,azimuth){
+  var url='/api/pvgis-monthly?lat=43.85&lon=12.98&kwp=1&losses='+loss+'&tilt='+tilt+'&azimuth='+azimuth;
+  var res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+  var json=await res.json();
+  var monthly=json.outputs&&json.outputs.monthly&&json.outputs.monthly.fixed;
+  if(!monthly||monthly.length<12)throw new Error('Risposta PVGIS non valida');
+  return monthly.map(function(m,i){return{nome:FALLBACK_MENSILI[i].nome,irr:Math.round(parseFloat(m['H(i)_m']||0)||FALLBACK_MENSILI[i].irr),kwp_kwh:parseFloat(parseFloat(m['E_d']||0).toFixed(4)),giorni:FALLBACK_MENSILI[i].giorni};});
+}
+// Media mensile pesata sui kWp installati in ciascuna delle due giaciture (tetto/terra).
+function blendMensili(roofArr,groundArr,wRoof,wGround){
+  var tot=wRoof+wGround||1;
+  return roofArr.map(function(m,i){
+    var g=groundArr[i];
+    return{nome:m.nome,giorni:m.giorni,irr:(m.irr*wRoof+g.irr*wGround)/tot,kwp_kwh:(m.kwp_kwh*wRoof+g.kwp_kwh*wGround)/tot};
+  });
+}
 async function loadPVGIS(){
   var btn=document.getElementById('pvgis-btn'),dot=document.getElementById('pvgis-dot');
   var msg=document.getElementById('pvgis-msg'),src=document.getElementById('pvgis-src');
   btn.disabled=true;dot.className='pvgis-dot dot-loading';msg.textContent='Connessione a PVGIS\u2026';
   var loss=parseFloat(document.getElementById('r-loss').value);
+  var sp=getSuperficiParams(),sf=calcSuperfici(sp);
+  var kwp=parseFloat(document.getElementById('r-kwp').value);
+  var kwpRoof=Math.min(kwp,sf.fvRoofMax),kwpGround=Math.max(0,kwp-kwpRoof);
   try{
-    var url='/api/pvgis-monthly?lat=43.85&lon=12.98&kwp=1&losses='+loss+'&tilt=5&azimuth=145';
-    var res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
-    var json=await res.json();
-    var monthly=json.outputs&&json.outputs.monthly&&json.outputs.monthly.fixed;
-    if(!monthly||monthly.length<12)throw new Error('Risposta PVGIS non valida');
-    pvgisData=monthly.map(function(m,i){return{nome:FALLBACK_MENSILI[i].nome,irr:Math.round(parseFloat(m['H(i)_m']||0)||FALLBACK_MENSILI[i].irr),kwp_kwh:parseFloat(parseFloat(m['E_d']||0).toFixed(4)),giorni:FALLBACK_MENSILI[i].giorni};});
+    var roof=await fetchPvgisMonthly(loss,5,145);
+    var ground=kwpGround>0?await fetchPvgisMonthly(loss,30,180):null;
+    pvgisRoofData=roof;pvgisGroundData=ground;
+    pvgisData=ground?blendMensili(roof,ground,kwpRoof,kwpGround):roof;
     pvgisLoaded=true;dot.className='pvgis-dot dot-ok';
-    msg.innerHTML='\u2705 Dati PVGIS caricati \u2014 EC JRC';
+    msg.innerHTML='\u2705 Dati PVGIS caricati \u2014 EC JRC'+(ground?' (tetto + terreno)':' (tetto)');
     src.textContent='PVGIS v5.2 \u00b7 SARAH2 \u00b7 loss '+loss+'%';
     document.getElementById('data-source-label').textContent='dati: PVGIS v5.2';
     resetRun();
   }catch(e){
     dot.className='pvgis-dot dot-error';
     msg.innerHTML='\u26d4 Errore: <em>'+e.message+'</em>. Usando stime di fallback.';
-    pvgisData=null;pvgisLoaded=false;
+    pvgisData=null;pvgisRoofData=null;pvgisGroundData=null;pvgisLoaded=false;
   }
   btn.disabled=false;
 }
@@ -64,4 +81,4 @@ function exportCSV(){
 // ============================================================
 // INIT
 // ============================================================
-calMese=0;renderLabels();renderCalendar();
+calMese=0;updateSuperficiUI();renderLabels();renderCalendar();

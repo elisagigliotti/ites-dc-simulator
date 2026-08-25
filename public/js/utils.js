@@ -1,4 +1,5 @@
 var pvgisData=null,pvgisLoaded=false,tankStates365=null,cache365=null;
+var pvgisRoofData=null,pvgisGroundData=null;
 var charts={};
 function destroyC(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function getMensili(){return pvgisData||FALLBACK_MENSILI;}
