@@ -26,14 +26,16 @@ function getParams(){
   var itKw=nRack*rack.kw;
   var gridPrice=parseFloat(document.getElementById('r-price').value);
   var tariffMode=document.getElementById('r-tariffmode').value;
-  var kwp=parseFloat(document.getElementById('r-kwp').value);
+  var kwpInterno=parseFloat(document.getElementById('r-kwp').value);
+  var kwpEsterno=parseFloat(document.getElementById('r-kwp-ext').value)||0;
+  var kwp=kwpInterno+kwpEsterno;
   var sp=getSuperficiParams(),sf=calcSuperfici(sp);
-  var kwpRoof=Math.min(kwp,sf.fvRoofMax),kwpGround=Math.max(0,kwp-kwpRoof);
-  // Miscela pesata dei due profili PVGIS (tetto/terra) sui kWp installati in ciascuno.
+  var kwpRoof=Math.min(kwpInterno,sf.fvRoofMax),kwpGround=Math.max(0,kwpInterno-kwpRoof);
+  // Miscela pesata dei due profili PVGIS (tetto/terra) sui kWp installati in ciascuno (solo FV interna).
   // Puro ricalcolo locale: le chiamate di rete avvengono solo al click "Carica da PVGIS".
   if(pvgisRoofData) pvgisData=pvgisGroundData?blendMensili(pvgisRoofData,pvgisGroundData,kwpRoof,kwpGround):pvgisRoofData;
   return{
-    kwp,
+    kwp,kwpInterno,kwpEsterno,
     loss:parseFloat(document.getElementById('r-loss').value)/100,
     rackType:rt,rack,nRack,itKw,
     dcBase:itKw,

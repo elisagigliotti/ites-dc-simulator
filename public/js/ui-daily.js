@@ -48,9 +48,11 @@ function renderLabels(){var p=getParams();updateLabels(p);}
 function updateSuperficiUI(){
   var sp=getSuperficiParams(),sf=calcSuperfici(sp);
   var slider=document.getElementById('r-kwp');
-  var potenziale=Math.max(1,Math.round(sf.fvPotenzialeMax));
-  var kwp=parseFloat(slider.value);
-  var kwpRoof=Math.min(kwp,sf.fvRoofMax),kwpGround=Math.max(0,kwp-kwpRoof);
+  var newMax=Math.max(1,Math.round(sf.fvPotenzialeMax));
+  slider.max=newMax;
+  if(parseFloat(slider.value)>newMax)slider.value=newMax;
+  var kwpInterno=parseFloat(slider.value);
+  var kwpRoof=Math.min(kwpInterno,sf.fvRoofMax),kwpGround=Math.max(0,kwpInterno-kwpRoof);
   var info=document.getElementById('superfici-info');
   document.getElementById('hdr-footprint-txt').textContent=itNum(Math.round(sp.footprint))+' m²';
   document.getElementById('hdr-suplotto-txt').textContent=itNum(Math.round(sp.supLotto))+' m²';
@@ -59,13 +61,14 @@ function updateSuperficiUI(){
   info.innerHTML=
     'Terreno libero: <b>'+itNum(Math.round(sf.terrenoLibero))+' m²</b> tutto a FV ('+sp.groundType+')<br>'
     +'FV tetto max: <b>'+itNum(Math.round(sf.fvRoofMax))+' kWp</b> &middot; FV terra max: <b>'+itNum(Math.round(sf.fvGroundMax))+' kWp</b><br>'
-    +'<b style="color:var(--teal);">FV potenziale lotto Petra: '+itNum(potenziale)+' kWp</b><br>'
-    +'Installato ora: '+itNum(Math.round(kwp))+' kWp — tetto '+itNum(Math.round(kwpRoof))+' / terra '+itNum(Math.round(kwpGround))+' kWp'
-    +(kwp>potenziale?'<div style="color:var(--amber);margin-top:4px;">&#9888; Superi il potenziale del solo lotto Petra ('+itNum(potenziale)+' kWp): la parte eccedente ('+itNum(Math.round(kwp-potenziale))+' kWp) va considerata come alimentazione esterna (PPA/campi terzi), non tetto+terreno del lotto.</div>':'');
+    +'<b style="color:var(--teal);">FV potenziale totale: '+itNum(newMax)+' kWp</b><br>'
+    +'Installato ora: '+itNum(Math.round(kwpInterno))+' kWp — tetto '+itNum(Math.round(kwpRoof))+' / terra '+itNum(Math.round(kwpGround))+' kWp'
+    +(kwpInterno>=newMax-0.5?'<div style="color:var(--red);margin-top:4px;">&#9888; Hai raggiunto il potenziale massimo del layout scelto.</div>':'');
 }
 
 function updateLabels(p){
-  document.getElementById('v-kwp').textContent=p.kwp+' kWp';
+  document.getElementById('v-kwp').textContent=p.kwpInterno+' kWp';
+  document.getElementById('v-kwp-ext').textContent=itNum(p.kwpEsterno)+' kWp';
   document.getElementById('hdr-fvkwp-txt').textContent=itNum(p.kwp)+' kWp';
   document.getElementById('hdr-fvbadge-txt').textContent=itNum(p.kwp/1000,1)+' MWp';
   document.getElementById('v-loss').textContent=Math.round(p.loss*100)+' %';
