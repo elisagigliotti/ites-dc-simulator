@@ -14,12 +14,12 @@
   <div class="hdr-top">
     <div>
       <h1>Studio Pre-Fattibilit&agrave; <span>ITES</span> &mdash; Data Center <span style="font-size:1.0rem;color:rgba(255,255,255,0.6)">v7</span></h1>
-      <p>Ice Thermal Energy Storage + FV 1 MWp &middot; Ghiaccio prima della rete, vendita solo d'estate a tank saturo &middot; kWh_el &harr; kWh_th &middot; CO&#8322;</p>
+      <p>Ice Thermal Energy Storage + FV <span id="hdr-fvkwp-txt">2000 kWp</span> &middot; Ghiaccio prima della rete, vendita solo d'estate a tank saturo &middot; kWh_el &harr; kWh_th &middot; CO&#8322;</p>
     </div>
-    <div class="hdr-meta">Sito: Bellocchi (PU) &middot; 43.85&deg;N 12.98&deg;E<br>Capannone ex-frigo: 5.500 m&sup2; &middot; H 6m (riuso)<br>Lotto Petra Srl: 23.659 m&sup2; (Comparto A)<br>Terreno libero: ~18.000 m&sup2; tutto a FV<br>Azimut tetto 145&deg; (SSE) &middot; Inclinazione 5&deg;</div>
+    <div class="hdr-meta">Sito: Bellocchi (PU) &middot; 43.85&deg;N 12.98&deg;E<br>Capannone ex-frigo: <span id="hdr-footprint-txt">5.500 m&sup2;</span> &middot; H 6m (riuso)<br>Lotto Petra Srl: <span id="hdr-suplotto-txt">23.659 m&sup2;</span> (Comparto A)<br>Terreno libero: <span id="hdr-terreno-txt">~18.000 m&sup2;</span> tutto a FV<br>Azimut tetto 145&deg; (SSE) &middot; Inclinazione 5&deg;</div>
   </div>
   <div class="badges">
-    <span class="badge">FV &asymp; 1 MWp</span><span class="badge">PVGIS v5.2</span><span class="badge">ITES &lambda;=334 kJ/kg</span>
+    <span class="badge">FV &asymp; <span id="hdr-fvbadge-txt">2 MWp</span></span><span class="badge">PVGIS v5.2</span><span class="badge">ITES &lambda;=334 kJ/kg</span>
     <span class="badge">Ghiaccio oggi+domani</span><span class="badge">Vendita solo d'estate</span><span class="badge">Carry-over 24h</span>
     <span class="badge">kWh_el &harr; kWh_th</span><span class="badge">CO&#8322; evitata</span>
   </div>
@@ -84,7 +84,7 @@
               <option value="colo">Colocation (7 kW/rack)</option>
             </select>
           </div>
-          <div><div class="ch"><span class="cn">Numero rack</span><span class="cv" id="v-nrack">50</span></div><input type="range" min="5" max="120" step="1" value="50" id="r-nrack" oninput="resetRun()"></div>
+          <div><div class="ch"><span class="cn">Numero rack</span><span class="cv" id="v-nrack">50</span></div><input type="range" min="5" max="2000" step="5" value="50" id="r-nrack" oninput="resetRun()"></div>
           <div id="rack-summary" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
           <div><div class="ch"><span class="cn">Set-point interno</span><span class="cv" id="v-setp">27 &deg;C</span></div><input type="range" min="18" max="30" step="1" value="27" id="r-setp" oninput="resetRun()"></div>
           <div><div class="ch"><span class="cn">Involucro UA</span><span class="cv" id="v-ua">500 W/K</span></div><input type="range" min="100" max="5000" step="100" value="500" id="r-ua" oninput="resetRun()"></div>

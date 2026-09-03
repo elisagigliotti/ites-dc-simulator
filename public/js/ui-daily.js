@@ -54,6 +54,9 @@ function updateSuperficiUI(){
   var kwp=parseFloat(slider.value);
   var kwpRoof=Math.min(kwp,sf.fvRoofMax),kwpGround=Math.max(0,kwp-kwpRoof);
   var info=document.getElementById('superfici-info');
+  document.getElementById('hdr-footprint-txt').textContent=itNum(Math.round(sp.footprint))+' m²';
+  document.getElementById('hdr-suplotto-txt').textContent=itNum(Math.round(sp.supLotto))+' m²';
+  document.getElementById('hdr-terreno-txt').textContent=itNum(Math.round(sf.terrenoLibero))+' m²';
   if(!info)return;
   info.innerHTML=
     'Terreno libero: <b>'+itNum(Math.round(sf.terrenoLibero))+' m²</b> tutto a FV ('+sp.groundType+')<br>'
@@ -65,6 +68,8 @@ function updateSuperficiUI(){
 
 function updateLabels(p){
   document.getElementById('v-kwp').textContent=p.kwp+' kWp';
+  document.getElementById('hdr-fvkwp-txt').textContent=itNum(p.kwp)+' kWp';
+  document.getElementById('hdr-fvbadge-txt').textContent=itNum(p.kwp/1000,1)+' MWp';
   document.getElementById('v-loss').textContent=Math.round(p.loss*100)+' %';
   document.getElementById('v-nrack').textContent=p.nRack;
   document.getElementById('v-setp').textContent=p.setP+' \u00b0C';
