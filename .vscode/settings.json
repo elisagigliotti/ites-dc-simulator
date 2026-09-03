@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/c:\\Users\\e.gigliotti\\Downloads\\note_radar_xband.aux": true,
+        "**/c:\\Users\\e.gigliotti\\Downloads\\note_radar_xband.log": true,
+        "**/c:\\Users\\e.gigliotti\\Downloads\\note_radar_xband.gz": true,
+        "**/c:\\Users\\e.gigliotti\\Downloads\\note_radar_xband.out": true
+    }
+}
