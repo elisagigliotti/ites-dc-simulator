@@ -217,7 +217,7 @@ function renderAll(){
   var gridCols=n<=2?n:2;
   var gridStyle='display:grid;grid-template-columns:repeat('+gridCols+',1fr);gap:16px;margin-bottom:20px;';
 
-  function makeOpts(yLabel){
+  function makeOpts(yLabel,yMax){
     return {
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
@@ -231,7 +231,7 @@ function renderAll(){
       },
       scales:{
         x:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#1a202c',font:{size:13},autoSkip:true,maxTicksLimit:8}},
-        y:{grid:{color:'rgba(0,0,0,0.08)'},ticks:{color:'#1a202c',font:{size:13}},
+        y:{grid:{color:'rgba(0,0,0,0.08)'},ticks:{color:'#1a202c',font:{size:13}},min:0,max:yMax,
           title:{display:true,text:yLabel,color:'#1a202c',font:{size:13,weight:'bold'}}}
       }
     };
@@ -294,6 +294,14 @@ function renderAll(){
     var legCont=document.createElement('div');sec.appendChild(legCont);
     var grid=document.createElement('div');grid.style.cssText=gridStyle;sec.appendChild(grid);
     chartsDiv.appendChild(sec);
+    // Stessa scala Y su tutti i giorni del confronto, altrimenti non sono leggibili a colpo d'occhio.
+    var sharedMax=0;
+    results.forEach(function(item){
+      dsFactory(item.data).forEach(function(ds){
+        ds.data.forEach(function(v){if(v>sharedMax)sharedMax=v;});
+      });
+    });
+    sharedMax=sharedMax>0?Math.ceil(sharedMax*1.05):undefined;
     results.forEach(function(item,i){
       var gg=item.gg,data=item.data;
       var cell=document.createElement('div');cell.style.cssText='min-width:0;';
@@ -304,7 +312,7 @@ function renderAll(){
       var cv=document.createElement('canvas');cv.id=prefix+i;
       cw.appendChild(cv);cell.appendChild(lbl);cell.appendChild(cw);
       grid.appendChild(cell);
-      charts[prefix+i]=new Chart(cv,{type:'line',data:{labels,datasets:dsFactory(data)},options:makeOpts(yLabel)});
+      charts[prefix+i]=new Chart(cv,{type:'line',data:{labels,datasets:dsFactory(data)},options:makeOpts(yLabel,sharedMax)});
     });
     var ids=results.map(function(_,i){return prefix+i;});
     buildCustomLegend(legCont, dsFactory({hours:Array(24).fill({coolingNeed:0,iceCharged:0,iceUsed:0,iceAvailable:0,chillerCoolKw:0,chillerIceKw:0,totalElecConsumed:0,pvKw:0,totalGrid:0,pvToGrid:0})}), ids);
