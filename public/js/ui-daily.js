@@ -45,7 +45,19 @@ function clearAll(){
   Object.keys(charts).filter(function(k){return k.startsWith('cOrario');}).forEach(function(k){destroyC(k);});
   renderLabels();
 }
-function resetRun(){updateSuperficiUI();tankStates365=null;cache365=null;renderCalendar();if(selectedDays.length>0)renderAll();else renderLabels();}
+function resetRun(){
+  updateSuperficiUI();tankStates365=null;cache365=null;renderCalendar();
+  if(selectedDays.length>0)renderAll();else renderLabels();
+  // Le altre tab (COP, Profili, Heatmap, Rete, CAPEX/OPEX) si ricalcolano solo al cambio tab:
+  // se una di queste è già aperta quando si tocca uno slider FV/impianto, va rinfrescata subito.
+  var activePanel=document.querySelector('.panel.active');
+  var activeName=activePanel&&activePanel.id.replace('panel-','');
+  if(activeName==='cop')runCOP();
+  if(activeName==='profili')runProfili();
+  if(activeName==='heatmap')runHeatmap();
+  if(activeName==='rete')runRete();
+  if(activeName==='capex')runCapex();
+}
 function renderLabels(){var p=getParams();updateLabels(p);}
 
 // ============================================================
