@@ -81,4 +81,4 @@ function exportCSV(){
 // ============================================================
 // INIT
 // ============================================================
-calMese=0;updateSuperficiUI();renderLabels();renderCalendar();
+calMese=0;updateSuperficiUI();renderLabels();renderCalendar();loadPVGIS();
