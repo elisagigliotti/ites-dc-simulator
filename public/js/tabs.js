@@ -454,10 +454,15 @@ function runCapex(){
   var rNoFV=simulaAnnualeAggregato(Object.assign({},p,{kwp:0}));
   var costNoFV=(rNoFV.cost-rNoFV.feedIn)*(1+gridvarPct/100);
   var costNetto=ann.cost-ann.feedIn;
+  // Baseline "solo PPA" (0 kWp interna, ma con l'esterna fissa già dentro): serve a isolare il contributo
+  // della sola FV interna nel payback, che ha un CAPEX solo suo — altrimenti il risparmio gratuito del PPA
+  // finirebbe accreditato all'investimento in FV interna, gonfiandone il payback apparente.
+  var costPpaOnly=fvCompare[0].cost;
   fvCompare.forEach(function(row){
     row.risparmio=costNoFV-row.cost;
     row.risparmioPct=costNoFV>0?(row.risparmio/costNoFV*100):0;
-    row.paybackFv=row.capexFv>0&&row.risparmio>0?row.capexFv/row.risparmio:Infinity;
+    var risparmioSoloInterna=costPpaOnly-row.cost;
+    row.paybackFv=row.capexFv>0&&risparmioSoloInterna>0?row.capexFv/risparmioSoloInterna:Infinity;
   });
 
   document.getElementById('capex-content').innerHTML=
