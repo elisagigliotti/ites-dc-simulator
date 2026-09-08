@@ -1,4 +1,10 @@
 // ============================================================
+// INFO PUE (tap-friendly: title="" non funziona su mobile/touch)
+// ============================================================
+var PUE_INFO_TXT='PUE = (IT + raffreddamento + ghiaccio prodotto) / IT, a prescindere dalla fonte.\n\nPiù FV in eccesso = più ghiaccio prodotto = PUE più alto, anche se l\'energia è gratuita.\n\nNon include costi o investimento (vedi tab CAPEX/OPEX).';
+function showPueInfo(){alert(PUE_INFO_TXT);}
+
+// ============================================================
 // CALENDARIO
 // ============================================================
 var calMese=0;var selectedDays=[];var MAX_GIORNI=4;
@@ -204,7 +210,7 @@ function renderAll(){
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:#0e7490;font-size:1.2rem;">'+itNum(kgCarry)+'</div><div class="ku" style="font-size:1.0rem;">kg</div><div class="kl" style="font-size:1.0rem;">Carry domani</div></div>'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+fN1(d.totGrid/1000)+'</div><div class="ku" style="font-size:1.0rem;">MWh_el</div><div class="kl" style="font-size:1.0rem;">Rete</div></div>'
       +'<div class="kpi" style="padding:.4rem .1rem;"><div class="kv" style="color:var(--amber);font-size:1.2rem;">'+fN(d.totCost)+'</div><div class="ku" style="font-size:1.0rem;">\u20ac</div><div class="kl" style="font-size:1.0rem;">Costo</div></div>'
-      +'<div class="kpi" style="padding:.4rem .1rem;" title="PUE = (IT + raffreddamento + ghiaccio prodotto) / IT, a prescindere dalla fonte. Più FV in eccesso = più ghiaccio prodotto = PUE più alto, anche se l\'energia è gratuita."><div class="kv" style="color:var(--blue);font-size:1.2rem;">'+itNum(d.pueAvg,2)+'</div><div class="ku" style="font-size:1.0rem;"></div><div class="kl" style="font-size:1.0rem;">PUE ⓘ</div></div>'
+      +'<div class="kpi" style="padding:.4rem .1rem;cursor:pointer;" onclick="showPueInfo()"><div class="kv" style="color:var(--blue);font-size:1.2rem;">'+itNum(d.pueAvg,2)+'</div><div class="ku" style="font-size:1.0rem;"></div><div class="kl" style="font-size:1.0rem;">PUE ⓘ</div></div>'
       +'</div></div>';
   }).join('');
 
@@ -531,17 +537,17 @@ function renderAll(){
       ['Risparmio giornaliero',fE(risp),'',risp>0?'#39d353':'#f85149'],
       ['','','',''],
       ['─── EFFICIENZA ───','','','var(--text3)'],
-      ['PUE medio',itNum(d.pueAvg,2),'','#58a6ff','PUE = (IT + raffreddamento + ghiaccio prodotto) / IT, a prescindere dalla fonte. Più FV in eccesso = più ghiaccio prodotto = PUE più alto, anche se l\'energia è gratuita. Non include costi o investimento (vedi tab CAPEX/OPEX).'],
+      ['PUE medio',itNum(d.pueAvg,2),'','#58a6ff','showPueInfo()'],
       ['CO\u2082 evitata',co2s,'kg','#39d353'],
       ['FV autoconsumato',pvPct,'%','#39d353']
     ];
     var hdr='<div style="font-size:.88rem;font-weight:700;color:'+SEL_COLORS[idx]+';text-transform:uppercase;padding:3px 0 4px;border-bottom:2px solid '+SEL_COLORS[idx]+';margin-bottom:3px;">'+giornoLabel(item.gg)+'</div>';
     var rowsHtml=rows.map(function(row){
-      var l=row[0],v=row[1],u=row[2],c=row[3],tip=row[4];
+      var l=row[0],v=row[1],u=row[2],c=row[3],onClick=row[4];
       if(!l)return '<hr style="border:none;border-top:1px solid var(--border);margin:3px 0;">';
       if(l.startsWith('───'))return '<div style="font-size:.90rem;font-weight:700;color:'+c+';text-transform:uppercase;letter-spacing:.07em;padding:4px 0 2px;margin-top:2px;">'+l.replace(/─── | ───/g,'').trim()+'</div>';
       var isIndented=l.startsWith('  ');
-      return '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border);'+(isIndented?'padding-left:10px;':'')+'"'+(tip?' title="'+tip.replace(/"/g,'&quot;')+'"':'')+'><span style="font-size:1.0rem;color:var(--text3);">'+l.trim()+(tip?' ⓘ':'')+'</span><span style="font-size:1.0rem;font-family:\'IBM Plex Mono\',monospace;color:'+c+';">'+v+'<span style="color:var(--text3);font-size:.95rem;margin-left:2px;">'+u+'</span></span></div>';
+      return '<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border);'+(isIndented?'padding-left:10px;':'')+(onClick?'cursor:pointer;':'')+'"'+(onClick?' onclick="'+onClick+'"':'')+'><span style="font-size:1.0rem;color:var(--text3);">'+l.trim()+(onClick?' ⓘ':'')+'</span><span style="font-size:1.0rem;font-family:\'IBM Plex Mono\',monospace;color:'+c+';">'+v+'<span style="color:var(--text3);font-size:.95rem;margin-left:2px;">'+u+'</span></span></div>';
     }).join('');
     return '<div style="border:1px solid '+SEL_COLORS[idx]+';border-radius:var(--r);padding:.7rem .8rem;">'+hdr+rowsHtml+'</div>';
   }).join('')+'</div>';
