@@ -483,16 +483,18 @@ function runCapex(){
     +'<div class="card" style="margin-bottom:1rem;">'
     +'<div class="ct">Differenza costi con e senza fotovoltaico &mdash; per taglia FV</div>'
     +'<div class="ibar" style="margin-bottom:.8rem;font-size:1.0rem;">'
-    +'Costo netto rete annuo simulato (stessi IT/chiller/tariffe) per diverse taglie di impianto FV, a partire da 0 kWp (nessun FV, nessun ITES). Il ghiaccio copre sempre oggi+domani prima di tutto; il surplus oltre quella soglia si vende solo nei mesi estivi.'
+    +'Costo netto rete annuo simulato (stessi IT/chiller/tariffe) per diverse taglie di impianto FV interna, a partire da 0 kWp (nessun FV, nessun ITES). Il ghiaccio copre sempre oggi+domani prima di tutto; il surplus oltre quella soglia si vende solo nei mesi estivi.'
+    +(p.kwpEsterno>0?' <b>Ogni riga somma anche il PPA/campi terzi fisso di '+fN(p.kwpEsterno)+' kWp</b> impostato a sinistra (non varia tra le righe).':'')
     +'</div>'
     +'<div class="cw" style="height:220px;margin-bottom:1rem;"><canvas id="cFvCompare"></canvas></div>'
     +'<div style="overflow-x:auto;"><table><thead><tr>'
-    +'<th>Taglia FV</th><th>Costo rete/anno</th><th>Risparmio vs 0 kWp</th><th>Risparmio %</th><th>CAPEX FV extra</th><th>Payback FV</th>'
+    +'<th>Taglia FV interna'+(p.kwpEsterno>0?' + PPA':'')+'</th><th>Costo rete/anno</th><th>Risparmio vs 0 kWp</th><th>Risparmio %</th><th>CAPEX FV extra</th><th>Payback FV</th>'
     +'</tr></thead><tbody>'
     +fvCompare.map(function(row){
       var isCurrent=row.kwp===Math.round(p.kwpInterno);
+      var totLabel=fN(row.kwp)+' kWp'+(p.kwpEsterno>0?' + '+fN(p.kwpEsterno)+' PPA <span style="color:var(--text3);">('+fN(row.kwp+p.kwpEsterno)+' kWp tot.)</span>':'');
       return '<tr style="'+(isCurrent?'background:var(--green3);font-weight:700;':'')+'">'
-        +'<td>'+fN(row.kwp)+' kWp'+(isCurrent?' <span style="color:var(--green);font-size:.90rem;">(attuale)</span>':'')+'</td>'
+        +'<td>'+totLabel+(isCurrent?' <span style="color:var(--green);font-size:.90rem;">(attuale)</span>':'')+'</td>'
         +'<td>'+fE(row.cost)+'</td>'
         +'<td style="color:'+(row.risparmio>0?'var(--green)':'var(--red)')+'">'+(row.risparmio>0?'+':'')+fE(row.risparmio)+'</td>'
         +'<td style="color:'+(row.risparmio>0?'var(--green)':'var(--red)')+'">'+itNum(row.risparmioPct,1)+'%</td>'
@@ -530,7 +532,7 @@ function runCapex(){
     +'</div>'
     +'<div class="card"><div class="ct">Cash Flow cumulativo 20 anni</div><div class="cw" style="height:250px;"><canvas id="cCashflow"></canvas></div></div>';
   destroyC('cFvCompare');
-  charts['cFvCompare']=new Chart(document.getElementById('cFvCompare'),{type:'bar',data:{labels:fvCompare.map(function(row){return fN(row.kwp)+' kWp';}),datasets:[{label:'Costo rete annuo (\u20ac)',data:fvCompare.map(function(row){return Math.round(row.cost);}),backgroundColor:fvCompare.map(function(row){return row.kwp===Math.round(p.kwpInterno)?'rgba(22,163,74,.6)':'rgba(227,179,65,.45)';}),borderColor:fvCompare.map(function(row){return row.kwp===Math.round(p.kwpInterno)?'#16a34a':'#e3b341';}),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'Costo rete: '+fE(ctx.parsed.y)+'/anno';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:11},callback:function(v){return fK(v);}},title:{display:true,text:'\u20ac/anno',color:'#718096',font:{size:11}}}}}});
+  charts['cFvCompare']=new Chart(document.getElementById('cFvCompare'),{type:'bar',data:{labels:fvCompare.map(function(row){return fN(row.kwp)+' kWp'+(p.kwpEsterno>0?'+PPA':'');}),datasets:[{label:'Costo rete annuo (\u20ac)',data:fvCompare.map(function(row){return Math.round(row.cost);}),backgroundColor:fvCompare.map(function(row){return row.kwp===Math.round(p.kwpInterno)?'rgba(22,163,74,.6)':'rgba(227,179,65,.45)';}),borderColor:fvCompare.map(function(row){return row.kwp===Math.round(p.kwpInterno)?'#16a34a':'#e3b341';}),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'Costo rete: '+fE(ctx.parsed.y)+'/anno';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:11},callback:function(v){return fK(v);}},title:{display:true,text:'\u20ac/anno',color:'#718096',font:{size:11}}}}}});
   setTimeout(function(){
     destroyC('cCashflow');
     var cfData=Array.from({length:21},function(_,y){return{cf:cfArr[y],cum:cfArr.slice(0,y+1).reduce(function(a,b){return a+b;},0)};});
