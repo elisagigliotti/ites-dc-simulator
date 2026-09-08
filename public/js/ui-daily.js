@@ -148,7 +148,7 @@ function buildExplainerForDay(item,p,colore){
   var html='<div class="explainer-box" style="border-color:'+colore+';background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(240,249,255,0.9));margin-bottom:.6rem;">'
     +'<div class="explainer-title" style="color:'+colore+';">'
     +'<span style="font-size:1rem;">&#128270;</span>'
-    +' Spiegatore &mdash; <span style="font-weight:700;">'+giornoLabel(gg)+'</span>'
+    +' Spiegazione &mdash; <span style="font-weight:700;">'+giornoLabel(gg)+'</span>'
     +'</div>'
     +'<div class="explainer-events">';
   events.forEach(function(ev){
