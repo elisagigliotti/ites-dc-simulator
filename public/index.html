@@ -149,7 +149,24 @@
   </details>
   <details open>
     <summary>Tariffe &amp; Rete</summary>
-    <div class="input-grid" id="grid-tariffe"></div>
+    <div class="input-grid" id="grid-tariffe">
+      <div>
+        <label for="r-tariffmode">Tariffa</label>
+        <select id="r-tariffmode" onchange="resetRun()">
+          <option value="f1f2f3" selected>Oraria F1/F2/F3 (reale)</option>
+          <option value="fixed">Prezzo fisso</option>
+        </select>
+      </div>
+      <div>
+        <label for="r-price">Prezzo base / F2, &euro;/kWh</label>
+        <input type="number" min="0.05" max="0.50" step="0.01" value="0.24" id="r-price" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div>
+        <label for="r-feedin">Feed-in (immissione, solo estate), &euro;/kWh</label>
+        <input type="number" min="0.00" max="0.15" step="0.01" value="0.05" id="r-feedin" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div id="tariff-info" style="font-size:1.0rem;color:var(--text3);line-height:1.6;grid-column:1/-1;"></div>
+    </div>
   </details>
   <details>
     <summary>Ipotesi economiche (CAPEX/OPEX)</summary>
@@ -176,21 +193,6 @@
         <div id="cal-container"></div>
       </div>
 
-
-      <div class="card">
-        <div class="ct">Tariffe energia</div>
-        <div class="cg">
-          <div><div class="ch"><span class="cn">Tariffa</span></div>
-            <select id="r-tariffmode" onchange="resetRun()">
-              <option value="f1f2f3" selected>Oraria F1/F2/F3 (reale)</option>
-              <option value="fixed">Prezzo fisso</option>
-            </select>
-          </div>
-          <div><div class="ch"><span class="cn">Prezzo base / F2</span><span class="cv" id="v-price">0.24 &euro;/kWh</span></div><input type="range" min="0.05" max="0.50" step="0.01" value="0.24" id="r-price" oninput="resetRun()"></div>
-          <div><div class="ch"><span class="cn">Feed-in (immissione, solo estate)</span><span class="cv" id="v-feedin">0.05 &euro;/kWh</span></div><input type="range" min="0.00" max="0.15" step="0.01" value="0.05" id="r-feedin" oninput="resetRun()"></div>
-          <div id="tariff-info" style="font-size:1.0rem;color:var(--text3);line-height:1.6;"></div>
-        </div>
-      </div>
 
       <div class="ibar ibar-g" style="font-size:1.0rem;">
         <b>Ghiaccio prima della rete:</b> il chiller fa sempre ghiaccio col surplus FV finch&eacute; il tank non copre il fabbisogno di oggi + domani (tutte le ore notturne comprese). Nei mesi <b>estivi</b> (T media &gt;15&deg;C), superata quella soglia il surplus in pi&ugrave; viene venduto in rete. Nei mesi <b>invernali</b> non si vende mai: tutto il surplus resta ghiaccio.
