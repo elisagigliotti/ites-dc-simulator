@@ -98,11 +98,8 @@ function updateSuperficiUI(){
 }
 
 function updateLabels(p){
-  document.getElementById('v-kwp').textContent=p.kwpInterno+' kWp';
-  document.getElementById('v-kwp-ext').textContent=itNum(p.kwpEsterno)+' kWp';
   document.getElementById('hdr-fvkwp-txt').textContent=itNum(p.kwp)+' kWp';
   document.getElementById('hdr-fvbadge-txt').textContent=itNum(p.kwp/1000,1)+' MWp';
-  document.getElementById('v-loss').textContent=Math.round(p.loss*100)+' %';
   document.getElementById('v-nrack').textContent=p.nRack;
   document.getElementById('v-setp').textContent=p.setP+' \u00b0C';
   document.getElementById('v-ua').textContent=p.ua+' W/K';
