@@ -100,7 +100,6 @@ function updateSuperficiUI(){
 function updateLabels(p){
   document.getElementById('hdr-fvkwp-txt').textContent=itNum(p.kwp)+' kWp';
   document.getElementById('hdr-fvbadge-txt').textContent=itNum(p.kwp/1000,1)+' MWp';
-  document.getElementById('v-cop').textContent=itNum(p.cop,1);
   document.getElementById('v-price').textContent=itNum(p.gridPrice,2)+' \u20ac/kWh';
   document.getElementById('v-feedin').textContent=itNum(p.feedIn,2)+' \u20ac/kWh';
   var nFile=Math.ceil(p.nRack/p.rack.perRow),rpf=Math.min(p.nRack,p.rack.perRow);
