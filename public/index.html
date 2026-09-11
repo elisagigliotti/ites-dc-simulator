@@ -35,7 +35,29 @@
 <div class="card" id="input-form">
   <details open>
     <summary>Sito &amp; Capannone</summary>
-    <div class="input-grid" id="grid-sito"></div>
+    <div class="input-grid" id="grid-sito">
+      <div>
+        <label for="r-suplotto">Superficie lotto Petra netta, m&sup2;</label>
+        <input type="number" value="23659" id="r-suplotto" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div>
+        <label for="r-footprint">Footprint edificio ex-frigo, m&sup2;</label>
+        <input type="number" value="5500" id="r-footprint" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div>
+        <label for="r-fvroof">Densit&agrave; FV in copertura, kWp/m&sup2; utile</label>
+        <input type="number" step="0.01" value="0.19" id="r-fvroof" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div>
+        <label for="r-fvground-type">Tipo montaggio FV a terra</label>
+        <select id="r-fvground-type" onchange="resetRun()">
+          <option value="bancali" selected>Bancali a terra (0,10 kWp/m&sup2;)</option>
+          <option value="piazzali">Piazzali complanari (0,13 kWp/m&sup2;)</option>
+          <option value="pensiline">Pensiline (0,15 kWp/m&sup2;)</option>
+        </select>
+      </div>
+      <div id="superfici-info" style="font-size:1.0rem;color:var(--text3);line-height:1.7;grid-column:1/-1;"></div>
+    </div>
   </details>
   <details open>
     <summary>Potenza FV</summary>
@@ -92,22 +114,6 @@
         <div id="cal-container"></div>
       </div>
 
-      <div class="card" style="border:1.5px solid var(--green);">
-        <div class="ct" style="color:var(--green);">FV: tetto + terreno &mdash; Lotto Petra Srl</div>
-        <div class="cg">
-          <div><div class="ch"><span class="cn">Superficie lotto Petra netta (m&sup2;)</span></div><input type="number" value="23659" id="r-suplotto" oninput="resetRun()"></div>
-          <div><div class="ch"><span class="cn">Footprint edificio ex-frigo (m&sup2;)</span></div><input type="number" value="5500" id="r-footprint" oninput="resetRun()"></div>
-          <div><div class="ch"><span class="cn">Densit&agrave; FV in copertura (kWp/m&sup2; utile)</span></div><input type="number" step="0.01" value="0.19" id="r-fvroof" oninput="resetRun()"></div>
-          <div><div class="ch"><span class="cn">Tipo montaggio FV a terra</span></div>
-            <select id="r-fvground-type" onchange="resetRun()">
-              <option value="bancali" selected>Bancali a terra (0,10 kWp/m&sup2;)</option>
-              <option value="piazzali">Piazzali complanari (0,13 kWp/m&sup2;)</option>
-              <option value="pensiline">Pensiline (0,15 kWp/m&sup2;)</option>
-            </select>
-          </div>
-          <div id="superfici-info" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
-        </div>
-      </div>
 
       <div class="card">
         <div class="ct">Data Center &mdash; Rack IT</div>
