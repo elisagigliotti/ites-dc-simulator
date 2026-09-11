@@ -5,6 +5,19 @@ var PUE_INFO_TXT='PUE = (IT + raffreddamento + ghiaccio prodotto) / IT, a presci
 function showPueInfo(){alert(PUE_INFO_TXT);}
 
 // ============================================================
+// CLAMP INPUT NUMERICI (i vecchi slider avevano min/max nativi;
+// un campo digitato può uscire dal range se l'utente scrive a mano)
+// ============================================================
+function clampNumberInput(el){
+  var v=parseFloat(el.value);
+  var min=parseFloat(el.min),max=parseFloat(el.max);
+  if(isNaN(v))v=isNaN(min)?0:min;
+  if(!isNaN(min))v=Math.max(min,v);
+  if(!isNaN(max))v=Math.min(max,v);
+  el.value=v;
+}
+
+// ============================================================
 // CALENDARIO
 // ============================================================
 var calMese=0;var selectedDays=[];var MAX_GIORNI=4;
