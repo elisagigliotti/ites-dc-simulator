@@ -107,7 +107,45 @@
   </details>
   <details open>
     <summary>Chiller / Pompa di calore</summary>
-    <div class="input-grid" id="grid-chiller"></div>
+    <div class="input-grid" id="grid-chiller">
+      <div>
+        <label for="r-cop">EER/COP nominale (15&deg;C)</label>
+        <input type="number" min="2.0" max="6.0" step="0.1" value="3.5" id="r-cop" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div style="grid-column:1/-1;">
+        <div class="cop-panel" id="cop-explain-panel">
+          <div style="font-size:1.0rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;">Catena di conversione energetica</div>
+          <div class="cop-flow">
+            <span class="cop-box" style="background:var(--red3);color:var(--red);">200 kW_el IT</span>
+            <span class="cop-arrow">&rarr;</span>
+            <span class="cop-box" style="background:var(--orange3);color:var(--orange);">200 kW_th calore</span>
+            <span style="font-size:1.0rem;color:var(--text3);">(100% conversione fisica)</span>
+          </div>
+          <div class="cop-flow" style="margin-top:5px;">
+            <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-el-box">1 kWh_el FV</span>
+            <span class="cop-arrow">&times;</span>
+            <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-th-box">EER 3.5</span>
+            <span class="cop-arrow">=</span>
+            <span class="cop-box" style="background:var(--green3);color:var(--green);" id="cop-result-box">3.5 kWh_th freddo</span>
+          </div>
+          <div class="cop-flow" style="margin-top:5px;">
+            <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-ice-el-box">1 kWh_el FV surplus</span>
+            <span class="cop-arrow">&times;</span>
+            <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-ice-th-box">COP_ice 2.98</span>
+            <span class="cop-arrow">=</span>
+            <span class="cop-box" style="background:rgba(57,200,200,0.15);color:#0e7490;" id="cop-ice-result-box">2.98 kWh_th ghiaccio</span>
+          </div>
+          <div style="font-size:.95rem;color:var(--text3);margin-top:.4rem;">COP_ice = COP &times; 0.85 &middot; Degrada -2%/&deg;C sopra 15&deg;C</div>
+          <div class="cop-flow" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border2);">
+            <span class="cop-box" style="background:var(--amber3);color:var(--amber);">+25% ausiliari</span>
+            <span style="font-size:.95rem;color:var(--text3);">pompe glicole/acqua, ventole condensatore, controlli &rarr;</span>
+            <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-real-box">EER impianto 2.8</span>
+          </div>
+          <div style="font-size:.95rem;color:var(--text3);margin-top:.4rem;">Il kW_el realmente assorbito dalla centrale frigorifera si calcola con l'EER/COP <b>di impianto</b> (compressore + ausiliari), non il solo compressore.</div>
+        </div>
+        <div id="cop-mensile-quick" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
+      </div>
+    </div>
   </details>
   <details open>
     <summary>Tariffe &amp; Rete</summary>
@@ -138,46 +176,6 @@
         <div id="cal-container"></div>
       </div>
 
-
-<div class="card" style="border:1.5px solid var(--teal);">
-        <div class="ct" style="color:var(--teal);">Pompa di Calore / Chiller &mdash; Conversione kWh_el &#8596; kWh_th</div>
-        <div class="cg">
-          <div><div class="ch"><span class="cn">EER/COP nominale (15&deg;C)</span><span class="cv" id="v-cop">3.5</span></div>
-            <input type="range" min="2.0" max="6.0" step="0.1" value="3.5" id="r-cop" oninput="resetRun()">
-          </div>
-          <div class="cop-panel" id="cop-explain-panel">
-            <div style="font-size:1.0rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;">Catena di conversione energetica</div>
-            <div class="cop-flow">
-              <span class="cop-box" style="background:var(--red3);color:var(--red);">200 kW_el IT</span>
-              <span class="cop-arrow">&rarr;</span>
-              <span class="cop-box" style="background:var(--orange3);color:var(--orange);">200 kW_th calore</span>
-              <span style="font-size:1.0rem;color:var(--text3);">(100% conversione fisica)</span>
-            </div>
-            <div class="cop-flow" style="margin-top:5px;">
-              <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-el-box">1 kWh_el FV</span>
-              <span class="cop-arrow">&times;</span>
-              <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-th-box">EER 3.5</span>
-              <span class="cop-arrow">=</span>
-              <span class="cop-box" style="background:var(--green3);color:var(--green);" id="cop-result-box">3.5 kWh_th freddo</span>
-            </div>
-            <div class="cop-flow" style="margin-top:5px;">
-              <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-ice-el-box">1 kWh_el FV surplus</span>
-              <span class="cop-arrow">&times;</span>
-              <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-ice-th-box">COP_ice 2.98</span>
-              <span class="cop-arrow">=</span>
-              <span class="cop-box" style="background:rgba(57,200,200,0.15);color:#0e7490;" id="cop-ice-result-box">2.98 kWh_th ghiaccio</span>
-            </div>
-            <div style="font-size:.95rem;color:var(--text3);margin-top:.4rem;">COP_ice = COP &times; 0.85 &middot; Degrada -2%/&deg;C sopra 15&deg;C</div>
-            <div class="cop-flow" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border2);">
-              <span class="cop-box" style="background:var(--amber3);color:var(--amber);">+25% ausiliari</span>
-              <span style="font-size:.95rem;color:var(--text3);">pompe glicole/acqua, ventole condensatore, controlli &rarr;</span>
-              <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-real-box">EER impianto 2.8</span>
-            </div>
-            <div style="font-size:.95rem;color:var(--text3);margin-top:.4rem;">Il kW_el realmente assorbito dalla centrale frigorifera si calcola con l'EER/COP <b>di impianto</b> (compressore + ausiliari), non il solo compressore.</div>
-          </div>
-          <div id="cop-mensile-quick" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
-        </div>
-      </div>
 
       <div class="card">
         <div class="ct">Tariffe energia</div>
