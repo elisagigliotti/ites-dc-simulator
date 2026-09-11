@@ -40,7 +40,6 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;}
 .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;}
 .g6{display:grid;grid-template-columns:repeat(6,1fr);gap:.8rem;}
-.gsb{display:grid;grid-template-columns:340px 1fr;gap:1.1rem;}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:1.3rem 1.4rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
 .ct{font-size:1.0rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);margin-bottom:.7rem;}
 .kpi{text-align:center;padding:.9rem .5rem;}
@@ -113,7 +112,7 @@ hr{border:none;border-top:1px solid var(--border);margin:1.1rem 0;}
 .tbl365 td:first-child{font-family:'IBM Plex Sans',sans-serif;color:var(--text2);text-align:left;font-size:.92rem;}
 .tbl365 tr:hover td{background:var(--bg3);}
 .tbl365 tr.month-sep td{border-top:2px solid var(--border2);}
-@media(max-width:960px){.gsb{grid-template-columns:1fr;}.g4,.g5,.g6{grid-template-columns:1fr 1fr;}}
+@media(max-width:960px){.g4,.g5,.g6{grid-template-columns:1fr 1fr;}}
 @media(max-width:600px){.g2,.g3,.g4,.g5,.g6{grid-template-columns:1fr;}}
 .cal-wrap{user-select:none;}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}

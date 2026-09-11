@@ -212,22 +212,17 @@
 
 <!-- ═══════════════════════════════════════════════ PANEL GIORNALIERA -->
 <div id="panel-giornaliera" class="panel active">
-  <div class="gsb">
-    <div style="display:flex;flex-direction:column;gap:.8rem;">
-      <div class="card">
-        <div class="ct" style="margin-bottom:6px;">Seleziona giorno</div>
-        <div id="cal-container"></div>
-      </div>
+  <div class="card">
+    <div class="ct" style="margin-bottom:6px;">Seleziona giorno</div>
+    <div id="cal-container"></div>
+  </div>
 
+  <div class="ibar ibar-g" style="font-size:1.0rem;">
+    <b>Ghiaccio prima della rete:</b> il chiller fa sempre ghiaccio col surplus FV finch&eacute; il tank non copre il fabbisogno di oggi + domani (tutte le ore notturne comprese). Nei mesi <b>estivi</b> (T media &gt;15&deg;C), superata quella soglia il surplus in pi&ugrave; viene venduto in rete. Nei mesi <b>invernali</b> non si vende mai: tutto il surplus resta ghiaccio.
+  </div>
 
-      <div class="ibar ibar-g" style="font-size:1.0rem;">
-        <b>Ghiaccio prima della rete:</b> il chiller fa sempre ghiaccio col surplus FV finch&eacute; il tank non copre il fabbisogno di oggi + domani (tutte le ore notturne comprese). Nei mesi <b>estivi</b> (T media &gt;15&deg;C), superata quella soglia il surplus in pi&ugrave; viene venduto in rete. Nei mesi <b>invernali</b> non si vende mai: tutto il surplus resta ghiaccio.
-      </div>
-    </div>
-
-    <!-- COLONNA DESTRA -->
-    <div style="display:flex;flex-direction:column;gap:.8rem;">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+  <div style="display:flex;flex-direction:column;gap:.8rem;">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-size:1.0rem;color:var(--text3);">Giorni selezionati:</span>
         <div id="selected-badges" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
         <button onclick="clearAll()" style="font-size:1.0rem;padding:2px 8px;border-radius:var(--r);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;">Cancella tutto</button>
@@ -292,7 +287,6 @@
       <div id="tabella-oraria"></div>
       <div class="card" id="kpi-side"><div class="ct">Statistiche di fine giornata</div><div id="kpi-side-content"></div></div>
     </div>
-  </div>
 </div>
 
 <div id="panel-cop" class="panel"><div id="cop-content"></div></div>
