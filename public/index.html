@@ -32,6 +32,33 @@
   <button class="pvgis-btn" id="pvgis-btn" onclick="loadPVGIS()">&#11015; Carica da PVGIS</button>
 </div>
 
+<div class="card" id="input-form">
+  <details open>
+    <summary>Sito &amp; Capannone</summary>
+    <div class="input-grid" id="grid-sito"></div>
+  </details>
+  <details open>
+    <summary>Potenza FV</summary>
+    <div class="input-grid" id="grid-fv"></div>
+  </details>
+  <details open>
+    <summary>Data Center &mdash; Rack IT</summary>
+    <div class="input-grid" id="grid-rack"></div>
+  </details>
+  <details open>
+    <summary>Chiller / Pompa di calore</summary>
+    <div class="input-grid" id="grid-chiller"></div>
+  </details>
+  <details open>
+    <summary>Tariffe &amp; Rete</summary>
+    <div class="input-grid" id="grid-tariffe"></div>
+  </details>
+  <details>
+    <summary>Ipotesi economiche (CAPEX/OPEX)</summary>
+    <div class="input-grid" id="grid-econ"></div>
+  </details>
+</div>
+
 <div class="tabs">
   <div class="tab active" onclick="sw('giornaliera')">Simulazione Giornaliera</div>
   <div class="tab" onclick="sw('cop')">COP &amp; Termodinamica</div>
