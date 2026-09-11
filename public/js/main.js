@@ -51,6 +51,7 @@ function sw(name){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.tab').forEach(function(t){if(t.getAttribute('onclick')&&t.getAttribute('onclick').includes("'"+name+"'"))t.classList.add('active');});
   document.getElementById('panel-'+name).classList.add('active');
+  if(name==='giornaliera'&&selectedDays.length>0)renderAll();
   if(name==='rete')runRete();
   if(name==='cop')runCOP();
   if(name==='profili')runProfili();

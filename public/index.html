@@ -38,15 +38,15 @@
     <div class="input-grid" id="grid-sito">
       <div>
         <label for="r-suplotto">Superficie lotto Petra netta, m&sup2;</label>
-        <input type="number" value="23659" id="r-suplotto" onchange="clampNumberInput(this);resetRun()">
+        <input type="number" value="23659" min="0" id="r-suplotto" onchange="clampNumberInput(this);resetRun()">
       </div>
       <div>
         <label for="r-footprint">Footprint edificio ex-frigo, m&sup2;</label>
-        <input type="number" value="5500" id="r-footprint" onchange="clampNumberInput(this);resetRun()">
+        <input type="number" value="5500" min="0" id="r-footprint" onchange="clampNumberInput(this);resetRun()">
       </div>
       <div>
         <label for="r-fvroof">Densit&agrave; FV in copertura, kWp/m&sup2; utile</label>
-        <input type="number" step="0.01" value="0.19" id="r-fvroof" onchange="clampNumberInput(this);resetRun()">
+        <input type="number" step="0.01" value="0.19" min="0" max="1" id="r-fvroof" onchange="clampNumberInput(this);resetRun()">
       </div>
       <div>
         <label for="r-fvground-type">Tipo montaggio FV a terra</label>
@@ -217,7 +217,7 @@
     <div id="cal-container"></div>
   </div>
 
-  <div class="ibar ibar-g" style="font-size:1.0rem;">
+  <div class="ibar ibar-g" style="font-size:1.0rem;margin:.8rem 0;">
     <b>Ghiaccio prima della rete:</b> il chiller fa sempre ghiaccio col surplus FV finch&eacute; il tank non copre il fabbisogno di oggi + domani (tutte le ore notturne comprese). Nei mesi <b>estivi</b> (T media &gt;15&deg;C), superata quella soglia il surplus in pi&ugrave; viene venduto in rete. Nei mesi <b>invernali</b> non si vende mai: tutto il surplus resta ghiaccio.
   </div>
 
