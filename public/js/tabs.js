@@ -394,10 +394,7 @@ function runCapex(){
   var p=getParams(),res=simula365completa(p),ann=res.ann;
   var fvcostPct=parseFloat(document.getElementById('r-fvcost').value)||0;
   var gridvarPct=parseFloat(document.getElementById('r-gridvar').value)||0;
-  document.getElementById('v-fvcost').textContent=(fvcostPct>0?'+':'')+fvcostPct+' %';
-  document.getElementById('v-gridvar').textContent=(gridvarPct>0?'+':'')+gridvarPct+' %';
   var hostingFee=parseFloat(document.getElementById('r-hosting').value)||0.12;
-  document.getElementById('v-hosting').textContent=itNum(hostingFee,2)+' \u20ac/kWh';
   var nMacchine=parseInt(document.getElementById('r-nmacchine').value)||1;
   var fvCost=850*(1+fvcostPct/100);
 
@@ -422,7 +419,6 @@ function runCapex(){
   capex['BMS / Monitoring']=85000;
   capex['Ingegneria e permessi']=120000;
   var urbCostM2=parseFloat(document.getElementById('r-urbcost').value)||0;
-  document.getElementById('v-urbcost').textContent=urbCostM2+' €/m²';
   capex['Oneri di urbanizzazione a scomputo ('+fN(p.supLotto)+' m² × '+urbCostM2+')']=p.supLotto*urbCostM2;
   var capexTot=Object.values(capex).reduce(function(a,b){return a+b;},0);
   var annCostAdj=ann.cost*(1+gridvarPct/100);

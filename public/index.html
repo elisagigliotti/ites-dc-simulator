@@ -170,7 +170,33 @@
   </details>
   <details>
     <summary>Ipotesi economiche (CAPEX/OPEX)</summary>
-    <div class="input-grid" id="grid-econ"></div>
+    <div class="input-grid" id="grid-econ">
+      <div>
+        <label for="r-fvcost">Variazione costo FV, %</label>
+        <input type="number" min="-30" max="30" step="5" value="0" id="r-fvcost" onchange="clampNumberInput(this);runCapex()">
+      </div>
+      <div>
+        <label for="r-gridvar">Variazione tariffa energia, %</label>
+        <input type="number" min="-30" max="50" step="5" value="0" id="r-gridvar" onchange="clampNumberInput(this);runCapex()">
+      </div>
+      <div>
+        <label for="r-hosting">Tariffa hosting IT, &euro;/kWh</label>
+        <input type="number" min="0.05" max="0.30" step="0.01" value="0.12" id="r-hosting" onchange="clampNumberInput(this);runCapex()">
+      </div>
+      <div>
+        <label for="r-urbcost">Oneri urbanizzazione, &euro;/m&sup2;</label>
+        <input type="number" min="0" max="150" step="5" value="50" id="r-urbcost" onchange="clampNumberInput(this);runCapex()">
+      </div>
+      <div>
+        <label for="r-nmacchine">N&deg; macchine ghiaccio</label>
+        <select id="r-nmacchine" onchange="runCapex()">
+          <option value="1" selected>1 macchina (nessuna ridondanza)</option>
+          <option value="2">2 macchine (ridondanza N+1)</option>
+          <option value="3">3 macchine (ridondanza N+1)</option>
+          <option value="4">4 macchine (ridondanza N+1)</option>
+        </select>
+      </div>
+    </div>
   </details>
 </div>
 
@@ -275,23 +301,6 @@
 <div id="panel-rete" class="panel"><div id="rete-content"></div></div>
 
 <div id="panel-capex" class="panel">
-  <div class="card" style="margin-bottom:1rem;">
-    <div class="ct">Parametri analisi finanziaria</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:1.2rem;">
-      <div><div class="ch"><span class="cn">Variazione costo FV</span><span class="cv" id="v-fvcost">0 %</span></div><input type="range" min="-30" max="30" step="5" value="0" id="r-fvcost" oninput="runCapex()"></div>
-      <div><div class="ch"><span class="cn">Variazione tariffa energia</span><span class="cv" id="v-gridvar">0 %</span></div><input type="range" min="-30" max="50" step="5" value="0" id="r-gridvar" oninput="runCapex()"></div>
-      <div><div class="ch"><span class="cn">Tariffa hosting IT</span><span class="cv" id="v-hosting">0.12 &euro;/kWh</span></div><input type="range" min="0.05" max="0.30" step="0.01" value="0.12" id="r-hosting" oninput="runCapex()"></div>
-      <div><div class="ch"><span class="cn">Oneri urbanizzazione</span><span class="cv" id="v-urbcost">50 &euro;/m&sup2;</span></div><input type="range" min="0" max="150" step="5" value="50" id="r-urbcost" oninput="runCapex()"></div>
-      <div><div class="ch"><span class="cn">N&deg; macchine ghiaccio</span></div>
-        <select id="r-nmacchine" onchange="runCapex()">
-          <option value="1" selected>1 macchina (nessuna ridondanza)</option>
-          <option value="2">2 macchine (ridondanza N+1)</option>
-          <option value="3">3 macchine (ridondanza N+1)</option>
-          <option value="4">4 macchine (ridondanza N+1)</option>
-        </select>
-      </div>
-    </div>
-  </div>
   <div id="capex-content"></div>
 </div>
 
