@@ -79,7 +79,31 @@
   </details>
   <details open>
     <summary>Data Center &mdash; Rack IT</summary>
-    <div class="input-grid" id="grid-rack"></div>
+    <div class="input-grid" id="grid-rack">
+      <div>
+        <label for="r-racktype">Tipo rack</label>
+        <select id="r-racktype" onchange="resetRun()">
+          <option value="ai_gpu">AI / GPU (40 kW/rack)</option>
+          <option value="ai_mixed">AI Misto GPU+CPU (25 kW/rack)</option>
+          <option value="hpc">HPC Computing (20 kW/rack)</option>
+          <option value="cloud" selected>Cloud Standard (10 kW/rack)</option>
+          <option value="colo">Colocation (7 kW/rack)</option>
+        </select>
+      </div>
+      <div>
+        <label for="r-nrack">Numero rack</label>
+        <input type="number" min="5" max="2000" step="5" value="50" id="r-nrack" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div>
+        <label for="r-setp">Set-point interno, &deg;C</label>
+        <input type="number" min="18" max="30" step="1" value="27" id="r-setp" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div>
+        <label for="r-ua">Involucro UA, W/K</label>
+        <input type="number" min="100" max="5000" step="100" value="500" id="r-ua" onchange="clampNumberInput(this);resetRun()">
+      </div>
+      <div id="rack-summary" style="font-size:1.0rem;color:var(--text3);line-height:1.7;grid-column:1/-1;"></div>
+    </div>
   </details>
   <details open>
     <summary>Chiller / Pompa di calore</summary>
@@ -115,26 +139,7 @@
       </div>
 
 
-      <div class="card">
-        <div class="ct">Data Center &mdash; Rack IT</div>
-        <div class="cg">
-          <div><div class="ch"><span class="cn">Tipo rack</span></div>
-            <select id="r-racktype" onchange="resetRun()">
-              <option value="ai_gpu">AI / GPU (40 kW/rack)</option>
-              <option value="ai_mixed">AI Misto GPU+CPU (25 kW/rack)</option>
-              <option value="hpc">HPC Computing (20 kW/rack)</option>
-              <option value="cloud" selected>Cloud Standard (10 kW/rack)</option>
-              <option value="colo">Colocation (7 kW/rack)</option>
-            </select>
-          </div>
-          <div><div class="ch"><span class="cn">Numero rack</span><span class="cv" id="v-nrack">50</span></div><input type="range" min="5" max="2000" step="5" value="50" id="r-nrack" oninput="resetRun()"></div>
-          <div id="rack-summary" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
-          <div><div class="ch"><span class="cn">Set-point interno</span><span class="cv" id="v-setp">27 &deg;C</span></div><input type="range" min="18" max="30" step="1" value="27" id="r-setp" oninput="resetRun()"></div>
-          <div><div class="ch"><span class="cn">Involucro UA</span><span class="cv" id="v-ua">500 W/K</span></div><input type="range" min="100" max="5000" step="100" value="500" id="r-ua" oninput="resetRun()"></div>
-        </div>
-      </div>
-
-      <div class="card" style="border:1.5px solid var(--teal);">
+<div class="card" style="border:1.5px solid var(--teal);">
         <div class="ct" style="color:var(--teal);">Pompa di Calore / Chiller &mdash; Conversione kWh_el &#8596; kWh_th</div>
         <div class="cg">
           <div><div class="ch"><span class="cn">EER/COP nominale (15&deg;C)</span><span class="cv" id="v-cop">3.5</span></div>
