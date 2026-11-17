@@ -10,15 +10,6 @@ var NOMI_MESE=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov'
 var NOMI_MESE_FULL=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
 // ============================================================
-// TARIFFE F1/F2/F3
-// ============================================================
-function getTariffMult(h){
-  if(h>=8&&h<19) return 0.938;
-  if((h>=7&&h<8)||(h>=19&&h<23)) return 1.00;
-  return 0.906;
-}
-
-// ============================================================
 // SUPERFICI — densità FV per tipo di montaggio a terra (kWp/m²)
 // ============================================================
 var DENSITA_GROUND={bancali:0.10,piazzali:0.13,pensiline:0.15};
@@ -70,3 +61,33 @@ var FALLBACK_MENSILI=[
   {nome:'Set',irr:145,kwp_kwh:4.40,giorni:30},{nome:'Ott',irr:104,kwp_kwh:3.16,giorni:31},
   {nome:'Nov',irr:68,kwp_kwh:2.07,giorni:30},{nome:'Dic',irr:56,kwp_kwh:1.70,giorni:31},
 ];
+
+// ============================================================
+// TARIFFA ORARIA — curva realistica stile PUN per grandi consumatori
+// Un grande consumatore in MT/AT con misura oraria non paga le fasce ARERA
+// F1/F2/F3 (fatturazione per utenze piccole/non orarie): acquista a PUN /
+// prezzo zonale orario + spread, pubblicato ora per ora dal GME
+// (mercatoelettrico.org). Forma: notte bassa, "duck curve" a mezzogiorno
+// (surplus FV sulla rete — dip più profondo nei mesi più soleggiati), picco
+// serale (più alto nei mesi con meno sole). Il dip/picco è ancorato
+// all'irraggiamento mensile già usato per il FV (FALLBACK_MENSILI), così la
+// stagionalità della rete è coerente con quella solare senza inventare nuovi
+// parametri. Riferimento: bollettini GME/ARERA (PUN 2025 medio ≈0,116 €/kWh
+// all'ingrosso, picchi giornalieri anche >0,20 €/kWh). Il prezzo medio resta
+// il campo "Prezzo base" impostato dall'utente.
+// ============================================================
+var _IRR_MESE_REF=FALLBACK_MENSILI.map(function(f){return f.irr;});
+var _IRR_MESE_MAX=Math.max.apply(null,_IRR_MESE_REF);
+function tariffShape(h,sunFrac){
+  var notte=0.70, giornoBase=0.95, dip=0.38*sunFrac, picco=1.45-0.20*sunFrac;
+  if(h<6) return notte;
+  if(h<9) return notte+(giornoBase-notte)*(h-6)/3;
+  if(h<16) return giornoBase-dip*Math.sin((h-9)/7*Math.PI);
+  if(h<20) return giornoBase+(picco-giornoBase)*(h-16)/4;
+  if(h<23) return picco-(picco-notte)*(h-20)/3;
+  return notte;
+}
+function getTariffMult(mese,h){
+  var sunFrac=_IRR_MESE_REF[mese]/_IRR_MESE_MAX;
+  return tariffShape(h,sunFrac);
+}

@@ -51,9 +51,17 @@ function getParams(){
   };
 }
 
-function getTariff(h,p){
+function getTariff(mese,h,p){
   if(p.tariffMode==='fixed') return p.gridPrice;
-  return p.gridPrice*getTariffMult(h);
+  return p.gridPrice*getTariffMult(mese,h);
+}
+// Soglia sotto la quale un'ora è "economica": le 8 ore più a buon mercato del
+// giorno (indice 7 su 24 ordinate). A prezzo fisso non esiste un'ora più
+// economica di un'altra: -Infinity disattiva la ricarica ghiaccio da rete.
+function cheapHourThreshold(mese,p){
+  if(p.tariffMode==='fixed') return -Infinity;
+  var tariffs=Array.from({length:24},function(_,h){return getTariff(mese,h,p);});
+  return tariffs.slice().sort(function(a,b){return a-b;})[7];
 }
 
 // ============================================================
@@ -73,38 +81,44 @@ function getCOPiceReal(copNom,tExt){return getCOPice(copNom,tExt)/(1+CHILLER_AUX
 // ============================================================
 function isMesEstate(mese){ return TEMP_MEDIE[mese] > 15; }
 
-// Fabbisogno di cooling ora per ora per un dato mese (usato per stimare il
-// residuo di oggi e il totale di domani nel calcolo del cap ghiaccio estivo).
-function coolingNeedsArr(mese,p){
-  return TEMP_ORARIE[mese].map(function(tExt){
+// Fabbisogno di cooling ora per ora per un dato giorno dell'anno (1..365) — usa
+// la temperatura reale del giorno (PVGIS) se caricata, altrimenti il giorno
+// "tipico" del mese. Usato per stimare il residuo di oggi e il totale di
+// domani nel calcolo del cap ghiaccio (estivo e ricarica da rete).
+function coolingNeedsArr(gg,p){
+  return getTExtArr(gg).map(function(tExt){
     var heatIT=p.itKw, servKw=p.dcBase*p.servPct, heatEnv=p.ua*(tExt-p.setP)/1000;
     return Math.max(0, heatIT+servKw+heatEnv);
   });
 }
 // residuo[h] = somma del fabbisogno cooling dalle ore h+1 a 23 (resto della giornata)
-function coolingResiduoOggi(mese,p){
-  var needs=coolingNeedsArr(mese,p);
+function coolingResiduoOggi(gg,p){
+  var needs=coolingNeedsArr(gg,p);
   var residuo=new Array(24).fill(0), cum=0;
   for(var h=23;h>=0;h--){ residuo[h]=cum; cum+=needs[h]; }
   return residuo;
 }
-function coolingTotaleGiorno(mese,p){
-  return coolingNeedsArr(mese,p).reduce(function(a,b){return a+b;},0);
+function coolingTotaleGiorno(gg,p){
+  return coolingNeedsArr(gg,p).reduce(function(a,b){return a+b;},0);
 }
-// Mese del "giorno dopo": stesso mese se non è l'ultimo giorno, altrimenti il successivo (Dic->Gen).
-function meseGiornoDopo(mese,giornoDelMese){
-  return (giornoDelMese < GIORNI_MESE[mese]-1) ? mese : (mese+1)%12;
-}
+// Giorno dell'anno di "domani", con wraparound 365->1.
+function giornoDopo(gg){ return gg<365?gg+1:1; }
 
 // ============================================================
-// SIMULAZIONE ORARIA — v9: il ghiaccio ha sempre priorità sulla rete.
+// SIMULAZIONE ORARIA — v10: il ghiaccio ha sempre priorità sulla rete, più la
+// ricarica anticipata da rete nelle ore più economiche della giornata.
 // Estate (T media mese > 15°C): il chiller produce ghiaccio finché il tank non
 // copre il fabbisogno di cooling di oggi (resto giornata) + domani (24h); solo
 // dopo quella soglia il surplus residuo viene venduto in rete.
 // Inverno: nessun cap, tutto il surplus FV diventa ghiaccio, mai vendita.
+// Ore economiche (qualunque stagione): se il tank non ha ancora raggiunto il
+// target oggi+domani, il chiller compra energia dalla rete per anticipare la
+// produzione di ghiaccio quando costa meno, evitando di comprarla più tardi
+// nelle ore care — stesso cap "oggi+domani" usato per il surplus FV estivo.
 // ============================================================
-function simulaOra(h,mese,p,tankKwhToday,iceYesterdayKwh,coolingResiduoArr,domaniTotale){
-  var tExt=TEMP_ORARIE[mese][h];
+function simulaOra(h,gg,p,tankKwhToday,iceYesterdayKwh,coolingResiduoArr,domaniTotale,cheapTh){
+  var mese=giornoToMese(gg).mese_idx;
+  var tExt=getTExtArr(gg)[h];
   var heatIT=p.itKw;
   var servKw=p.dcBase*p.servPct;
   var heatEnv=p.ua*(tExt-p.setP)/1000;
@@ -116,7 +130,7 @@ function simulaOra(h,mese,p,tankKwhToday,iceYesterdayKwh,coolingResiduoArr,doman
   var sumP=prof.reduce(function(a,b){return a+b;},0);
   var pvKw=prof[h]/sumP*mensili[mese].kwp_kwh*p.kwp*lossCorr;
 
-  var tariff=getTariff(h,p);
+  var tariff=getTariff(mese,h,p);
   var eer=getEER(p.cop,tExt);           // EER nominale compressore (teorico)
   var copIce=getCOPice(p.cop,tExt);
   var eerReal=getEERreal(p.cop,tExt);   // EER di impianto (con ausiliari) — usato per i kWel reali
@@ -184,10 +198,28 @@ function simulaOra(h,mese,p,tankKwhToday,iceYesterdayKwh,coolingResiduoArr,doman
     }
   }
 
+  // 7) Ghiaccio da rete nelle ore economiche — a prescindere dal surplus FV,
+  //    se siamo in una delle ore più a buon mercato della giornata e il tank
+  //    non ha ancora raggiunto il target oggi+domani, anticipa la produzione
+  //    comprando dalla rete invece di aspettare un'ora più cara.
+  var iceFromGrid=0, gridElUsedForIce=0;
+  if(cheapTh!==undefined && tariff<=cheapTh){
+    var tankAttualeGrid=tankKwhToday+iceYesterdayKwh;
+    var targetGrid=(coolingResiduoArr?coolingResiduoArr[h]:0)+(domaniTotale||0);
+    var capRimanenteGrid=Math.max(0, targetGrid-tankAttualeGrid);
+    if(capRimanenteGrid>0){
+      iceFromGrid=capRimanenteGrid;
+      gridElUsedForIce=iceFromGrid/copIceReal;
+      tankKwhToday+=iceFromGrid;
+      iceCharged+=iceFromGrid;
+      chillerIceKw+=gridElUsedForIce;
+    }
+  }
+
   var iceUsedTotal=iceYestUsed+iceTodayUsed;
   var chillerCoolKw=pvForCooling+gridForChiller; // kW_el totali per cooling
-  var totalElecConsumed=(p.dcBase+servKw)+chillerCoolKw+pvElUsedForIce;
-  var totalGrid=itFromGrid+gridForChiller;
+  var totalElecConsumed=(p.dcBase+servKw)+chillerCoolKw+pvElUsedForIce+gridElUsedForIce;
+  var totalGrid=itFromGrid+gridForChiller+gridElUsedForIce;
   var gridCost=totalGrid*tariff;
   var feedInRev=pvToGrid*p.feedIn;
   var pue=p.dcBase>0?(totalElecConsumed/p.dcBase):1;
@@ -228,18 +260,17 @@ function simulaOra(h,mese,p,tankKwhToday,iceYesterdayKwh,coolingResiduoArr,doman
 // SIMULAZIONE GIORNO SINGOLO
 // ============================================================
 function simulaGiorno(gg,p){
-  var mi=giornoToMese(gg);
-  var mese=mi.mese_idx;
-  var meseDomani=(mi.giorno_m<GIORNI_MESE[mese])?mese:(mese+1)%12;
-  var coolingResiduoArr=coolingResiduoOggi(mese,p);
-  var domaniTotale=coolingTotaleGiorno(meseDomani,p);
+  var mese=giornoToMese(gg).mese_idx;
+  var coolingResiduoArr=coolingResiduoOggi(gg,p);
+  var domaniTotale=coolingTotaleGiorno(giornoDopo(gg),p);
+  var cheapTh=cheapHourThreshold(mese,p);
   var iceYesterday=tankStates365?Math.max(0,tankStates365[gg-1]):0;
   var tankToday=0;
   var iceYestRem=iceYesterday;
   var hours=[];
   for(var h=0;h<24;h++){
     iceYestRem=iceYestRem*(1-0.005);
-    var r=simulaOra(h,mese,p,tankToday,iceYestRem,coolingResiduoArr,domaniTotale);
+    var r=simulaOra(h,gg,p,tankToday,iceYestRem,coolingResiduoArr,domaniTotale,cheapTh);
     iceYestRem=Math.max(0,iceYestRem-r.iceYestUsed);
     tankToday=r.tankKwhToday;
     hours.push(r);
@@ -281,21 +312,21 @@ function preSimula365(p){
   var carryOver=0;
   var gg=0;
   for(var m=0;m<12;m++){
-    var coolingResiduoArr=coolingResiduoOggi(m,p);
     for(var d=0;d<GIORNI_MESE[m];d++){
-      var meseDomani=meseGiornoDopo(m,d);
-      var domaniTotale=coolingTotaleGiorno(meseDomani,p);
-      states[gg]=carryOver;
+      gg++;
+      var coolingResiduoArr=coolingResiduoOggi(gg,p);
+      var domaniTotale=coolingTotaleGiorno(giornoDopo(gg),p);
+      var cheapTh=cheapHourThreshold(m,p);
+      states[gg-1]=carryOver;
       var iceYestRem=carryOver;
       var tankToday=0;
       for(var h=0;h<24;h++){
         iceYestRem=iceYestRem*(1-0.005);
-        var r=simulaOra(h,m,p,tankToday,iceYestRem,coolingResiduoArr,domaniTotale);
+        var r=simulaOra(h,gg,p,tankToday,iceYestRem,coolingResiduoArr,domaniTotale,cheapTh);
         iceYestRem=Math.max(0,iceYestRem-r.iceYestUsed);
         tankToday=r.tankKwhToday;
       }
       carryOver=tankToday+iceYestRem;
-      gg++;
     }
   }
   states[365]=carryOver;
@@ -306,16 +337,18 @@ function preSimula365(p){
 // Usata per confrontare rapidamente scenari con parametri diversi (es. altre taglie FV).
 function simulaAnnualeAggregato(p){
   var carryOver=0,totGrid=0,totCost=0,totPv=0,totElec=0,totIceUp=0,totFeedIn=0,totPvToGrid=0;
+  var gg=0;
   for(var m=0;m<12;m++){
-    var coolingResiduoArr=coolingResiduoOggi(m,p);
     for(var d=0;d<GIORNI_MESE[m];d++){
-      var meseDomani=meseGiornoDopo(m,d);
-      var domaniTotale=coolingTotaleGiorno(meseDomani,p);
+      gg++;
+      var coolingResiduoArr=coolingResiduoOggi(gg,p);
+      var domaniTotale=coolingTotaleGiorno(giornoDopo(gg),p);
+      var cheapTh=cheapHourThreshold(m,p);
       var iceYestRem=carryOver;
       var tankToday=0;
       for(var h=0;h<24;h++){
         iceYestRem=iceYestRem*(1-0.005);
-        var r=simulaOra(h,m,p,tankToday,iceYestRem,coolingResiduoArr,domaniTotale);
+        var r=simulaOra(h,gg,p,tankToday,iceYestRem,coolingResiduoArr,domaniTotale,cheapTh);
         iceYestRem=Math.max(0,iceYestRem-r.iceYestUsed);
         tankToday=r.tankKwhToday;
         totGrid+=r.totalGrid;totCost+=r.gridCost;totPv+=r.pvKw;totElec+=r.totalElecConsumed;totIceUp+=r.iceCharged;

@@ -70,6 +70,7 @@ function resetRun(){
   if(activeName==='heatmap')runHeatmap();
   if(activeName==='rete')runRete();
   if(activeName==='capex')runCapex();
+  if(activeName==='caso1mw')runCaso1MW();
 }
 function renderLabels(){var p=getParams();updateLabels(p);}
 
@@ -107,7 +108,10 @@ function updateLabels(p){
     +'Tipo: '+p.rack.name+'<br>'
     +'File: '+nFile+' \u00d7 '+rpf+' rack/fila';
   if(p.tariffMode==='f1f2f3'){
-    document.getElementById('tariff-info').innerHTML='F1: <b style="color:var(--amber)">'+fN2(p.gridPrice*0.938)+' \u20ac</b> \u00b7 F2: <b style="color:var(--blue)">'+fN2(p.gridPrice)+' \u20ac</b> \u00b7 F3: <b style="color:var(--green)">'+fN2(p.gridPrice*0.906)+' \u20ac</b>';
+    var _allMult=[];
+    for(var _mm=0;_mm<12;_mm++)for(var _hh=0;_hh<24;_hh++)_allMult.push(getTariffMult(_mm,_hh));
+    var _multMin=Math.min.apply(null,_allMult),_multMax=Math.max.apply(null,_allMult);
+    document.getElementById('tariff-info').innerHTML='Curva oraria PUN (grandi consumatori): da <b style="color:var(--green)">'+fN2(p.gridPrice*_multMin)+' \u20ac</b> (notte/mezzogiorno estivo) a <b style="color:var(--amber)">'+fN2(p.gridPrice*_multMax)+' \u20ac</b> (picco serale invernale) \u2014 non le fasce ARERA F1/F2/F3';
   } else {
     document.getElementById('tariff-info').innerHTML='Prezzo fisso tutto il giorno';
   }

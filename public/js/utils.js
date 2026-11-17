@@ -1,10 +1,17 @@
 var pvgisData=null,pvgisLoaded=false,tankStates365=null,cache365=null;
 var pvgisRoofData=null,pvgisGroundData=null;
+var pvgisHourlyTemp=null; // Array[365] di Array[24] T2m reali (PVGIS seriescalc), o null se non caricati
 var charts={};
 function destroyC(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function getMensili(){return pvgisData||FALLBACK_MENSILI;}
 function giornoToMese(gg){var g=gg-1;for(var m=0;m<12;m++){if(g<GIORNI_MESE[m])return{mese_idx:m,giorno_m:g+1};g-=GIORNI_MESE[m];}return{mese_idx:11,giorno_m:31};}
 function giornoLabel(gg){var r=giornoToMese(gg);return r.giorno_m+' '+NOMI_MESE[r.mese_idx];}
+// Temperatura oraria del giorno gg (1..365): dati reali PVGIS se caricati, altrimenti
+// la tabella sintetica mensile (stesso giorno "tipico" ripetuto per tutto il mese).
+function getTExtArr(gg){
+  if(pvgisHourlyTemp&&pvgisHourlyTemp[gg-1])return pvgisHourlyTemp[gg-1];
+  return TEMP_ORARIE[giornoToMese(gg).mese_idx];
+}
 function itNum(n,dec){
   if(n===null||n===undefined||isNaN(n))return '—';
   dec=dec||0;

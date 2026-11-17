@@ -153,12 +153,12 @@
       <div>
         <label for="r-tariffmode">Tariffa</label>
         <select id="r-tariffmode" onchange="resetRun()">
-          <option value="f1f2f3" selected>Oraria F1/F2/F3 (reale)</option>
+          <option value="f1f2f3" selected>Oraria PUN (grandi consumatori)</option>
           <option value="fixed">Prezzo fisso</option>
         </select>
       </div>
       <div>
-        <label for="r-price">Prezzo base / F2, &euro;/kWh</label>
+        <label for="r-price">Prezzo base (medio annuo), &euro;/kWh</label>
         <input type="number" min="0.05" max="0.50" step="0.01" value="0.24" id="r-price" onchange="clampNumberInput(this);resetRun()">
       </div>
       <div>
@@ -207,6 +207,7 @@
   <div class="tab" onclick="sw('heatmap')">Heatmap 365gg</div>
   <div class="tab" onclick="sw('rete')">Ruolo in Rete</div>
   <div class="tab" onclick="sw('capex')">CAPEX / OPEX</div>
+  <div class="tab" onclick="sw('caso1mw')">Caso 1 MW</div>
   <div class="tab" onclick="sw('note')">Basi Teoriche</div>
 </div>
 
@@ -293,6 +294,7 @@
 <div id="panel-profili" class="panel"><div id="profili-content"></div></div>
 <div id="panel-heatmap" class="panel"><div id="heatmap-content"></div></div>
 <div id="panel-rete" class="panel"><div id="rete-content"></div></div>
+<div id="panel-caso1mw" class="panel"><div id="caso1mw-content"></div></div>
 
 <div id="panel-capex" class="panel">
   <div id="capex-content"></div>

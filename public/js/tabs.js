@@ -40,7 +40,8 @@ function runRete(){
     +'<div class="ct">Effetto ITES sulla curva di carico</div>'
     +'<div style="font-size:.92rem;color:var(--text2);line-height:2.0;">'
     +'<span style="color:#39d353;font-weight:700;">&#9654;</span> <b>Ore centrali</b> (FV attivo): surplus → ghiaccio fino a coprire oggi+domani, poi (solo d\'estate) vendita in rete<br>'
-    +'<span style="color:#a371f7;font-weight:700;">&#9654;</span> <b>Ore serali/notturne</b>: ghiaccio → cooling, evita sempre il prelievo da rete<br>'
+    +'<span style="color:#e3b341;font-weight:700;">&#9654;</span> <b>Ore più economiche della giornata</b> (tariffa PUN bassa, es. notte): se il ghiaccio non copre ancora oggi+domani, si anticipa la produzione comprando dalla rete a buon mercato<br>'
+    +'<span style="color:#a371f7;font-weight:700;">&#9654;</span> <b>Ore serali/notturne</b>: ghiaccio → cooling, evita sempre il prelievo da rete nelle ore più care<br>'
     +'<span style="color:#39c8c8;font-weight:700;">&#9654;</span> <b>Inverno</b>: nessuna vendita, tutto il surplus resta ghiaccio<br>'
     +'<span style="color:var(--blue);font-weight:700;">&#9654;</span> <b>Effetto netto</b>: appiattimento della curva di carico, riduzione picchi'
     +'</div>'
@@ -540,4 +541,80 @@ function runCapex(){
     var cfEl=document.getElementById('cCashflow');
     if(cfEl) charts['cCashflow']=new Chart(cfEl,{type:'bar',data:{labels:Array.from({length:21},function(_,y){return 'A'+y;}),datasets:[{label:'Cash Flow',data:cfData.map(function(d){return d.cf;}),backgroundColor:cfData.map(function(d){return d.cf<0?'rgba(248,81,73,.5)':'rgba(57,211,83,.5)';}),borderColor:cfData.map(function(d){return d.cf<0?'#f85149':'#39d353';}),borderWidth:1,borderRadius:3},{label:'Cumulativo',data:cfData.map(function(d){return d.cum;}),type:'line',borderColor:'#58a6ff',fill:false,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': \u20ac'+itNum(ctx.parsed.y/1000000,2)+'M';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:11},callback:function(v){return itNum(v/1000000,1)+'M\u20ac';}}}}}});
   },80);
+}
+
+// ============================================================
+// TAB CASO 1 MW \u2014 test-case interattivo: rack fissati a 1 MW IT, sweep del
+// kWp FV per trovare la taglia che minimizza il costo rete netto annuo.
+// Riusa simulaAnnualeAggregato (stessa funzione gi\u00e0 usata dal confronto
+// taglie FV nel tab CAPEX/OPEX) \u2014 nessuna nuova logica di simulazione.
+// ============================================================
+function runCaso1MW(){
+  var pBase=getParams();
+  var nRack1MW=Math.max(1,Math.round(1000/pBase.rack.kw));
+  var itKw1MW=nRack1MW*pBase.rack.kw;
+  var p1MW=Object.assign({},pBase,{nRack:nRack1MW,itKw:itKw1MW,dcBase:itKw1MW,heatKw:itKw1MW,kwpEsterno:0});
+  var fvCostKwp=850;
+
+  // Il tetto dello sweep è il massimo FV che il lotto (tetto+terra) può ospitare,
+  // non un numero arbitrario: oltre quella superficie l'FV extra non è installabile.
+  var sf=calcSuperfici(getSuperficiParams());
+  var kwpMax=Math.max(500,Math.ceil(sf.fvPotenzialeMax/100)*100);
+  var kwpSizes=[];
+  for(var k=0;k<=kwpMax;k+=Math.max(50,Math.round(kwpMax/40/50)*50))kwpSizes.push(k);
+  if(kwpSizes[kwpSizes.length-1]!==kwpMax)kwpSizes.push(kwpMax);
+  var sweep=kwpSizes.map(function(kwp){
+    var r=simulaAnnualeAggregato(Object.assign({},p1MW,{kwp,kwpInterno:kwp}));
+    return{kwp,costNetto:r.cost-r.feedIn};
+  });
+  var costNoFV=sweep[0].costNetto;
+  var vitaFvAnni=20; // ammortamento lineare semplice per confrontare taglie FV diverse
+  sweep.forEach(function(s){
+    s.risparmio=costNoFV-s.costNetto;
+    s.capexFv=s.kwp*fvCostKwp;
+    s.payback=s.kwp>0&&s.risparmio>0?s.capexFv/s.risparmio:Infinity;
+    // Senza ammortizzare il CAPEX, il costo rete netto scende sempre all'aumentare del
+    // kWp (più vendita feed-in estiva): non ci sarebbe mai un minimo interno. Il costo
+    // totale annualizzato (rete + FV/20 anni) sì, ed è quello che va minimizzato.
+    s.costTotaleAnnualizzato=s.costNetto+s.capexFv/vitaFvAnni;
+  });
+  var best=sweep.reduce(function(b,s){return s.costTotaleAnnualizzato<b.costTotaleAnnualizzato?s:b;},sweep[0]);
+
+  document.getElementById('caso1mw-content').innerHTML=
+    '<div class="ibar ibar-g" style="margin-bottom:1rem;font-size:.95rem;">'
+    +'<b>Test-case:</b> rack dimensionati a <b>1 MW IT</b> ('+nRack1MW+' &times; '+pBase.rack.name+', '+fN(pBase.rack.kw)+' kW/rack). '
+    +'Si fa variare la sola taglia FV interna (kWp), a parit\u00e0 di tariffa/COP/UA impostati nel form, e si misura il costo totale annuo (rete netta + FV ammortizzata in '+vitaFvAnni+' anni) per trovare il punto di minimo \u2014 il costo rete da solo scenderebbe sempre con pi\u00f9 FV (pi\u00f9 vendita feed-in estiva), senza un minimo reale.'
+    +'</div>'
+    +'<div class="g4" style="margin-bottom:1rem;">'
+    +'<div class="card kpi"><div class="kv" style="color:var(--text)">'+fN(itKw1MW)+'</div><div class="ku">kW_el</div><div class="kl">IT (rack)</div></div>'
+    +'<div class="card kpi"><div class="kv" style="color:var(--teal)">'+fN(best.kwp)+'</div><div class="ku">kWp</div><div class="kl">FV consigliata (costo totale minimo)</div></div>'
+    +'<div class="card kpi"><div class="kv" style="color:var(--green)">'+fE(best.risparmio)+'</div><div class="ku">/anno</div><div class="kl">Risparmio rete vs 0 kWp</div></div>'
+    +'<div class="card kpi"><div class="kv" style="color:var(--blue)">'+(isFinite(best.payback)?itNum(best.payback,1):'\u2014')+'</div><div class="ku">anni</div><div class="kl">Payback FV (850 \u20ac/kWp)</div></div>'
+    +'</div>'
+    +'<div class="card" style="margin-bottom:1rem;">'
+    +'<div class="ct">Costo totale annuo (rete netta + FV/'+vitaFvAnni+'a) vs taglia FV</div>'
+    +'<div class="cw" style="height:260px;"><canvas id="cCaso1MW"></canvas></div>'
+    +'</div>'
+    +'<div class="card"><div class="ct">Dettaglio sweep</div>'
+    +'<div style="overflow-x:auto;"><table><thead><tr><th>FV (kWp)</th><th>Costo netto rete/anno</th><th>Costo totale annuo*</th><th>Risparmio rete vs 0 kWp</th><th>CAPEX FV</th><th>Payback</th></tr></thead><tbody>'
+    +sweep.filter(function(s,i){return i%Math.max(1,Math.round(sweep.length/12))===0||s.kwp===best.kwp||i===sweep.length-1;}).map(function(s){
+      var isBest=s.kwp===best.kwp;
+      return '<tr style="'+(isBest?'background:var(--green3);font-weight:700;':'')+'">'
+        +'<td>'+fN(s.kwp)+(isBest?' <span style="color:var(--green);font-size:.9rem;">(minimo)</span>':'')+'</td>'
+        +'<td>'+fE(s.costNetto)+'</td>'
+        +'<td>'+fE(s.costTotaleAnnualizzato)+'</td>'
+        +'<td style="color:'+(s.risparmio>0?'var(--green)':'var(--red)')+'">'+(s.risparmio>0?'+':'')+fE(s.risparmio)+'</td>'
+        +'<td style="color:var(--text3);">'+(s.capexFv>0?fE(s.capexFv):'\u2014')+'</td>'
+        +'<td>'+(isFinite(s.payback)?itNum(s.payback,1)+' anni':'\u2014')+'</td>'
+        +'</tr>';
+    }).join('')
+    +'</tbody></table></div>'
+    +'<div style="font-size:.85rem;color:var(--text3);margin-top:.5rem;">*Costo totale annuo = costo netto rete + CAPEX FV / '+vitaFvAnni+' anni (ammortamento lineare, senza tasso di sconto).</div>'
+    +'</div>';
+
+  destroyC('cCaso1MW');
+  charts['cCaso1MW']=new Chart(document.getElementById('cCaso1MW'),{type:'line',data:{labels:sweep.map(function(s){return fN(s.kwp);}),datasets:[
+    {label:'Costo totale annuo (rete+FV/'+vitaFvAnni+'a)',data:sweep.map(function(s){return Math.round(s.costTotaleAnnualizzato);}),borderColor:'#e3b341',backgroundColor:'rgba(227,179,65,.08)',fill:true,tension:.25,pointRadius:0,borderWidth:2},
+    {label:'Costo netto rete',data:sweep.map(function(s){return Math.round(s.costNetto);}),borderColor:'#58a6ff',fill:false,tension:.25,pointRadius:0,borderWidth:1.5,borderDash:[5,3]}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#4a5568',font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+fE(ctx.parsed.y)+'/anno';}}}},scales:{x:{grid:{display:false},ticks:{color:'#718096',font:{size:11},maxTicksLimit:12},title:{display:true,text:'kWp FV interna',color:'#718096',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.06)'},ticks:{color:'#718096',font:{size:11},callback:function(v){return fK(v);}}}}}});
 }

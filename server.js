@@ -46,6 +46,25 @@ app.get('/api/pvgis-monthly', async (req, res) => {
   }
 });
 
+// ---- Proxy endpoint PVGIS hourly reale (seriescalc) — temperatura T2m ora per ora ----
+app.get('/api/pvgis-hourly', async (req, res) => {
+  const { lat = '43.85', lon = '12.98', year = '2019' } = req.query;
+  const url = `https://re.jrc.ec.europa.eu/api/v5_2/seriescalc?` +
+    `lat=${lat}&lon=${lon}&startyear=${year}&endyear=${year}&pvcalculation=0&outputformat=json`;
+
+  try {
+    const pvRes = await fetch(url, { timeout: 15000 });
+    if (!pvRes.ok) {
+      const errText = await pvRes.text();
+      return res.status(502).json({ error: 'PVGIS seriescalc error', detail: errText });
+    }
+    const data = await pvRes.json();
+    res.json(data);
+  } catch (e) {
+    res.status(503).json({ error: 'PVGIS non raggiungibile', detail: e.message });
+  }
+});
+
 // ---- Proxy endpoint PVGIS hourly TMY ----
 app.get('/api/pvgis/tmy', async (req, res) => {
   const { lat, lon } = req.query;

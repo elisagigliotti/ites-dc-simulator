@@ -17,6 +17,29 @@ function blendMensili(roofArr,groundArr,wRoof,wGround){
     return{nome:m.nome,giorni:m.giorni,irr:(m.irr*wRoof+g.irr*wGround)/tot,kwp_kwh:(m.kwp_kwh*wRoof+g.kwp_kwh*wGround)/tot};
   });
 }
+// Temperatura oraria reale (seriescalc, anno 2019 non bisestile) per lo stesso
+// punto usato per l'irraggiamento. Fallback silenzioso sulla tabella sintetica
+// TEMP_ORARIE se PVGIS non risponde (vedi getTExtArr in utils.js).
+async function fetchPvgisHourlyTemp(){
+  var url='/api/pvgis-hourly?lat=43.85&lon=12.98&year=2019';
+  var res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+  var json=await res.json();
+  var hourly=json.outputs&&json.outputs.hourly;
+  if(!hourly||hourly.length<8700)throw new Error('Risposta PVGIS seriescalc non valida');
+  var days=Array.from({length:365},function(){return new Array(24).fill(null);});
+  var jan1=Date.UTC(2019,0,1);
+  hourly.forEach(function(row){
+    var t=row.time;
+    var y=+t.slice(0,4),m=+t.slice(4,6),d=+t.slice(6,8),hh=+t.slice(9,11);
+    var doy=Math.round((Date.UTC(y,m-1,d)-jan1)/86400000)+1; // 1..365
+    if(doy>=1&&doy<=365)days[doy-1][hh]=parseFloat(row.T2m);
+  });
+  days.forEach(function(arr){
+    for(var h=1;h<24;h++)if(arr[h]==null)arr[h]=arr[h-1];
+    if(arr[0]==null)arr[0]=arr.find(function(v){return v!=null;})||10;
+  });
+  return days;
+}
 async function loadPVGIS(){
   var btn=document.getElementById('pvgis-btn'),dot=document.getElementById('pvgis-dot');
   var msg=document.getElementById('pvgis-msg'),src=document.getElementById('pvgis-src');
@@ -31,14 +54,22 @@ async function loadPVGIS(){
     pvgisRoofData=roof;pvgisGroundData=ground;
     pvgisData=ground?blendMensili(roof,ground,kwpRoof,kwpGround):roof;
     pvgisLoaded=true;dot.className='pvgis-dot dot-ok';
-    msg.innerHTML='\u2705 Dati PVGIS caricati \u2014 EC JRC'+(ground?' (tetto + terreno)':' (tetto)');
+    var tempNote='';
+    try{
+      pvgisHourlyTemp=await fetchPvgisHourlyTemp();
+      tempNote=' + temperatura oraria reale';
+    }catch(eTemp){
+      pvgisHourlyTemp=null; // fallback silenzioso: resta la tabella sintetica TEMP_ORARIE
+    }
+    msg.innerHTML='\u2705 Dati PVGIS caricati \u2014 EC JRC'+(ground?' (tetto + terreno)':' (tetto)')+tempNote;
     src.textContent='PVGIS v5.2 \u00b7 SARAH2 \u00b7 loss '+loss+'%';
     document.getElementById('data-source-label').textContent='dati: PVGIS v5.2';
+    tankStates365=null;cache365=null;
     resetRun();
   }catch(e){
     dot.className='pvgis-dot dot-error';
     msg.innerHTML='\u26d4 Errore: <em>'+e.message+'</em>. Usando stime di fallback.';
-    pvgisData=null;pvgisRoofData=null;pvgisGroundData=null;pvgisLoaded=false;
+    pvgisData=null;pvgisRoofData=null;pvgisGroundData=null;pvgisLoaded=false;pvgisHourlyTemp=null;
   }
   btn.disabled=false;
 }
@@ -57,6 +88,7 @@ function sw(name){
   if(name==='profili')runProfili();
   if(name==='heatmap')runHeatmap();
   if(name==='capex')runCapex();
+  if(name==='caso1mw')runCaso1MW();
 }
 
 // ============================================================
