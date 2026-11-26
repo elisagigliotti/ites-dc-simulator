@@ -78,42 +78,33 @@ function renderLabels(){var p=getParams();updateLabels(p);}
 // SUPERFICI — lotto Petra: aggiorna il tetto dello slider FV e la card riepilogo
 // ============================================================
 function updateSuperficiUI(){
+  // Nota: il potenziale FV del lotto è solo un riferimento informativo — non
+  // blocca più il campo "Potenza installata", che resta libero per le
+  // sensitivity (i dati del caso 1 MW non sono fissi, si cambiano a piacere).
   var sp=getSuperficiParams(),sf=calcSuperfici(sp);
   var slider=document.getElementById('r-kwp');
-  var newMax=Math.max(1,Math.round(sf.fvPotenzialeMax));
-  slider.max=newMax;
-  if(parseFloat(slider.value)>newMax)slider.value=newMax;
+  var potenziale=Math.max(1,Math.round(sf.fvPotenzialeMax));
   var kwpInterno=parseFloat(slider.value);
   var kwpRoof=Math.min(kwpInterno,sf.fvRoofMax),kwpGround=Math.max(0,kwpInterno-kwpRoof);
-  var info=document.getElementById('superfici-info');
-  document.getElementById('hdr-footprint-txt').textContent=itNum(Math.round(sp.footprint))+' m²';
-  document.getElementById('hdr-suplotto-txt').textContent=itNum(Math.round(sp.supLotto))+' m²';
-  document.getElementById('hdr-terreno-txt').textContent=itNum(Math.round(sf.terrenoLibero))+' m²';
-  if(!info)return;
-  info.innerHTML=
-    'Terreno libero: <b>'+itNum(Math.round(sf.terrenoLibero))+' m²</b> tutto a FV ('+sp.groundType+')<br>'
-    +'FV tetto max: <b>'+itNum(Math.round(sf.fvRoofMax))+' kWp</b> &middot; FV terra max: <b>'+itNum(Math.round(sf.fvGroundMax))+' kWp</b><br>'
-    +'<b style="color:var(--teal);">FV potenziale totale: '+itNum(newMax)+' kWp</b><br>'
-    +'Installato ora: '+itNum(Math.round(kwpInterno))+' kWp — tetto '+itNum(Math.round(kwpRoof))+' / terra '+itNum(Math.round(kwpGround))+' kWp'
-    +(kwpInterno>=newMax-0.5?'<div style="color:var(--red);margin-top:4px;">&#9888; Hai raggiunto il potenziale massimo del layout scelto.</div>':'');
+  setTxt('calc-terreno',itNum(Math.round(sf.terrenoLibero))+' m²');
+  setTxt('calc-fvroofmax',itNum(Math.round(sf.fvRoofMax))+' kWp');
+  setTxt('calc-fvgroundmax',itNum(Math.round(sf.fvGroundMax))+' kWp');
+  setTxt('calc-fvtotmax',itNum(potenziale)+' kWp'+(kwpInterno>potenziale?' <span style="color:var(--amber);">(oltre il potenziale del Lotto A5 — ok per sensitivity)</span>':''));
 }
 
 function updateLabels(p){
-  document.getElementById('hdr-fvkwp-txt').textContent=itNum(p.kwp)+' kWp';
-  document.getElementById('hdr-fvbadge-txt').textContent=itNum(p.kwp/1000,1)+' MWp';
   var nFile=Math.ceil(p.nRack/p.rack.perRow),rpf=Math.min(p.nRack,p.rack.perRow);
-  document.getElementById('rack-summary').innerHTML=
-    'IT: <b style="color:var(--text);">'+fN(p.itKw)+' kW_el</b>'
-    +' \u00b7 Calore: <b style="color:var(--red);">'+fN(p.itKw)+' kW_th (100%)</b><br>'
-    +'Tipo: '+p.rack.name+'<br>'
-    +'File: '+nFile+' \u00d7 '+rpf+' rack/fila';
+  setTxt('calc-fvtot',itNum(p.kwp)+' kWp');
+  setTxt('calc-itkw',fN(p.itKw)+' kW_el');
+  setTxt('calc-heatkw',fN(p.itKw)+' kW_th');
+  setTxt('calc-rackinfo',p.rack.name+' \u00b7 '+nFile+' \u00d7 '+rpf+' rack/fila');
   if(p.tariffMode==='f1f2f3'){
     var _allMult=[];
     for(var _mm=0;_mm<12;_mm++)for(var _hh=0;_hh<24;_hh++)_allMult.push(getTariffMult(_mm,_hh));
     var _multMin=Math.min.apply(null,_allMult),_multMax=Math.max.apply(null,_allMult);
-    document.getElementById('tariff-info').innerHTML='Curva oraria PUN (grandi consumatori): da <b style="color:var(--green)">'+fN2(p.gridPrice*_multMin)+' \u20ac</b> (notte/mezzogiorno estivo) a <b style="color:var(--amber)">'+fN2(p.gridPrice*_multMax)+' \u20ac</b> (picco serale invernale) \u2014 non le fasce ARERA F1/F2/F3';
+    setTxt('calc-tariffrange','<b style="color:var(--green)">'+fN2(p.gridPrice*_multMin)+' \u20ac</b> \u2013 <b style="color:var(--amber)">'+fN2(p.gridPrice*_multMax)+' \u20ac</b>/kWh (oraria PUN, notte/mezzogiorno estivo \u2192 picco serale invernale)');
   } else {
-    document.getElementById('tariff-info').innerHTML='Prezzo fisso tutto il giorno';
+    setTxt('calc-tariffrange','Prezzo fisso tutto il giorno: <b>'+fN2(p.gridPrice)+' \u20ac/kWh</b>');
   }
   var eerNom=p.cop,copIceNom=p.cop*0.85;
   document.getElementById('cop-el-box').textContent='1 kWh_el FV';
@@ -123,13 +114,15 @@ function updateLabels(p){
   document.getElementById('cop-ice-th-box').textContent='COP_ice '+itNum(copIceNom,2);
   document.getElementById('cop-ice-result-box').textContent=itNum(copIceNom,2)+' kWh_th ghiaccio';
   document.getElementById('cop-real-box').textContent='EER impianto '+itNum(getEERreal(p.cop,15),2);
+  setTxt('calc-eerreal',itNum(getEERreal(p.cop,15),2));
+  setTxt('calc-copice',itNum(copIceNom,2));
   var eerMesi=TEMP_MEDIE.map(function(t){return getEER(p.cop,t).toFixed(1);});
-  document.getElementById('cop-mensile-quick').innerHTML=
+  setTxt('cop-mensile-quick',
     'EER mensile: '+NOMI_MESE.map(function(n,i){
       var v=parseFloat(eerMesi[i]);
       var c=v>=p.cop?'var(--green)':v>=p.cop*0.8?'var(--amber)':'var(--red)';
       return '<span style="color:'+c+'">'+n+' '+eerMesi[i]+'</span>';
-    }).join(' | ');
+    }).join(' | '));
 }
 
 // ============================================================

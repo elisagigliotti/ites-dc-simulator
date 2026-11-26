@@ -14,14 +14,7 @@
   <div class="hdr-top">
     <div>
       <h1>Studio Pre-Fattibilit&agrave; <span>ITES</span> &mdash; Data Center <span style="font-size:1.0rem;color:rgba(255,255,255,0.6)">v7</span></h1>
-      <p>Ice Thermal Energy Storage + FV <span id="hdr-fvkwp-txt">2000 kWp</span> &middot; Ghiaccio prima della rete, vendita solo d'estate a tank saturo &middot; kWh_el &harr; kWh_th &middot; CO&#8322;</p>
     </div>
-    <div class="hdr-meta">Sito: Bellocchi (PU) &middot; 43.85&deg;N 12.98&deg;E<br>Capannone ex-frigo: <span id="hdr-footprint-txt">5.500 m&sup2;</span> &middot; H 6m (riuso)<br>Lotto Petra Srl: <span id="hdr-suplotto-txt">23.659 m&sup2;</span> (Comparto A)<br>Terreno libero: <span id="hdr-terreno-txt">~18.000 m&sup2;</span> tutto a FV<br>Azimut tetto 145&deg; (SSE) &middot; Inclinazione 5&deg;</div>
-  </div>
-  <div class="badges">
-    <span class="badge">FV &asymp; <span id="hdr-fvbadge-txt">2 MWp</span></span><span class="badge">PVGIS v5.2</span><span class="badge">ITES &lambda;=334 kJ/kg</span>
-    <span class="badge">Ghiaccio oggi+domani</span><span class="badge">Vendita solo d'estate</span><span class="badge">Carry-over 24h</span>
-    <span class="badge">kWh_el &harr; kWh_th</span><span class="badge">CO&#8322; evitata</span>
   </div>
 </div>
 
@@ -33,55 +26,85 @@
 </div>
 
 <div class="card" id="input-form">
-  <details open>
-    <summary>Sito &amp; Capannone</summary>
-    <div class="input-grid" id="grid-sito">
-      <div>
-        <label for="r-suplotto">Superficie lotto Petra netta, m&sup2;</label>
-        <input type="number" value="23659" min="0" id="r-suplotto" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div>
-        <label for="r-footprint">Footprint edificio ex-frigo, m&sup2;</label>
-        <input type="number" value="5500" min="0" id="r-footprint" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div>
-        <label for="r-fvroof">Densit&agrave; FV in copertura, kWp/m&sup2; utile</label>
-        <input type="number" step="0.01" value="0.19" min="0" max="1" id="r-fvroof" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div>
-        <label for="r-fvground-type">Tipo montaggio FV a terra</label>
+  <div class="xl-legend">
+    <span><span class="xl-chip" style="background:var(--blue3);border:1px solid var(--blue);"></span>Dato (modificabile)</span>
+    <span><span class="xl-chip" style="background:var(--green3);border:1px solid var(--green);"></span>Calcolato (si aggiorna da solo)</span>
+  </div>
+  <table class="xl-table">
+    <tr class="xl-sec"><td colspan="3">Sito &amp; Capannone</td></tr>
+    <tr>
+      <td class="xl-label"><label for="r-suplotto">Superficie lotto Petra recintabile, m&sup2;</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" value="11563" min="0" id="r-suplotto" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">dato catastale/urbanistico</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-footprint">Footprint edificio ex-frigo, m&sup2;</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" value="5500" min="0" id="r-footprint" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">edificio esistente (riuso)</td>
+    </tr>
+    <tr>
+      <td class="xl-label">Terreno libero, m&sup2;</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-terreno">&mdash;</span></td>
+      <td class="xl-formula">lotto &minus; footprint</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-fvroof">Densit&agrave; FV in copertura, kWp/m&sup2; utile</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" step="0.01" value="0.19" min="0" max="1" id="r-fvroof" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">resa pannelli a tetto</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-fvground-type">Tipo montaggio FV a terra</label></td>
+      <td class="xl-val xl-input-cell">
         <select id="r-fvground-type" onchange="resetRun()">
           <option value="bancali" selected>Bancali a terra (0,10 kWp/m&sup2;)</option>
           <option value="piazzali">Piazzali complanari (0,13 kWp/m&sup2;)</option>
           <option value="pensiline">Pensiline (0,15 kWp/m&sup2;)</option>
         </select>
-      </div>
-      <div id="superfici-info" style="font-size:1.0rem;color:var(--text3);line-height:1.7;grid-column:1/-1;"></div>
-    </div>
-  </details>
-  <details open>
-    <summary>Potenza FV</summary>
-    <div class="input-grid" id="grid-fv">
-      <div>
-        <label for="r-kwp">Potenza installata &mdash; FV interna (tetto+terreno lotto Petra), kWp</label>
-        <input type="number" min="200" max="3000" step="20" value="2000" id="r-kwp" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div>
-        <label for="r-kwp-ext">Potenza esterna &mdash; PPA / campi terzi, kWp</label>
-        <input type="number" min="0" max="25000" step="500" value="0" id="r-kwp-ext" onchange="clampNumberInput(this);resetRun()">
-        <div style="font-size:.85rem;color:var(--text3);margin-top:4px;">Esterna: nessun vincolo fisico n&eacute; CAPEX &mdash; si somma alla produzione FV ma non compare nell'investimento.</div>
-      </div>
-      <div>
-        <label for="r-loss">Perdite sistema, %</label>
-        <input type="number" min="10" max="22" step="1" value="14" id="r-loss" onchange="clampNumberInput(this);resetRun()">
-      </div>
-    </div>
-  </details>
-  <details open>
-    <summary>Data Center &mdash; Rack IT</summary>
-    <div class="input-grid" id="grid-rack">
-      <div>
-        <label for="r-racktype">Tipo rack</label>
+      </td>
+      <td class="xl-formula">fissa la densit&agrave; terra</td>
+    </tr>
+    <tr>
+      <td class="xl-label">FV tetto max, kWp</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-fvroofmax">&mdash;</span></td>
+      <td class="xl-formula">footprint &times; 0,6 &times; densit&agrave; tetto</td>
+    </tr>
+    <tr>
+      <td class="xl-label">FV terra max, kWp</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-fvgroundmax">&mdash;</span></td>
+      <td class="xl-formula">terreno libero &times; densit&agrave; terra</td>
+    </tr>
+    <tr>
+      <td class="xl-label">FV potenziale totale, kWp</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-fvtotmax">&mdash;</span></td>
+      <td class="xl-formula">tetto max + terra max</td>
+    </tr>
+
+    <tr class="xl-sec"><td colspan="3">Potenza FV</td></tr>
+    <tr>
+      <td class="xl-label"><label for="r-kwp">Potenza installata &mdash; FV interna (tetto+terreno lotto Petra), kWp</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="200" max="3000" step="20" value="2000" id="r-kwp" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">vincolato dal potenziale max sopra</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-kwp-ext">Potenza esterna &mdash; PPA / campi terzi, kWp</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="0" max="25000" step="500" value="0" id="r-kwp-ext" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">nessun vincolo fisico/CAPEX</td>
+    </tr>
+    <tr>
+      <td class="xl-label">FV totale (interna + esterna), kWp</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-fvtot">&mdash;</span></td>
+      <td class="xl-formula">interna + esterna</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-loss">Perdite sistema, %</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="10" max="22" step="1" value="14" id="r-loss" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">cavi, inverter, sporcamento</td>
+    </tr>
+
+    <tr class="xl-sec"><td colspan="3">Data Center &mdash; Rack IT</td></tr>
+    <tr>
+      <td class="xl-label"><label for="r-racktype">Tipo rack</label></td>
+      <td class="xl-val xl-input-cell">
         <select id="r-racktype" onchange="resetRun()">
           <option value="ai_gpu">AI / GPU (40 kW/rack)</option>
           <option value="ai_mixed">AI Misto GPU+CPU (25 kW/rack)</option>
@@ -89,115 +112,138 @@
           <option value="cloud" selected>Cloud Standard (10 kW/rack)</option>
           <option value="colo">Colocation (7 kW/rack)</option>
         </select>
-      </div>
-      <div>
-        <label for="r-nrack">Numero rack</label>
-        <input type="number" min="5" max="2000" step="5" value="50" id="r-nrack" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div>
-        <label for="r-setp">Set-point interno, &deg;C</label>
-        <input type="number" min="18" max="30" step="1" value="27" id="r-setp" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div>
-        <label for="r-ua">Involucro UA, W/K</label>
-        <input type="number" min="100" max="5000" step="100" value="500" id="r-ua" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div id="rack-summary" style="font-size:1.0rem;color:var(--text3);line-height:1.7;grid-column:1/-1;"></div>
-    </div>
-  </details>
-  <details open>
-    <summary>Chiller / Pompa di calore</summary>
-    <div class="input-grid" id="grid-chiller">
-      <div>
-        <label for="r-cop">EER/COP nominale (15&deg;C)</label>
-        <input type="number" min="2.0" max="6.0" step="0.1" value="3.5" id="r-cop" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div style="grid-column:1/-1;">
-        <div class="cop-panel" id="cop-explain-panel">
-          <div style="font-size:1.0rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem;">Catena di conversione energetica</div>
-          <div class="cop-flow">
-            <span class="cop-box" style="background:var(--red3);color:var(--red);">200 kW_el IT</span>
-            <span class="cop-arrow">&rarr;</span>
-            <span class="cop-box" style="background:var(--orange3);color:var(--orange);">200 kW_th calore</span>
-            <span style="font-size:1.0rem;color:var(--text3);">(100% conversione fisica)</span>
-          </div>
-          <div class="cop-flow" style="margin-top:5px;">
-            <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-el-box">1 kWh_el FV</span>
-            <span class="cop-arrow">&times;</span>
-            <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-th-box">EER 3.5</span>
-            <span class="cop-arrow">=</span>
-            <span class="cop-box" style="background:var(--green3);color:var(--green);" id="cop-result-box">3.5 kWh_th freddo</span>
-          </div>
-          <div class="cop-flow" style="margin-top:5px;">
-            <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-ice-el-box">1 kWh_el FV surplus</span>
-            <span class="cop-arrow">&times;</span>
-            <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-ice-th-box">COP_ice 2.98</span>
-            <span class="cop-arrow">=</span>
-            <span class="cop-box" style="background:rgba(57,200,200,0.15);color:#0e7490;" id="cop-ice-result-box">2.98 kWh_th ghiaccio</span>
-          </div>
-          <div style="font-size:.95rem;color:var(--text3);margin-top:.4rem;">COP_ice = COP &times; 0.85 &middot; Degrada -2%/&deg;C sopra 15&deg;C</div>
-          <div class="cop-flow" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border2);">
-            <span class="cop-box" style="background:var(--amber3);color:var(--amber);">+25% ausiliari</span>
-            <span style="font-size:.95rem;color:var(--text3);">pompe glicole/acqua, ventole condensatore, controlli &rarr;</span>
-            <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-real-box">EER impianto 2.8</span>
-          </div>
-          <div style="font-size:.95rem;color:var(--text3);margin-top:.4rem;">Il kW_el realmente assorbito dalla centrale frigorifera si calcola con l'EER/COP <b>di impianto</b> (compressore + ausiliari), non il solo compressore.</div>
+      </td>
+      <td class="xl-formula">fissa i kW/rack</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-nrack">Numero rack</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="5" max="2000" step="5" value="50" id="r-nrack" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula" id="calc-rackinfo">&mdash;</td>
+    </tr>
+    <tr>
+      <td class="xl-label">Potenza IT, kW_el</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-itkw">&mdash;</span></td>
+      <td class="xl-formula">numero rack &times; kW/rack</td>
+    </tr>
+    <tr>
+      <td class="xl-label">Calore da smaltire, kW_th</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-heatkw">&mdash;</span></td>
+      <td class="xl-formula">= IT (100% conversione fisica)</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-setp">Set-point interno, &deg;C</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="18" max="30" step="1" value="27" id="r-setp" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">temperatura ambiente IT</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-ua">Involucro UA, W/K</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="100" max="5000" step="100" value="500" id="r-ua" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">dispersione termica edificio</td>
+    </tr>
+
+    <tr class="xl-sec"><td colspan="3">Chiller / Pompa di calore</td></tr>
+    <tr>
+      <td class="xl-label"><label for="r-cop">EER/COP nominale (15&deg;C)</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="2.0" max="6.0" step="0.1" value="3.5" id="r-cop" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">compressore, a 15&deg;C</td>
+    </tr>
+    <tr>
+      <td class="xl-label">EER impianto reale (15&deg;C)</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-eerreal">&mdash;</span></td>
+      <td class="xl-formula">COP / 1,25 (+25% ausiliari)</td>
+    </tr>
+    <tr>
+      <td class="xl-label">COP_ice ghiaccio (15&deg;C)</td>
+      <td class="xl-val"><span class="xl-calc-cell" id="calc-copice">&mdash;</span></td>
+      <td class="xl-formula">COP &times; 0,85</td>
+    </tr>
+    <tr class="xl-note"><td colspan="3">
+      <div class="cop-panel" id="cop-explain-panel">
+        <div class="cop-flow">
+          <span class="cop-box" style="background:var(--red3);color:var(--red);">200 kW_el IT</span>
+          <span class="cop-arrow">&rarr;</span>
+          <span class="cop-box" style="background:var(--orange3);color:var(--orange);">200 kW_th calore</span>
+          <span style="font-size:1.0rem;color:var(--text3);">(100% conversione fisica)</span>
         </div>
-        <div id="cop-mensile-quick" style="font-size:1.0rem;color:var(--text3);line-height:1.7;"></div>
+        <div class="cop-flow" style="margin-top:5px;">
+          <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-el-box">1 kWh_el FV</span>
+          <span class="cop-arrow">&times;</span>
+          <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-th-box">EER 3.5</span>
+          <span class="cop-arrow">=</span>
+          <span class="cop-box" style="background:var(--green3);color:var(--green);" id="cop-result-box">3.5 kWh_th freddo</span>
+        </div>
+        <div class="cop-flow" style="margin-top:5px;">
+          <span class="cop-box" style="background:var(--blue3);color:var(--blue);" id="cop-ice-el-box">1 kWh_el FV surplus</span>
+          <span class="cop-arrow">&times;</span>
+          <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-ice-th-box">COP_ice 2.98</span>
+          <span class="cop-arrow">=</span>
+          <span class="cop-box" style="background:rgba(57,200,200,0.15);color:#0e7490;" id="cop-ice-result-box">2.98 kWh_th ghiaccio</span>
+        </div>
+        <div class="cop-flow" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border2);">
+          <span class="cop-box" style="background:var(--amber3);color:var(--amber);">+25% ausiliari</span>
+          <span style="font-size:.95rem;color:var(--text3);">pompe glicole/acqua, ventole condensatore, controlli &rarr;</span>
+          <span class="cop-box" style="background:var(--teal3);color:var(--teal);" id="cop-real-box">EER impianto 2.8</span>
+        </div>
       </div>
-    </div>
-  </details>
-  <details open>
-    <summary>Tariffe &amp; Rete</summary>
-    <div class="input-grid" id="grid-tariffe">
-      <div>
-        <label for="r-tariffmode">Tariffa</label>
+      <div id="cop-mensile-quick" style="margin-top:.5rem;"></div>
+    </td></tr>
+
+    <tr class="xl-sec"><td colspan="3">Tariffe &amp; Rete</td></tr>
+    <tr>
+      <td class="xl-label"><label for="r-tariffmode">Tariffa</label></td>
+      <td class="xl-val xl-input-cell">
         <select id="r-tariffmode" onchange="resetRun()">
           <option value="f1f2f3" selected>Oraria PUN (grandi consumatori)</option>
           <option value="fixed">Prezzo fisso</option>
         </select>
-      </div>
-      <div>
-        <label for="r-price">Prezzo base (medio annuo), &euro;/kWh</label>
-        <input type="number" min="0.05" max="0.50" step="0.01" value="0.24" id="r-price" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div>
-        <label for="r-feedin">Feed-in (immissione, solo estate), &euro;/kWh</label>
-        <input type="number" min="0.00" max="0.15" step="0.01" value="0.05" id="r-feedin" onchange="clampNumberInput(this);resetRun()">
-      </div>
-      <div id="tariff-info" style="font-size:1.0rem;color:var(--text3);line-height:1.6;grid-column:1/-1;"></div>
-    </div>
-  </details>
-  <details>
-    <summary>Ipotesi economiche (CAPEX/OPEX)</summary>
-    <div class="input-grid" id="grid-econ">
-      <div>
-        <label for="r-fvcost">Variazione costo FV, %</label>
-        <input type="number" min="-30" max="30" step="5" value="0" id="r-fvcost" onchange="clampNumberInput(this);runCapex()">
-      </div>
-      <div>
-        <label for="r-gridvar">Variazione tariffa energia, %</label>
-        <input type="number" min="-30" max="50" step="5" value="0" id="r-gridvar" onchange="clampNumberInput(this);runCapex()">
-      </div>
-      <div>
-        <label for="r-hosting">Tariffa hosting IT, &euro;/kWh</label>
-        <input type="number" min="0.05" max="0.30" step="0.01" value="0.12" id="r-hosting" onchange="clampNumberInput(this);runCapex()">
-      </div>
-      <div>
-        <label for="r-urbcost">Oneri urbanizzazione, &euro;/m&sup2;</label>
-        <input type="number" min="0" max="150" step="5" value="50" id="r-urbcost" onchange="clampNumberInput(this);runCapex()">
-      </div>
-      <div>
-        <label for="r-nmacchine">N&deg; macchine ghiaccio</label>
+      </td>
+      <td class="xl-formula" id="calc-tariffrange">&mdash;</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-price">Prezzo base (medio annuo), &euro;/kWh</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="0.05" max="0.50" step="0.01" value="0.24" id="r-price" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">centro della curva oraria</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-feedin">Feed-in (immissione, solo estate), &euro;/kWh</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="0.00" max="0.15" step="0.01" value="0.05" id="r-feedin" onchange="clampNumberInput(this);resetRun()"></td>
+      <td class="xl-formula">ricavo vendita surplus estivo</td>
+    </tr>
+
+    <tr class="xl-sec"><td colspan="3">Ipotesi economiche (CAPEX/OPEX)</td></tr>
+    <tr>
+      <td class="xl-label"><label for="r-fvcost">Variazione costo FV, %</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="-30" max="30" step="5" value="0" id="r-fvcost" onchange="clampNumberInput(this);runCapex()"></td>
+      <td class="xl-formula">su 850 &euro;/kWp base</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-gridvar">Variazione tariffa energia, %</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="-30" max="50" step="5" value="0" id="r-gridvar" onchange="clampNumberInput(this);runCapex()"></td>
+      <td class="xl-formula">scenario su costo rete annuo</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-hosting">Tariffa hosting IT, &euro;/kWh</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="0.05" max="0.30" step="0.01" value="0.12" id="r-hosting" onchange="clampNumberInput(this);runCapex()"></td>
+      <td class="xl-formula">ricavo da clienti colocation</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-urbcost">Oneri urbanizzazione, &euro;/m&sup2;</label></td>
+      <td class="xl-val xl-input-cell"><input type="number" min="0" max="150" step="5" value="50" id="r-urbcost" onchange="clampNumberInput(this);runCapex()"></td>
+      <td class="xl-formula">su superficie lotto recintabile</td>
+    </tr>
+    <tr>
+      <td class="xl-label"><label for="r-nmacchine">N&deg; macchine ghiaccio</label></td>
+      <td class="xl-val xl-input-cell">
         <select id="r-nmacchine" onchange="runCapex()">
           <option value="1" selected>1 macchina (nessuna ridondanza)</option>
           <option value="2">2 macchine (ridondanza N+1)</option>
           <option value="3">3 macchine (ridondanza N+1)</option>
           <option value="4">4 macchine (ridondanza N+1)</option>
         </select>
-      </div>
-    </div>
-  </details>
+      </td>
+      <td class="xl-formula">impatta CAPEX macchina ghiaccio</td>
+    </tr>
+  </table>
 </div>
 
 <div class="tabs">
@@ -306,13 +352,13 @@
       <div class="card" style="margin-bottom:.8rem;border:1.5px solid var(--green);">
         <div class="ct" style="color:var(--green);">Superfici e FV (lotto Petra)</div>
         <div style="font-size:.92rem;color:var(--text2);line-height:1.9;">
-          <b>Lotto Petra Srl (Comparto A):</b> 23.659 m&sup2; netti, propriet&agrave; diretta.<br>
-          <b>Edificio ex-frigo (riuso):</b> ~5.500 m&sup2;, gi&agrave; esistente, nessuna nuova costruzione.<br>
-          <b>Terreno libero:</b> ~18.000 m&sup2;, interamente destinato a fotovoltaico (bancali, piazzali o pensiline a scelta).<br>
+          <b>Lotto Petra Srl, Lotto A5 (Comparto A):</b> 11.563 m&sup2; recintabili (superficie catastale 23.659 m&sup2;; la differenza va cessa al Comune per l'urbanizzazione primaria del Comparto Zero), propriet&agrave; diretta.<br>
+          <b>Edificio ex-frigo (riuso):</b> ~5.500 m&sup2;, gi&agrave; esistente, nessuna nuova costruzione (entro la superficie edificabile di ca 5.915 m&sup2;).<br>
+          <b>Terreno libero:</b> ~6.000 m&sup2;, interamente destinato a fotovoltaico (bancali, piazzali o pensiline a scelta).<br>
           <b>Tetto:</b> orientamento fisso 145&deg;/5&deg; (vincolato dall'edificio esistente) &middot; <b>Terra:</b> orientabile a Sud, resa specifica maggiore.
         </div>
         <div class="ibar ibar-a" style="margin-top:.7rem;font-size:.92rem;">
-          <b>Attenzione:</b> la taglia FV massima installabile &egrave; vincolata dalla somma di tetto + terreno del lotto, non solo dal tetto. Il n.32% di PMI Srl (Comparto B, 158.979 m&sup2;) &egrave; escluso da questo studio.
+          <b>Attenzione:</b> la taglia FV massima installabile &egrave; vincolata dalla somma di tetto + terreno del lotto, non solo dal tetto. Il Comparto B (PMI Srl, di cui Petra Srl detiene il 32%; superficie edificabile ca 39.118 m&sup2; su 77.694 m&sup2; recintabili) &egrave; escluso da questo studio.
         </div>
       </div>
       <div class="card" style="margin-bottom:.8rem;">

@@ -556,10 +556,10 @@ function runCaso1MW(){
   var p1MW=Object.assign({},pBase,{nRack:nRack1MW,itKw:itKw1MW,dcBase:itKw1MW,heatKw:itKw1MW,kwpEsterno:0});
   var fvCostKwp=850;
 
-  // Il tetto dello sweep è il massimo FV che il lotto (tetto+terra) può ospitare,
-  // non un numero arbitrario: oltre quella superficie l'FV extra non è installabile.
-  var sf=calcSuperfici(getSuperficiParams());
-  var kwpMax=Math.max(500,Math.ceil(sf.fvPotenzialeMax/100)*100);
+  // Caso esemplificativo (1 MW IT, Consorzio Torno): lo sweep copre un range fisso
+  // di sensitivity, non il solo potenziale fisico del Lotto A5 — i dati si cambiano
+  // liberamente per il confronto, il lotto reale è solo una delle ipotesi.
+  var kwpMax=3000;
   var kwpSizes=[];
   for(var k=0;k<=kwpMax;k+=Math.max(50,Math.round(kwpMax/40/50)*50))kwpSizes.push(k);
   if(kwpSizes[kwpSizes.length-1]!==kwpMax)kwpSizes.push(kwpMax);

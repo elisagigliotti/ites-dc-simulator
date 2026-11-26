@@ -1,5 +1,8 @@
 // ============================================================
-// SUPERFICI — lotto Petra Srl: tetto (riuso ex-frigo) + terreno libero a FV
+// SUPERFICI — lotto Petra Srl (Lotto A5, Comparto A): tetto (riuso ex-frigo)
+// + terreno libero a FV. Default 11.563 m² = superficie recintabile (non la
+// catastale 23.659 m²): la differenza va cessa al Comune per l'urbanizzazione
+// primaria del Comparto Zero (situazione urbanistica ZI Fano - Torno).
 // ============================================================
 function getSuperficiParams(){
   return{

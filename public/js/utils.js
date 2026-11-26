@@ -3,6 +3,7 @@ var pvgisRoofData=null,pvgisGroundData=null;
 var pvgisHourlyTemp=null; // Array[365] di Array[24] T2m reali (PVGIS seriescalc), o null se non caricati
 var charts={};
 function destroyC(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function setTxt(id,html){var el=document.getElementById(id);if(el)el.innerHTML=html;}
 function getMensili(){return pvgisData||FALLBACK_MENSILI;}
 function giornoToMese(gg){var g=gg-1;for(var m=0;m<12;m++){if(g<GIORNI_MESE[m])return{mese_idx:m,giorno_m:g+1};g-=GIORNI_MESE[m];}return{mese_idx:11,giorno_m:31};}
 function giornoLabel(gg){var r=giornoToMese(gg);return r.giorno_m+' '+NOMI_MESE[r.mese_idx];}

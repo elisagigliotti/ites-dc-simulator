@@ -47,14 +47,19 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--tex
 .ku{font-size:.95rem;color:var(--text2);margin-top:4px;font-weight:600;}
 .kl{font-size:1.0rem;color:var(--text2);margin-top:5px;text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
 #input-form{margin-bottom:1.5rem;}
-#input-form details{border-bottom:1px solid var(--border);padding:.7rem 0;}
-#input-form details:last-child{border-bottom:none;}
-#input-form summary{font-size:1.0rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);cursor:pointer;list-style:none;padding:.2rem 0;}
-#input-form summary::-webkit-details-marker{display:none;}
-#input-form summary::before{content:'\25B8\00a0';color:var(--blue);}
-#input-form details[open] summary::before{content:'\25BE\00a0';}
-.input-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:.8rem;}
-.input-grid label{display:block;font-size:.95rem;color:var(--text);font-weight:600;margin-bottom:4px;}
+.xl-legend{display:flex;gap:18px;font-size:.88rem;color:var(--text3);margin-bottom:.7rem;align-items:center;}
+.xl-chip{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+.xl-table{width:100%;border-collapse:collapse;font-size:.92rem;}
+.xl-table td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.xl-sec td{background:var(--blue);color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.82rem;padding:7px 8px;}
+.xl-label{color:var(--text2);font-weight:600;width:42%;}
+.xl-val{width:26%;}
+.xl-formula{color:var(--text3);font-size:.82rem;font-family:'IBM Plex Mono',monospace;}
+.xl-input-cell{background:var(--blue3);border-radius:var(--r);}
+.xl-input-cell input,.xl-input-cell select{background:transparent;border:none;padding:4px 6px;font-weight:700;color:var(--blue);width:100%;font-size:.92rem;}
+.xl-input-cell input:focus,.xl-input-cell select:focus{outline:1px solid var(--blue);}
+.xl-calc-cell{background:var(--green3);color:var(--green);font-weight:700;font-family:'IBM Plex Mono',monospace;border-radius:var(--r);padding:6px 8px;}
+.xl-note td{background:var(--bg3);color:var(--text3);font-size:.88rem;padding:.7rem .9rem;}
 select{background:#ffffff;border:1px solid #a0aec0;color:var(--text);border-radius:var(--r);padding:7px 10px;font-size:1.0rem;font-family:'IBM Plex Sans',sans-serif;width:100%;cursor:pointer;font-weight:600;}
 input[type=number]{background:#ffffff;border:1px solid #a0aec0;color:var(--text);border-radius:var(--r);padding:7px 10px;font-size:1.0rem;font-family:'IBM Plex Mono',monospace;width:100%;font-weight:600;}
 .cw{position:relative;width:100%;}
